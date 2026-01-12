@@ -1,7 +1,7 @@
 import React from 'react';
 import { InternshipLog, AttainmentLevel } from '../types';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { LayoutDashboard, School, GraduationCap, Building2, Clock, Award, CheckCircle2, Sparkles } from 'lucide-react';
+import { LayoutDashboard, School, GraduationCap, Building2, Award, CheckCircle2, Sparkles } from 'lucide-react';
 
 interface DashboardProps {
   logs: InternshipLog[];

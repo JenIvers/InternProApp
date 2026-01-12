@@ -72,7 +72,7 @@ const SitesView: React.FC<SitesViewProps> = ({ sites, onAddSite, onRemoveSite })
                 <div className="relative">
                   <select 
                     value={formData.level}
-                    onChange={e => setFormData({...formData, level: e.target.value as any})}
+                    onChange={e => setFormData({...formData, level: e.target.value as Site['level']})}
                     className="w-full bg-white/60 border-none rounded-[1.5rem] px-8 py-5 text-lg font-black text-app-dark focus:ring-4 focus:ring-app-bright/10 outline-none appearance-none cursor-pointer shadow-inner"
                   >
                     <option value="Primary">Primary (K-6)</option>

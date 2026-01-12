@@ -22,8 +22,16 @@ const App: React.FC = () => {
       if (!parsed.primarySetting || parsed.primarySetting === 'Elementary') parsed.primarySetting = 'Secondary';
       
       // Migration for logs and sites if user has old data
-      parsed.logs = parsed.logs?.map((l: any) => l.schoolLevel === 'Elementary' ? { ...l, schoolLevel: 'Primary' } : l);
-      parsed.sites = parsed.sites?.map((s: any) => s.level === 'Elementary' ? { ...s, level: 'Primary' } : s);
+      parsed.logs = parsed.logs?.map((l: InternshipLog) => 
+        (l as unknown as { schoolLevel: string }).schoolLevel === 'Elementary' 
+          ? { ...l, schoolLevel: 'Primary' as const } 
+          : l
+      );
+      parsed.sites = parsed.sites?.map((s: Site) => 
+        (s as unknown as { level: string }).level === 'Elementary' 
+          ? { ...s, level: 'Primary' as const } 
+          : s
+      );
       
       return parsed;
     }

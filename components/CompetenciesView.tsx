@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AttainmentLevel, InternshipLog, Artifact } from '../types';
 import { ALL_COMPETENCIES } from '../constants';
-import { Target, Award, MessageSquare, CheckCircle2, ChevronRight, FileText, Info, X } from 'lucide-react';
+import { Target, MessageSquare, CheckCircle2, FileText, X } from 'lucide-react';
 
 interface CompetenciesViewProps {
   progress: Record<string, AttainmentLevel>;

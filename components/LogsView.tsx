@@ -47,7 +47,7 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog }) => {
       hours: Number(formData.hours),
       activity: formData.activity!,
       location: formData.location!,
-      schoolLevel: formData.schoolLevel as any,
+      schoolLevel: formData.schoolLevel as InternshipLog['schoolLevel'],
       taggedCompetencyIds: formData.taggedCompetencyIds || [],
       reflections: formData.reflections || '',
       artifactIds: []

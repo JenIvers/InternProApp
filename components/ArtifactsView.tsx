@@ -11,6 +11,82 @@ interface ArtifactsViewProps {
   onAddShelf: (name: string) => void;
 }
 
+const ArtifactCard: React.FC<{ 
+  artifact: Artifact, 
+  onSelect: (artifact: Artifact) => void 
+}> = ({ artifact, onSelect }) => (
+  <div 
+    onClick={() => onSelect(artifact)}
+    className="glass rounded-[2.5rem] border border-white/50 overflow-hidden shadow-sm hover:shadow-2xl hover:scale-[1.03] transition-all active:scale-95 cursor-pointer group animate-in zoom-in-95 duration-300"
+  >
+    <div className="aspect-square bg-app-bg flex items-center justify-center relative overflow-hidden group-hover:bg-app-light/20 transition-colors">
+      {artifact.type.startsWith('image') ? (
+        <img src={artifact.data} alt={artifact.name} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700" />
+      ) : (
+        <div className="flex flex-col items-center text-app-light group-hover:text-app-bright transition-colors">
+          <div className="p-6 rounded-3xl bg-white shadow-inner">
+            <FileText size={48} strokeWidth={1.5} />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] mt-4 opacity-60">{artifact.type.split('/')[1] || 'FILE'}</span>
+        </div>
+      )}
+      <div className="absolute top-4 right-4 flex gap-1">
+        {artifact.taggedCompetencyIds && artifact.taggedCompetencyIds.length > 0 && (
+          <div className="bg-app-dark/80 backdrop-blur-md text-white text-[9px] font-black px-3 py-1.5 rounded-xl shadow-2xl uppercase tracking-tighter">
+            {artifact.taggedCompetencyIds.length} Tags
+          </div>
+        )}
+      </div>
+    </div>
+    <div className="p-5 flex items-center justify-between gap-3">
+      <div className="overflow-hidden">
+        <p className="text-sm font-black text-app-dark truncate">{artifact.name}</p>
+        <div className="flex items-center gap-2 mt-1 opacity-60">
+           <Calendar size={12} className="text-app-slate" />
+           <p className="text-[9px] text-app-slate font-black uppercase tracking-widest">{artifact.uploadDate}</p>
+        </div>
+      </div>
+      <div className="w-8 h-8 rounded-full flex items-center justify-center text-app-light group-hover:text-app-bright transition-colors">
+         <MoreVertical size={18} />
+      </div>
+    </div>
+  </div>
+);
+
+const ShelfSection: React.FC<{ 
+  shelf?: Shelf, 
+  artifactsInShelf: Artifact[],
+  onSelectArtifact: (artifact: Artifact) => void
+}> = ({ shelf, artifactsInShelf, onSelectArtifact }) => (
+  <div className="mb-14 px-2">
+    <div className="flex items-center justify-between mb-8 border-b border-app-light/30 pb-5">
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all ${shelf ? 'bg-app-bright text-white rotate-3 shadow-app-bright/20' : 'glass-blue text-app-slate'}`}>
+          {shelf ? <Folder size={24} strokeWidth={2.5} /> : <Archive size={24} strokeWidth={2.5} />}
+        </div>
+        <div>
+          <h3 className="text-lg font-black text-app-dark tracking-tight uppercase tracking-wider">
+            {shelf ? shelf.name : 'Unshelved Artifacts'}
+          </h3>
+          <p className="text-[10px] font-black text-app-slate uppercase tracking-[0.2em] opacity-60">
+             {artifactsInShelf.length} Professional Documents
+          </p>
+        </div>
+      </div>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {artifactsInShelf.map(art => (
+        <ArtifactCard key={art.id} artifact={art} onSelect={onSelectArtifact} />
+      ))}
+      {artifactsInShelf.length === 0 && (
+        <div className="col-span-full py-12 px-8 glass-blue rounded-[2.5rem] border border-dashed border-app-bright/20 text-center">
+           <p className="text-sm text-app-slate font-black italic opacity-50">No artifacts have been placed on this shelf.</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 const ArtifactsView: React.FC<ArtifactsViewProps> = ({ 
   artifacts, 
   shelves, 
@@ -63,75 +139,6 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
   const moveArtifactToShelf = (artifact: Artifact, shelfId: string | undefined) => {
     onUpdateArtifact({ ...artifact, shelfId });
   };
-
-  const ArtifactCard: React.FC<{ artifact: Artifact }> = ({ artifact }) => (
-    <div 
-      onClick={() => setSelectedArtifact(artifact)}
-      className="glass rounded-[2.5rem] border border-white/50 overflow-hidden shadow-sm hover:shadow-2xl hover:scale-[1.03] transition-all active:scale-95 cursor-pointer group animate-in zoom-in-95 duration-300"
-    >
-      <div className="aspect-square bg-app-bg flex items-center justify-center relative overflow-hidden group-hover:bg-app-light/20 transition-colors">
-        {artifact.type.startsWith('image') ? (
-          <img src={artifact.data} alt={artifact.name} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700" />
-        ) : (
-          <div className="flex flex-col items-center text-app-light group-hover:text-app-bright transition-colors">
-            <div className="p-6 rounded-3xl bg-white shadow-inner">
-              <FileText size={48} strokeWidth={1.5} />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] mt-4 opacity-60">{artifact.type.split('/')[1] || 'FILE'}</span>
-          </div>
-        )}
-        <div className="absolute top-4 right-4 flex gap-1">
-          {artifact.taggedCompetencyIds?.length > 0 && (
-            <div className="bg-app-dark/80 backdrop-blur-md text-white text-[9px] font-black px-3 py-1.5 rounded-xl shadow-2xl uppercase tracking-tighter">
-              {artifact.taggedCompetencyIds.length} Tags
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="p-5 flex items-center justify-between gap-3">
-        <div className="overflow-hidden">
-          <p className="text-sm font-black text-app-dark truncate">{artifact.name}</p>
-          <div className="flex items-center gap-2 mt-1 opacity-60">
-             <Calendar size={12} className="text-app-slate" />
-             <p className="text-[9px] text-app-slate font-black uppercase tracking-widest">{artifact.uploadDate}</p>
-          </div>
-        </div>
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-app-light group-hover:text-app-bright transition-colors">
-           <MoreVertical size={18} />
-        </div>
-      </div>
-    </div>
-  );
-
-  const ShelfSection: React.FC<{ shelf?: Shelf, artifactsInShelf: Artifact[] }> = ({ shelf, artifactsInShelf }) => (
-    <div className="mb-14 px-2">
-      <div className="flex items-center justify-between mb-8 border-b border-app-light/30 pb-5">
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all ${shelf ? 'bg-app-bright text-white rotate-3 shadow-app-bright/20' : 'glass-blue text-app-slate'}`}>
-            {shelf ? <Folder size={24} strokeWidth={2.5} /> : <Archive size={24} strokeWidth={2.5} />}
-          </div>
-          <div>
-            <h3 className="text-lg font-black text-app-dark tracking-tight uppercase tracking-wider">
-              {shelf ? shelf.name : 'Unshelved Artifacts'}
-            </h3>
-            <p className="text-[10px] font-black text-app-slate uppercase tracking-[0.2em] opacity-60">
-               {artifactsInShelf.length} Professional Documents
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {artifactsInShelf.map(art => (
-          <ArtifactCard key={art.id} artifact={art} />
-        ))}
-        {artifactsInShelf.length === 0 && (
-          <div className="col-span-full py-12 px-8 glass-blue rounded-[2.5rem] border border-dashed border-app-bright/20 text-center">
-             <p className="text-sm text-app-slate font-black italic opacity-50">No artifacts have been placed on this shelf.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-12 pb-24 md:pb-8">
@@ -189,10 +196,12 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
             key={shelf.id} 
             shelf={shelf} 
             artifactsInShelf={artifacts.filter(a => a.shelfId === shelf.id)} 
+            onSelectArtifact={setSelectedArtifact}
           />
         ))}
         <ShelfSection 
           artifactsInShelf={artifacts.filter(a => !a.shelfId)} 
+          onSelectArtifact={setSelectedArtifact}
         />
       </div>
 
