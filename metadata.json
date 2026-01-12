@@ -1,0 +1,7 @@
+{
+  "name": "Internship Pro Tracker",
+  "description": "A comprehensive tool for tracking internship hours, tagging educational administration competencies, and managing artifacts based on Bethel University requirements.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
