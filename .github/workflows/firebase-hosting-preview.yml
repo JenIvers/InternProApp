@@ -1,11 +1,10 @@
-name: Deploy to Firebase Hosting on merge
+name: Preview Deploy to Firebase Hosting on push to main
 'on':
-  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
   push:
-    tags:
-      - 'v*' # Only deploys to production when you push a tag like v1.0.0
+    branches:
+      - main
 jobs:
-  build_and_deploy:
+  build_and_preview:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,5 +13,6 @@ jobs:
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_INTERN_PRO_APP }}'
-          channelId: live
           projectId: intern-pro-app
+          # By NOT specifying 'channelId: live', it defaults to a preview channel
+          # expiresIn: 7d # Optional: how long the preview URL lasts
