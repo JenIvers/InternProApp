@@ -1,0 +1,12 @@
+description = "Add, commit, and push current changes to main to trigger a Firebase Preview URL."
+
+prompt = """
+Follow these steps to deploy a preview:
+1. Run `git status` and `git diff HEAD` to understand the changes.
+2. Propose a concise, high-quality commit message based on the changes.
+3. Once the user confirms or provides a message, run:
+   - `git add .`
+   - `git commit -m "[message]"`
+   - `git push origin main`
+4. Remind the user that the preview URL will be available in the GitHub Actions logs or as a PR comment if applicable.
+"""

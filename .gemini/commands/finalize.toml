@@ -1,0 +1,12 @@
+description = "Tag the current commit and push to trigger a Firebase Production deployment."
+
+prompt = """
+Follow these steps to finalize and deploy to production:
+1. Ensure the working directory is clean (`git status`). If not, suggest running `/preview` first.
+2. Check for the latest tag using `git describe --tags --abbrev=0` (handle the case where no tags exist).
+3. Suggest a new version tag (e.g., incrementing the patch version of the latest tag, or starting with `v1.0.0`).
+4. Once the user confirms the tag name, run:
+   - `git tag [tag_name]`
+   - `git push origin [tag_name]`
+5. Confirm that this will trigger the production deployment workflow.
+"""
