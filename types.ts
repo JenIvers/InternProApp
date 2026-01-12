@@ -19,6 +19,20 @@ export interface Artifact {
   type: string;
   data: string; // base64
   uploadDate: string;
+  taggedCompetencyIds: string[];
+  shelfId?: string;
+}
+
+export interface Shelf {
+  id: string;
+  name: string;
+}
+
+export interface Site {
+  id: string;
+  name: string;
+  level: 'Primary' | 'Secondary' | 'Alternate';
+  mentorName: string;
 }
 
 export interface InternshipLog {
@@ -29,20 +43,18 @@ export interface InternshipLog {
   hours: number;
   activity: string;
   location: string;
-  schoolLevel: 'Elementary' | 'Secondary' | 'Alternate';
+  schoolLevel: 'Primary' | 'Secondary' | 'Alternate';
   taggedCompetencyIds: string[];
   reflections: string;
   artifactIds: string[];
-}
-
-export interface CompetencyProgress {
-  competencyId: string;
-  level: AttainmentLevel;
-  lastUpdated: string;
 }
 
 export interface AppState {
   logs: InternshipLog[];
   artifacts: Artifact[];
   progress: Record<string, AttainmentLevel>;
+  shelves: Shelf[];
+  sites: Site[];
+  competencyReflections: Record<string, string>;
+  primarySetting: 'Primary' | 'Secondary';
 }

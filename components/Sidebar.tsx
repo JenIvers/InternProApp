@@ -12,17 +12,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
     { id: 'logs', label: 'Hours Log', icon: '🕒' },
     { id: 'competencies', label: 'Competencies', icon: '🎯' },
     { id: 'artifacts', label: 'Artifact Vault', icon: '📁' },
+    { id: 'sites', label: 'Sites', icon: '🏫' },
   ];
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 h-screen fixed left-0 top-0 hidden md:flex flex-col">
       <div className="p-6 border-b border-slate-100">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          InternTracker
+          InternPro
         </h1>
         <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mt-1">Bethel University</p>
       </div>
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -40,11 +41,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
       </nav>
       <div className="p-4 border-t border-slate-100">
         <div className="bg-slate-50 rounded-xl p-4">
-          <p className="text-xs font-semibold text-slate-500 mb-1">Target Hours</p>
-          <div className="w-full bg-slate-200 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full w-[10%]"></div>
-          </div>
-          <p className="text-[10px] text-slate-400 mt-2">32 / 320 hours completed</p>
+          <p className="text-xs font-semibold text-slate-500 mb-1">Portfolio Status</p>
+          <p className="text-[10px] text-slate-400 mt-2 tracking-tight uppercase font-black">Active Session</p>
         </div>
       </div>
     </aside>

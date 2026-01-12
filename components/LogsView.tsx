@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { InternshipLog } from '../types';
 import { ALL_COMPETENCIES } from '../constants';
-import { suggestCompetencies } from '../geminiService';
 
 interface LogsViewProps {
   logs: InternshipLog[];
@@ -11,7 +10,6 @@ interface LogsViewProps {
 
 const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog }) => {
   const [isAdding, setIsAdding] = useState(false);
-  const [isSuggesting, setIsSuggesting] = useState(false);
   const [formData, setFormData] = useState<Partial<InternshipLog>>({
     date: new Date().toISOString().split('T')[0],
     startTime: '08:00',
@@ -37,14 +35,6 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog }) => {
         : [...current, id];
       return { ...prev, taggedCompetencyIds: next };
     });
-  };
-
-  const handleAutoSuggest = async () => {
-    if (!formData.activity) return;
-    setIsSuggesting(true);
-    const suggested = await suggestCompetencies(formData.activity);
-    setFormData(prev => ({ ...prev, taggedCompetencyIds: suggested }));
-    setIsSuggesting(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,8 +93,8 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog }) => {
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">School Level</label>
               <select name="schoolLevel" value={formData.schoolLevel} onChange={handleInputChange} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="Elementary">Elementary</option>
-                <option value="Secondary">Secondary</option>
+                <option value="Primary">Primary (K-6)</option>
+                <option value="Secondary">Secondary (6-12)</option>
                 <option value="Alternate">Alternate</option>
               </select>
             </div>
@@ -112,24 +102,14 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog }) => {
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Activity Description</label>
-            <div className="relative">
-              <textarea
-                name="activity"
-                value={formData.activity}
-                onChange={handleInputChange}
-                required
-                placeholder="What did you do during these hours?"
-                className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-24"
-              />
-              <button
-                type="button"
-                onClick={handleAutoSuggest}
-                disabled={isSuggesting || !formData.activity}
-                className="absolute bottom-3 right-3 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors disabled:opacity-50"
-              >
-                {isSuggesting ? 'Analyzing...' : '✨ Suggest Competencies'}
-              </button>
-            </div>
+            <textarea
+              name="activity"
+              value={formData.activity}
+              onChange={handleInputChange}
+              required
+              placeholder="What did you do during these hours?"
+              className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-24"
+            />
           </div>
 
           <div>
