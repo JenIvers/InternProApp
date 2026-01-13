@@ -6,15 +6,17 @@ import LogsView from './components/LogsView';
 import CompetenciesView from './components/CompetenciesView';
 import ArtifactsView from './components/ArtifactsView';
 import SitesView from './components/SitesView';
+import LoginView from './components/LoginView';
 import { AppState, InternshipLog, AttainmentLevel, Artifact, Shelf, Site } from './types';
 import { loadStateFromFirestore, saveStateToFirestore } from './firestoreService';
-
-const STORAGE_KEY = 'internship_tracker_data_v7';
+import { subscribeToAuthChanges } from './authService';
+import { User } from 'firebase/auth';
 
 const App: React.FC = () => {
   const [currentView, setView] = useState<string>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [state, setState] = useState<AppState>({
     logs: [],
     artifacts: [],
@@ -25,16 +27,26 @@ const App: React.FC = () => {
     primarySetting: 'Secondary'
   });
 
-  // Initial load from Firestore and localStorage
+  // Auth Subscription
+  useEffect(() => {
+    const unsubscribe = subscribeToAuthChanges((currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Initial Data Load
   useEffect(() => {
     const initData = async () => {
+      setIsLoading(true);
       try {
         const params = new URLSearchParams(window.location.search);
         const viewId = params.get('view');
         
+        // Viewer Mode: Load data from the ID in URL
         if (viewId) {
           setIsReadOnly(true);
-          const sharedData = await loadStateFromFirestore(); // In a real app, use viewId here
+          const sharedData = await loadStateFromFirestore(viewId);
           if (sharedData) {
             setState(sharedData);
             setIsLoading(false);
@@ -42,32 +54,14 @@ const App: React.FC = () => {
           }
         }
 
-        const firestoreData = await loadStateFromFirestore();
-        if (firestoreData) {
-          setState(firestoreData);
-          setIsLoading(false);
-          return;
-        }
-
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (!parsed.shelves) parsed.shelves = [];
-          if (!parsed.sites) parsed.sites = [];
-          if (!parsed.competencyReflections) parsed.competencyReflections = {};
-          if (!parsed.primarySetting || parsed.primarySetting === 'Elementary') parsed.primarySetting = 'Secondary';
-          
-          parsed.logs = parsed.logs?.map((l: InternshipLog) => 
-            (l as unknown as { schoolLevel: string }).schoolLevel === 'Elementary' 
-              ? { ...l, schoolLevel: 'Primary' as const } 
-              : l
-          );
-          parsed.sites = parsed.sites?.map((s: Site) => 
-            (s as unknown as { level: string }).level === 'Elementary' 
-              ? { ...s, level: 'Primary' as const } 
-              : s
-          );
-          setState(parsed);
+        // Editor Mode: Load data for logged-in user
+        if (user) {
+          setIsReadOnly(false);
+          const firestoreData = await loadStateFromFirestore(user.uid);
+          if (firestoreData) {
+            setState(firestoreData);
+          } 
+          // New user? Could fall back to empty state (already set) or localStorage migration if needed
         }
       } catch (error) {
         console.error("Failed to initialize data:", error);
@@ -76,20 +70,27 @@ const App: React.FC = () => {
       }
     };
 
-    initData();
-  }, []);
+    // Only run if we are NOT waiting for auth (i.e. we either have a user, or we know we are in view mode, or we are sure no user is logged in)
+    // Actually, onAuthStateChanged fires initially, so 'user' state update will trigger this if we depend on [user].
+    // But we need to handle the "initial load" specifically.
+    if (user || window.location.search) {
+        initData();
+    } else {
+        // No user, no view param. 
+        setIsLoading(false);
+    }
+  }, [user]);
 
-  // Sync to Firestore and LocalStorage (with debounce)
+  // Sync to Firestore (only if logged in and not read-only)
   useEffect(() => {
-    if (isLoading || isReadOnly) return;
+    if (isLoading || isReadOnly || !user) return;
 
     const timeoutId = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      saveStateToFirestore(state);
+      saveStateToFirestore(user.uid, state);
     }, 1000);
 
     return () => clearTimeout(timeoutId);
-  }, [state, isLoading, isReadOnly]);
+  }, [state, isLoading, isReadOnly, user]);
 
   const addLog = (log: InternshipLog) => {
     setState(prev => ({ ...prev, logs: [...prev.logs, log] }));
@@ -136,6 +137,10 @@ const App: React.FC = () => {
   const setPrimarySetting = (setting: 'Primary' | 'Secondary') => {
     setState(prev => ({ ...prev, primarySetting: setting }));
   };
+
+  if (!user && !isReadOnly && !isLoading) {
+    return <LoginView />;
+  }
 
   const renderView = () => {
     switch (currentView) {
@@ -198,7 +203,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex">
-      <Sidebar currentView={currentView} setView={setView} isReadOnly={isReadOnly} />
+      <Sidebar currentView={currentView} setView={setView} isReadOnly={isReadOnly} userId={user?.uid} />
       
       <main className="flex-1 md:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
         {isLoading ? (
@@ -232,7 +237,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <BottomNav currentView={currentView} setView={setView} isReadOnly={isReadOnly} />
+      <BottomNav currentView={currentView} setView={setView} />
 
       {!isReadOnly && (currentView === 'dashboard' || currentView === 'sites') && (
         <div className="md:hidden fixed bottom-20 right-6 z-40">

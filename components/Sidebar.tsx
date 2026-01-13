@@ -1,13 +1,17 @@
-import React from 'react';
-import { LayoutDashboard, Clock, Target, Folder, School } from 'lucide-react';
+import React, { useState } from 'react';
+import { LayoutDashboard, Clock, Target, Folder, School, LogOut, Share2, Check } from 'lucide-react';
+import { signOut } from '../authService';
 
 interface SidebarProps {
   currentView: string;
   setView: (view: string) => void;
   isReadOnly?: boolean;
+  userId?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly, userId }) => {
+  const [copied, setCopied] = useState(false);
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'logs', label: 'Activity Log', icon: Clock },
@@ -15,6 +19,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly }) =
     { id: 'artifacts', label: 'Artifact Vault', icon: Folder },
     { id: 'sites', label: 'Sites', icon: School },
   ];
+
+  const handleShare = () => {
+    if (!userId) return;
+    const url = `${window.location.origin}?view=${userId}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <aside className="w-64 glass border-r border-white/30 h-screen fixed left-0 top-0 hidden md:flex flex-col z-50">
@@ -46,7 +58,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly }) =
           );
         })}
       </nav>
-      <div className="p-5 border-t border-white/20">
+      <div className="p-5 border-t border-white/20 space-y-4">
+        {!isReadOnly && (
+          <button 
+            onClick={handleShare}
+            className="w-full bg-app-bright/10 hover:bg-app-bright text-app-bright hover:text-white py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 group"
+          >
+            {copied ? <Check size={14} strokeWidth={3} /> : <Share2 size={14} strokeWidth={3} />}
+            {copied ? 'Link Copied' : 'Share Portfolio'}
+          </button>
+        )}
+        
         <div className="glass-blue rounded-2xl p-4">
           <p className="text-[10px] font-black text-app-deep uppercase tracking-widest mb-1 opacity-60">Status</p>
           <div className="flex items-center gap-2 mt-2">
@@ -54,6 +76,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly }) =
             <p className="text-xs font-bold text-app-dark">{isReadOnly ? 'Viewer Mode' : 'Cloud Syncing'}</p>
           </div>
         </div>
+
+        {!isReadOnly && (
+          <button 
+            onClick={signOut}
+            className="w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-app-slate/50 hover:text-red-500 transition-colors py-2"
+          >
+            <LogOut size={12} /> Sign Out
+          </button>
+        )}
       </div>
     </aside>
   );
