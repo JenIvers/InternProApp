@@ -11,6 +11,7 @@ import { AppState, InternshipLog, AttainmentLevel, Artifact, Shelf, Site } from 
 import { loadStateFromFirestore, saveStateToFirestore } from './firestoreService';
 import { subscribeToAuthChanges } from './authService';
 import { User } from 'firebase/auth';
+import logo from './bethel-logo.png';
 
 const App: React.FC = () => {
   const [currentView, setView] = useState<string>('dashboard');
@@ -218,8 +219,8 @@ const App: React.FC = () => {
         ) : (
           <>
             <div className="md:hidden flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#162D34] flex items-center justify-center text-white text-xs font-black shadow-lg shadow-[#162D3433]">P</div>
+              <div className="flex items-center gap-3">
+                <img src={logo} alt="Bethel" className="w-10 h-10 object-contain" />
                 <h1 className="text-lg font-black bg-gradient-to-r from-[#162D34] to-[#4587A7] bg-clip-text text-transparent">
                   InternPro
                 </h1>

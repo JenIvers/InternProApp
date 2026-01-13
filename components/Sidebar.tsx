@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, Clock, Target, Folder, School, LogOut, Share2, Check } from 'lucide-react';
 import { signOut } from '../authService';
+import logo from '../bethel-logo.png';
 
 interface SidebarProps {
   currentView: string;
@@ -31,6 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly, use
   return (
     <aside className="w-64 glass border-r border-white/30 h-screen fixed left-0 top-0 hidden md:flex flex-col z-50">
       <div className="p-10 border-b border-white/20 flex flex-col items-center text-center">
+        <img src={logo} alt="Bethel University" className="w-20 mb-6 drop-shadow-sm" />
         <h1 className="text-2xl font-black bg-gradient-to-br from-app-dark via-app-deep to-app-bright bg-clip-text text-transparent tracking-tighter">
           InternPro
         </h1>

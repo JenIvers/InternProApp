@@ -1,6 +1,7 @@
 import React from 'react';
 import { signInWithGoogle } from '../authService';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
+import logo from '../bethel-logo.png';
 
 const LoginView: React.FC = () => {
   return (
@@ -12,8 +13,9 @@ const LoginView: React.FC = () => {
       </div>
 
       <div className="glass p-12 rounded-[3.5rem] shadow-2xl max-w-md w-full text-center relative z-10 animate-in fade-in zoom-in-95 duration-700">
-        <div className="w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-app-dark to-app-deep flex items-center justify-center mx-auto mb-8 shadow-xl shadow-app-dark/20 text-white">
-          <ShieldCheck size={48} strokeWidth={1.5} />
+        <img src={logo} alt="Bethel University" className="w-24 mx-auto mb-8 drop-shadow-md" />
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-app-dark to-app-deep flex items-center justify-center mx-auto mb-6 shadow-xl shadow-app-dark/20 text-white">
+          <ShieldCheck size={32} strokeWidth={1.5} />
         </div>
         
         <h1 className="text-4xl font-black text-app-dark tracking-tight mb-3">InternPro</h1>
