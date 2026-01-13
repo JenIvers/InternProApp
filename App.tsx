@@ -7,48 +7,75 @@ import CompetenciesView from './components/CompetenciesView';
 import ArtifactsView from './components/ArtifactsView';
 import SitesView from './components/SitesView';
 import { AppState, InternshipLog, AttainmentLevel, Artifact, Shelf, Site } from './types';
+import { loadStateFromFirestore, saveStateToFirestore } from './firestoreService';
 
 const STORAGE_KEY = 'internship_tracker_data_v7';
 
 const App: React.FC = () => {
   const [currentView, setView] = useState<string>('dashboard');
-  const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (!parsed.shelves) parsed.shelves = [];
-      if (!parsed.sites) parsed.sites = [];
-      if (!parsed.competencyReflections) parsed.competencyReflections = {};
-      if (!parsed.primarySetting || parsed.primarySetting === 'Elementary') parsed.primarySetting = 'Secondary';
-      
-      // Migration for logs and sites if user has old data
-      parsed.logs = parsed.logs?.map((l: InternshipLog) => 
-        (l as unknown as { schoolLevel: string }).schoolLevel === 'Elementary' 
-          ? { ...l, schoolLevel: 'Primary' as const } 
-          : l
-      );
-      parsed.sites = parsed.sites?.map((s: Site) => 
-        (s as unknown as { level: string }).level === 'Elementary' 
-          ? { ...s, level: 'Primary' as const } 
-          : s
-      );
-      
-      return parsed;
-    }
-    return {
-      logs: [],
-      artifacts: [],
-      progress: {},
-      shelves: [],
-      sites: [],
-      competencyReflections: {},
-      primarySetting: 'Secondary'
-    };
+  const [isLoading, setIsLoading] = useState(true);
+  const [state, setState] = useState<AppState>({
+    logs: [],
+    artifacts: [],
+    progress: {},
+    shelves: [],
+    sites: [],
+    competencyReflections: {},
+    primarySetting: 'Secondary'
   });
 
+  // Initial load from Firestore and localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
+    const initData = async () => {
+      try {
+        const firestoreData = await loadStateFromFirestore();
+        if (firestoreData) {
+          setState(firestoreData);
+          setIsLoading(false);
+          return;
+        }
+
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (!parsed.shelves) parsed.shelves = [];
+          if (!parsed.sites) parsed.sites = [];
+          if (!parsed.competencyReflections) parsed.competencyReflections = {};
+          if (!parsed.primarySetting || parsed.primarySetting === 'Elementary') parsed.primarySetting = 'Secondary';
+          
+          parsed.logs = parsed.logs?.map((l: InternshipLog) => 
+            (l as unknown as { schoolLevel: string }).schoolLevel === 'Elementary' 
+              ? { ...l, schoolLevel: 'Primary' as const } 
+              : l
+          );
+          parsed.sites = parsed.sites?.map((s: Site) => 
+            (s as unknown as { level: string }).level === 'Elementary' 
+              ? { ...s, level: 'Primary' as const } 
+              : s
+          );
+          setState(parsed);
+        }
+      } catch (error) {
+        console.error("Failed to initialize data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initData();
+  }, []);
+
+  // Sync to Firestore and LocalStorage (with debounce)
+  useEffect(() => {
+    if (isLoading) return;
+
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      saveStateToFirestore(state);
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [state, isLoading]);
 
   const addLog = (log: InternshipLog) => {
     setState(prev => ({ ...prev, logs: [...prev.logs, log] }));
@@ -155,19 +182,30 @@ const App: React.FC = () => {
       <Sidebar currentView={currentView} setView={setView} />
       
       <main className="flex-1 md:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
-        <div className="md:hidden flex items-center justify-between mb-6">
-           <div className="flex items-center gap-2">
-             <div className="w-8 h-8 rounded-xl bg-[#162D34] flex items-center justify-center text-white text-xs font-black shadow-lg shadow-[#162D3433]">P</div>
-             <h1 className="text-lg font-black bg-gradient-to-r from-[#162D34] to-[#4587A7] bg-clip-text text-transparent">
-               InternPro
-             </h1>
-           </div>
-           <div className="flex items-center gap-2 text-right">
-             <span className="text-[10px] text-app-slate font-black uppercase tracking-widest opacity-70">Bethel University</span>
-           </div>
-        </div>
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+               <div className="w-12 h-12 border-4 border-app-bright border-t-transparent rounded-full animate-spin"></div>
+               <p className="text-app-slate font-black uppercase tracking-widest text-xs">Syncing Portfolio...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="md:hidden flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#162D34] flex items-center justify-center text-white text-xs font-black shadow-lg shadow-[#162D3433]">P</div>
+                <h1 className="text-lg font-black bg-gradient-to-r from-[#162D34] to-[#4587A7] bg-clip-text text-transparent">
+                  InternPro
+                </h1>
+              </div>
+              <div className="flex items-center gap-2 text-right">
+                <span className="text-[10px] text-app-slate font-black uppercase tracking-widest opacity-70">Bethel University</span>
+              </div>
+            </div>
 
-        {renderView()}
+            {renderView()}
+          </>
+        )}
       </main>
 
       <BottomNav currentView={currentView} setView={setView} />
