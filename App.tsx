@@ -16,6 +16,7 @@ import logo from './bethel-logo.png';
 const App: React.FC = () => {
   const [currentView, setView] = useState<string>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthInitializing, setIsAuthInitializing] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [state, setState] = useState<AppState>({
@@ -28,77 +29,84 @@ const App: React.FC = () => {
     primarySetting: 'Secondary'
   });
 
-  // Auth Subscription
+  // Combined Auth and Initial Data Load
   useEffect(() => {
-    // Check for redirect result first (for mobile flows)
-    checkRedirectResult().then((redirectUser) => {
-        if (redirectUser) {
-            setUser(redirectUser);
-        }
-    });
+    let isMounted = true;
 
-    const unsubscribe = subscribeToAuthChanges((currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Initial Data Load
-  useEffect(() => {
-    const initData = async () => {
-      setIsLoading(true);
+    const initialize = async () => {
+      console.log("App initializing...");
       try {
-        const params = new URLSearchParams(window.location.search);
-        const viewId = params.get('view');
-        
-        // Viewer Mode: Load data from the ID in URL
-        if (viewId) {
-          setIsReadOnly(true);
-          const sharedData = await loadStateFromFirestore(viewId);
-          if (sharedData) {
-            setState(sharedData);
-            setIsLoading(false);
-            return;
-          }
+        // 1. Check for redirect result first (crucial for mobile/PWA)
+        console.log("Checking redirect result...");
+        const redirectUser = await checkRedirectResult();
+        if (isMounted && redirectUser) {
+          console.log("Redirect user found:", redirectUser.email);
+          setUser(redirectUser);
         }
 
-        // Editor Mode: Load data for logged-in user
-        if (user) {
-          setIsReadOnly(false);
-          const firestoreData = await loadStateFromFirestore(user.uid);
-          if (firestoreData) {
-            setState(firestoreData);
-          } 
-          // New user? Could fall back to empty state (already set) or localStorage migration if needed
-        }
+        // 2. Set up auth state listener
+        console.log("Subscribing to auth changes...");
+        const unsubscribe = subscribeToAuthChanges(async (currentUser) => {
+          if (!isMounted) return;
+          
+          console.log("Auth state changed:", currentUser ? currentUser.email : "no user");
+          setUser(currentUser);
+          setIsAuthInitializing(false);
+
+          // 3. Load data based on auth state or URL params
+          const params = new URLSearchParams(window.location.search);
+          const viewId = params.get('view');
+
+          if (viewId) {
+            console.log("Loading viewer mode data for:", viewId);
+            setIsReadOnly(true);
+            const sharedData = await loadStateFromFirestore(viewId);
+            if (isMounted && sharedData) {
+              setState(sharedData);
+            }
+            setIsLoading(false);
+          } else if (currentUser) {
+            console.log("Loading editor mode data for:", currentUser.uid);
+            setIsReadOnly(false);
+            const firestoreData = await loadStateFromFirestore(currentUser.uid);
+            if (isMounted && firestoreData) {
+              setState(firestoreData);
+            }
+            setIsLoading(false);
+          } else {
+            console.log("No user and no view ID, stopping loader.");
+            setIsLoading(false);
+          }
+        });
+
+        return unsubscribe;
       } catch (error) {
-        console.error("Failed to initialize data:", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Initialization error:", error);
+        if (isMounted) {
+          setIsAuthInitializing(false);
+          setIsLoading(false);
+        }
       }
     };
 
-    // Only run if we are NOT waiting for auth (i.e. we either have a user, or we know we are in view mode, or we are sure no user is logged in)
-    // Actually, onAuthStateChanged fires initially, so 'user' state update will trigger this if we depend on [user].
-    // But we need to handle the "initial load" specifically.
-    if (user || window.location.search) {
-        initData();
-    } else {
-        // No user, no view param. 
-        setIsLoading(false);
-    }
-  }, [user]);
+    const authUnsubscribePromise = initialize();
+
+    return () => {
+      isMounted = false;
+      authUnsubscribePromise.then(unsubscribe => unsubscribe && unsubscribe());
+    };
+  }, []);
 
   // Sync to Firestore (only if logged in and not read-only)
   useEffect(() => {
-    if (isLoading || isReadOnly || !user) return;
+    if (isLoading || isAuthInitializing || isReadOnly || !user) return;
 
     const timeoutId = setTimeout(() => {
       saveStateToFirestore(user.uid, state);
     }, 1000);
 
     return () => clearTimeout(timeoutId);
-  }, [state, isLoading, isReadOnly, user]);
+  }, [state, isLoading, isAuthInitializing, isReadOnly, user]);
 
   const addLog = (log: InternshipLog) => {
     setState(prev => ({ ...prev, logs: [...prev.logs, log] }));
@@ -228,7 +236,7 @@ const App: React.FC = () => {
             <div className="md:hidden flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <img src={logo} alt="Bethel" className="w-10 h-10 object-contain" />
-                <h1 className="text-lg font-black bg-gradient-to-r from-[#162D34] to-[#4587A7] bg-clip-text text-transparent">
+                <h1 className="text-lg font-black text-app-dark bg-gradient-to-r from-app-dark to-app-bright bg-clip-text text-transparent">
                   InternPro
                 </h1>
               </div>

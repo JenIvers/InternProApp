@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { signInWithGoogle } from '../authService';
-import { ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import logo from '../bethel-logo.png';
 
 const LoginView: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    try {
+      await signInWithGoogle();
+      // Note: For redirect flow, the page will reload/redirect away.
+      // For popup flow, it will finish and App.tsx will pick up the user change.
+    } catch (error) {
+      console.error("Login failed:", error);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-app-bg relative overflow-hidden p-4">
       {/* Background Decor */}
@@ -14,7 +28,7 @@ const LoginView: React.FC = () => {
 
       <div className="glass p-12 rounded-[3.5rem] shadow-2xl max-w-md w-full text-center relative z-10 animate-in fade-in zoom-in-95 duration-700">
         <img src={logo} alt="Bethel University" className="w-24 mx-auto mb-8 drop-shadow-md" />
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-app-dark to-app-deep flex items-center justify-center mx-auto mb-6 shadow-xl shadow-app-dark/20 text-white">
+        <div className="w-16 h-16 rounded-2xl bg-app-dark bg-gradient-to-br from-app-dark to-app-deep flex items-center justify-center mx-auto mb-6 shadow-xl shadow-app-dark/20 text-white">
           <ShieldCheck size={32} strokeWidth={1.5} />
         </div>
         
@@ -24,12 +38,19 @@ const LoginView: React.FC = () => {
         </p>
 
         <button 
-          onClick={signInWithGoogle}
-          className="w-full bg-white hover:bg-gray-50 text-app-dark font-black py-5 px-6 rounded-[2rem] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-4 group border border-slate-100"
+          onClick={handleLogin}
+          disabled={isLoading}
+          className="w-full bg-white hover:bg-gray-50 text-app-dark font-black py-5 px-6 rounded-[2rem] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-4 group border border-slate-100 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
-          <img src="https://www.google.com/favicon.ico" alt="Google" className="w-6 h-6" />
-          <span className="uppercase tracking-widest text-sm">Sign in with Google</span>
-          <ArrowRight size={18} className="text-app-light group-hover:translate-x-1 transition-transform" />
+          {isLoading ? (
+            <Loader2 className="w-6 h-6 animate-spin text-app-bright" />
+          ) : (
+            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-6 h-6" />
+          )}
+          <span className="uppercase tracking-widest text-sm">
+            {isLoading ? 'Connecting...' : 'Sign in with Google'}
+          </span>
+          {!isLoading && <ArrowRight size={18} className="text-app-slate group-hover:translate-x-1 transition-transform" />}
         </button>
 
         <div className="mt-10 pt-8 border-t border-app-dark/5">

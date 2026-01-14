@@ -1,0 +1,21 @@
+{
+  "short_name": "InternPro",
+  "name": "InternPro Portfolio",
+  "icons": [
+    {
+      "src": "bethel-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "bethel-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#142930",
+  "background_color": "#F0F4F7"
+}

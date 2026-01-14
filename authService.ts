@@ -18,23 +18,29 @@ export const checkRedirectResult = async (): Promise<User | null> => {
 
 export const signInWithGoogle = async (): Promise<void> => {
   try {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const userAgent = navigator.userAgent || navigator.vendor || (window as { opera?: string }).opera || "";
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as { MSStream?: unknown }).MSStream;
+    const isAndroid = /Android/.test(userAgent);
+    const isMobile = isIOS || isAndroid;
+    const isStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone || 
+                         window.matchMedia('(display-mode: standalone)').matches;
 
-    if (isMobile) {
+    console.log("Auth attempt:", { isMobile, isIOS, isAndroid, isStandalone });
+
+    // For PWAs on iOS, signInWithRedirect is often more reliable than popup
+    // which can be blocked or cause context loss.
+    if (isMobile || isStandalone) {
       await signInWithRedirect(auth, provider);
     } else {
       await signInWithPopup(auth, provider);
     }
   } catch (error) {
     console.error("Error signing in with Google:", error);
-    // Fallback to redirect if popup fails (e.g., blocked)
-    const errorCode = (error as { code?: string })?.code;
-    if (errorCode === 'auth/popup-blocked' || errorCode === 'auth/popup-closed-by-user') {
-      try {
-        await signInWithRedirect(auth, provider);
-      } catch (e) {
-        console.error("Error signing in with Google (Redirect Fallback):", e);
-      }
+    // Fallback logic
+    try {
+      await signInWithRedirect(auth, provider);
+    } catch (e) {
+      console.error("Error signing in with Google (Fallback):", e);
     }
   }
 };
