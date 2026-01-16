@@ -62,6 +62,7 @@ export const signInWithGoogle = async (): Promise<void> => {
   } catch (error) {
     console.error("Error signing in with Google:", error);
     sessionStorage.removeItem(REDIRECT_KEY);
+    throw error;
   }
 };
 

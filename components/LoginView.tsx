@@ -5,16 +5,19 @@ import logo from '../bethel-logo.png';
 
 const LoginView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       await signInWithGoogle();
       // Note: For redirect flow, the page will reload/redirect away.
       // For popup flow, it will finish and App.tsx will pick up the user change.
-    } catch (error) {
-      console.error("Login failed:", error);
+    } catch (err: any) {
+      console.error("Login failed:", err);
       setIsLoading(false);
+      setError(err.message || "Failed to sign in. Please try again.");
     }
   };
 
@@ -52,6 +55,13 @@ const LoginView: React.FC = () => {
           </span>
           {!isLoading && <ArrowRight size={18} className="text-app-slate group-hover:translate-x-1 transition-transform" />}
         </button>
+
+        {error && (
+          <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-left animate-in slide-in-from-top-2">
+            <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">Authentication Error</p>
+            <p className="text-xs text-red-600 font-medium leading-relaxed">{error}</p>
+          </div>
+        )}
 
         <div className="mt-10 pt-8 border-t border-app-dark/5">
           <p className="text-[10px] uppercase font-black text-app-slate/40 tracking-[0.2em]">Bethel University</p>
