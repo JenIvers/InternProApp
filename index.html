@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>InternPro | Internship Portfolio</title>
     
     <!-- PWA / Mobile Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="InternPro">
     <meta name="theme-color" content="#142930">
-    <link rel="apple-touch-icon" href="bethel-logo.png">
+    <link rel="apple-touch-icon" href="InternPro.png">
     <link rel="manifest" href="/manifest.json">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -89,9 +90,15 @@
         .text-app-deep { color: var(--app-deep); }
         
         .border-app-light { border-color: var(--app-light); }
+
+        /* Safe Area Utilities for iOS PWA */
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .mt-safe { margin-top: env(safe-area-inset-top); }
+        .mb-safe { margin-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
-<body class="text-slate-900">
+<body class="text-slate-900 pt-safe">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>
