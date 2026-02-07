@@ -1,17 +1,33 @@
 import React, { useState } from 'react';
 import { InternshipLog } from '../types';
 import { ALL_COMPETENCIES } from '../constants';
-import { Clock, Calendar, School, Plus, PencilLine, Tag, Timer, X, Edit2 } from 'lucide-react';
+import { Clock, Calendar, School, Plus, PencilLine, Tag, Timer, X, Edit2, Printer } from 'lucide-react';
 
 interface LogsViewProps {
   logs: InternshipLog[];
   onAddLog: (log: InternshipLog) => void;
   onUpdateLog: (log: InternshipLog) => void;
   isReadOnly?: boolean;
+  userName?: string | null;
 }
 
-const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isReadOnly }) => {
+const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isReadOnly, userName }) => {
   const [isAdding, setIsAdding] = useState(false);
+  
+  // Stats Calculations
+  const sortedLogs = [...logs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const totalHours = logs.reduce((sum, log) => sum + Number(log.hours), 0);
+  
+  const statsByLevel = logs.reduce((acc, log) => {
+    const level = log.schoolLevel || 'Other';
+    acc[level] = (acc[level] || 0) + Number(log.hours);
+    return acc;
+  }, {} as Record<string, number>);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   const [formData, setFormData] = useState<Partial<InternshipLog>>({
     date: new Date().toISOString().split('T')[0],
     startTime: '08:00',
@@ -105,25 +121,114 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
 
   return (
     <div className="space-y-8 pb-20 md:pb-8">
-      <div className="flex justify-between items-center px-4">
+      <div className="flex justify-between items-center px-4 print:hidden">
         <div>
           <h2 className="text-3xl font-black text-app-dark tracking-tight">Activity Log</h2>
           <p className="text-app-slate text-base font-bold opacity-70">Cataloging real-world leadership moments.</p>
         </div>
-        {!isReadOnly && (
+        <div className="flex gap-4">
           <button
-            onClick={isAdding ? handleClose : () => setIsAdding(true)}
-            className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 shadow-2xl ${
-              isAdding 
-                ? 'bg-white text-app-dark border border-white/50' 
-                : 'bg-app-dark text-white shadow-app-dark/30 hover:scale-105 active:scale-95'
-            }`}
+            onClick={handlePrint}
+            className="px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 bg-white text-app-dark border border-app-dark/10 shadow-xl hover:bg-app-bg active:scale-95"
           >
-            {isAdding ? <X size={18} strokeWidth={3} /> : <Plus size={18} strokeWidth={3} />}
-            <span>{isAdding ? 'Close' : 'New Entry'}</span>
+            <Printer size={18} strokeWidth={3} />
+            <span className="hidden sm:inline">Export Report</span>
           </button>
-        )}
+          {!isReadOnly && (
+            <button
+              onClick={isAdding ? handleClose : () => setIsAdding(true)}
+              className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 shadow-2xl ${
+                isAdding 
+                  ? 'bg-white text-app-dark border border-white/50' 
+                  : 'bg-app-dark text-white shadow-app-dark/30 hover:scale-105 active:scale-95'
+              }`}
+            >
+              {isAdding ? <X size={18} strokeWidth={3} /> : <Plus size={18} strokeWidth={3} />}
+              <span>{isAdding ? 'Close' : 'New Entry'}</span>
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Printable Report Section - Hidden in UI */}
+      <div className="hidden print:block p-12 bg-white min-h-screen text-slate-900">
+        {/* Header */}
+        <div className="border-b-4 border-slate-900 pb-10 mb-10 flex justify-between items-end">
+          <div>
+            <h1 className="text-5xl font-black uppercase tracking-tighter text-slate-900">Internship Portfolio Report</h1>
+            <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm mt-3">
+              {userName || 'Internship Candidate'} &mdash; Bethel University Principal Internship
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="bg-slate-900 text-white px-6 py-4 rounded-xl">
+              <p className="text-4xl font-black leading-none">{totalHours.toFixed(1)}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest mt-1 opacity-70">Cumulative Hours</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Overview Grid */}
+        <div className="mb-12">
+          <h2 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-4">
+            <span>Hours by Institutional Context</span>
+            <div className="flex-1 h-px bg-slate-100"></div>
+          </h2>
+          <div className="grid grid-cols-4 gap-6">
+            {['Elementary', 'Intermediate', 'Middle', 'High School'].map(level => (
+              <div key={level} className="border-2 border-slate-50 p-6 rounded-2xl">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{level}</p>
+                <p className="text-2xl font-black text-slate-900">{(statsByLevel[level] || 0).toFixed(1)} <span className="text-xs opacity-30">hrs</span></p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Detailed Log Table */}
+        <div>
+          <h2 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-4">
+            <span>Chronological Activity History</span>
+            <div className="flex-1 h-px bg-slate-100"></div>
+          </h2>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400 w-32">Date</th>
+                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Activity Overview</th>
+                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400 w-32">Level</th>
+                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right w-24">Hours</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {sortedLogs.map((log) => (
+                <tr key={log.id} className="break-inside-avoid">
+                  <td className="py-4 px-2 text-sm font-bold text-slate-500">{log.date}</td>
+                  <td className="py-4 px-2">
+                    <p className="text-base font-black text-slate-900 leading-tight">
+                      {log.title || log.activity}
+                    </p>
+                  </td>
+                  <td className="py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">{log.schoolLevel}</td>
+                  <td className="py-4 px-2 text-right text-base font-black text-slate-900">{Number(log.hours).toFixed(1)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-slate-900">
+                <td colSpan={3} className="py-8 px-2 text-xs font-black uppercase tracking-[0.4em] text-slate-900">Total Internship Engagement</td>
+                <td className="py-8 px-2 text-right text-3xl font-black text-slate-900">{totalHours.toFixed(1)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-20 pt-10 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+          <p>InternPro Portfolio System &bull; Secure Academic Record</p>
+          <p>Generated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+        </div>
+      </div>
+
       {isAdding && (
         <form onSubmit={handleSubmit} className="glass p-10 rounded-[3.5rem] shadow-2xl border border-white/60 space-y-10 animate-in fade-in slide-in-from-top-6 duration-500">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -213,7 +318,7 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
         </form>
       )}
 
-      <div className="space-y-6 px-1">
+      <div className="space-y-6 px-1 print:hidden">
         {logs.slice().reverse().map(log => (
           <div key={log.id} className="glass p-8 rounded-[3rem] shadow-sm hover:shadow-2xl hover:translate-x-1 transition-all group duration-300">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">

@@ -281,7 +281,15 @@ const App: React.FC = () => {
           />
         );
       case 'logs':
-        return <LogsView logs={state.logs} onAddLog={addLog} onUpdateLog={updateLog} isReadOnly={isReadOnly} />;
+        return (
+          <LogsView 
+            logs={state.logs} 
+            onAddLog={addLog} 
+            onUpdateLog={updateLog} 
+            isReadOnly={isReadOnly} 
+            userName={isReadOnly ? state.userProfile?.displayName : user?.displayName}
+          />
+        );
       case 'competencies':
         return (
           <CompetenciesView 
