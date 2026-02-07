@@ -28,100 +28,20 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
     window.print();
   };
 
-  const [formData, setFormData] = useState<Partial<InternshipLog>>({
-    date: new Date().toISOString().split('T')[0],
-    startTime: '08:00',
-    endTime: '12:00',
-    hours: 4,
-    title: '',
-    activity: '',
-    location: '',
-    schoolLevel: 'Middle',
-    taggedCompetencyIds: [],
-    reflections: ''
-  });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const toggleCompetency = (id: string) => {
-    setFormData(prev => {
-      const current = prev.taggedCompetencyIds || [];
-      const next = current.includes(id)
-        ? current.filter(cid => cid !== id)
-        : [...current, id];
-      return { ...prev, taggedCompetencyIds: next };
-    });
-  };
-
-  const resetForm = () => {
-    setFormData({
-      date: new Date().toISOString().split('T')[0],
-      startTime: '08:00',
-      endTime: '12:00',
-      hours: 4,
-      title: '',
-      activity: '',
-      location: '',
-      schoolLevel: 'Middle',
-      taggedCompetencyIds: [],
-      reflections: ''
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.id) {
-      // Update existing log
-      const updatedLog: InternshipLog = {
-        ...formData as InternshipLog,
-        hours: Number(formData.hours),
-        title: formData.title || '',
-        taggedCompetencyIds: formData.taggedCompetencyIds || [],
-        reflections: formData.reflections || '',
-        artifactIds: formData.artifactIds || []
-      };
-      onUpdateLog(updatedLog);
-    } else {
-      // Create new log
-      const newLog: InternshipLog = {
-        id: crypto.randomUUID(),
-        date: formData.date!,
-        startTime: formData.startTime!,
-        endTime: formData.endTime!,
-        hours: Number(formData.hours),
-        title: formData.title || '',
-        activity: formData.activity!,
-        location: formData.location!,
-        schoolLevel: formData.schoolLevel as InternshipLog['schoolLevel'],
-        taggedCompetencyIds: formData.taggedCompetencyIds || [],
-        reflections: formData.reflections || '',
-        artifactIds: []
-      };
-      onAddLog(newLog);
-    }
-    
-    setIsAdding(false);
-    resetForm();
-  };
-
-  const handleEditClick = (log: InternshipLog) => {
-    setFormData({ ...log, title: log.title || '' });
-    setIsAdding(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleClose = () => {
-    setIsAdding(false);
-    resetForm();
-  };
-
   return (
     <div className="space-y-8 pb-20 md:pb-8">
+      {/* Global Print Overrides */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          nav, aside, button, .print\\:hidden { display: none !important; }
+          body { background: white !important; margin: 0; padding: 0; }
+          main { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+          .report-container { display: block !important; padding: 0 !important; }
+        }
+      `}} />
+
       <div className="flex justify-between items-center px-4 print:hidden">
+
         <div>
           <h2 className="text-3xl font-black text-app-dark tracking-tight">Activity Log</h2>
           <p className="text-app-slate text-base font-bold opacity-70">Cataloging real-world leadership moments.</p>
@@ -151,85 +71,68 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
       </div>
 
       {/* Printable Report Section - Hidden in UI */}
-      <div className="hidden print:block p-12 bg-white min-h-screen text-slate-900">
-        {/* Header */}
-        <div className="border-b-4 border-slate-900 pb-10 mb-10 flex justify-between items-end">
+      <div className="hidden print:block report-container bg-white min-h-screen text-slate-900 font-serif">
+        {/* Academic Header */}
+        <div className="border-b-2 border-slate-900 pb-6 mb-8 flex justify-between items-baseline">
           <div>
-            <h1 className="text-5xl font-black uppercase tracking-tighter text-slate-900">Internship Portfolio Report</h1>
-            <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-sm mt-3">
-              {userName || 'Internship Candidate'} &mdash; Bethel University Principal Internship
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Internship Activity Log</h1>
+            <p className="text-slate-600 text-sm mt-1 italic">
+              Candidate: <span className="font-bold not-italic">{userName || 'Jen Ivers'}</span> &bull; Bethel University
             </p>
           </div>
           <div className="text-right">
-            <div className="bg-slate-900 text-white px-6 py-4 rounded-xl">
-              <p className="text-4xl font-black leading-none">{totalHours.toFixed(1)}</p>
-              <p className="text-[10px] font-black uppercase tracking-widest mt-1 opacity-70">Cumulative Hours</p>
-            </div>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Total Hours</p>
+            <p className="text-4xl font-bold text-slate-900">{totalHours.toFixed(1)}</p>
           </div>
         </div>
 
-        {/* Stats Overview Grid */}
-        <div className="mb-12">
-          <h2 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-4">
-            <span>Hours by Institutional Context</span>
-            <div className="flex-1 h-px bg-slate-100"></div>
+        {/* Executive Summary Section */}
+        <div className="mb-10 p-6 bg-slate-50 rounded-lg border border-slate-100">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4 border-b border-slate-200 pb-2">
+            Engagement Summary by Context
           </h2>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-4 gap-8">
             {['Elementary', 'Intermediate', 'Middle', 'High School'].map(level => (
-              <div key={level} className="border-2 border-slate-50 p-6 rounded-2xl">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{level}</p>
-                <p className="text-2xl font-black text-slate-900">{(statsByLevel[level] || 0).toFixed(1)} <span className="text-xs opacity-30">hrs</span></p>
+              <div key={level}>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">{level}</p>
+                <p className="text-xl font-bold text-slate-900">
+                  {(statsByLevel[level] || 0).toFixed(1)} <span className="text-[10px] font-medium opacity-40 italic">hrs</span>
+                </p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Detailed Log History */}
+        {/* Log Entries */}
         <div>
-          <h2 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-4">
-            <span>Chronological Activity History</span>
-            <div className="flex-1 h-px bg-slate-100"></div>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 border-b border-slate-200 pb-2">
+            Chronological Activity History
           </h2>
           
-          <div className="space-y-0">
+          <div className="divide-y divide-slate-100">
             {sortedLogs.map((log) => (
-              <div key={log.id} className="py-6 border-b border-slate-100 break-inside-avoid">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex gap-4 items-center">
-                    <span className="text-sm font-bold text-slate-500">{log.date}</span>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
-                      {log.schoolLevel}
+              <div key={log.id} className="py-5 break-inside-avoid">
+                <div className="flex justify-between items-baseline mb-1">
+                  <div className="flex gap-3 items-center">
+                    <span className="text-xs font-bold text-slate-900">{log.date}</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                      [{log.schoolLevel}]
                     </span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-base font-black text-slate-900">{Number(log.hours).toFixed(1)} <span className="text-[10px] uppercase opacity-40">hrs</span></span>
-                  </div>
+                  <span className="text-sm font-bold text-slate-900">{Number(log.hours).toFixed(1)} hrs</span>
                 </div>
-                <div className="mt-1">
-                  {log.title ? (
-                    <p className="text-lg font-black text-slate-900 leading-tight">
-                      {log.title}
-                    </p>
-                  ) : (
-                    <p className="text-sm font-medium text-slate-300 italic">
-                      No title provided for this entry
-                    </p>
-                  )}
-                </div>
+                <p className="text-base font-medium text-slate-800 leading-snug">
+                  {log.title || 'Untitled Activity Entry'}
+                </p>
               </div>
             ))}
-          </div>
-
-          <div className="mt-10 flex justify-between items-center py-8 px-2 border-t-2 border-slate-900">
-            <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-900">Total Internship Engagement</span>
-            <span className="text-3xl font-black text-slate-900">{totalHours.toFixed(1)}</span>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-20 pt-10 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-          <p>InternPro Portfolio System &bull; Secure Academic Record</p>
-          <p>Generated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+        <div className="mt-12 pt-6 border-t border-slate-100 flex justify-between items-center text-[9px] font-medium text-slate-400 uppercase tracking-widest italic">
+          <p>Official Internship Record &bull; InternPro Systems</p>
+          <p>Report Date: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
         </div>
       </div>
 
