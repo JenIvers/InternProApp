@@ -184,42 +184,46 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
           </div>
         </div>
 
-        {/* Detailed Log Table */}
+        {/* Detailed Log History */}
         <div>
           <h2 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-4">
             <span>Chronological Activity History</span>
             <div className="flex-1 h-px bg-slate-100"></div>
           </h2>
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200">
-                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400 w-32">Date</th>
-                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Activity Overview</th>
-                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400 w-32">Level</th>
-                <th className="py-4 px-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right w-24">Hours</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {sortedLogs.map((log) => (
-                <tr key={log.id} className="break-inside-avoid">
-                  <td className="py-4 px-2 text-sm font-bold text-slate-500">{log.date}</td>
-                  <td className="py-4 px-2">
-                    <p className="text-base font-black text-slate-900 leading-tight">
-                      {log.title || log.activity}
+          
+          <div className="space-y-0">
+            {sortedLogs.map((log) => (
+              <div key={log.id} className="py-6 border-b border-slate-100 break-inside-avoid">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex gap-4 items-center">
+                    <span className="text-sm font-bold text-slate-500">{log.date}</span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                      {log.schoolLevel}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-base font-black text-slate-900">{Number(log.hours).toFixed(1)} <span className="text-[10px] uppercase opacity-40">hrs</span></span>
+                  </div>
+                </div>
+                <div className="mt-1">
+                  {log.title ? (
+                    <p className="text-lg font-black text-slate-900 leading-tight">
+                      {log.title}
                     </p>
-                  </td>
-                  <td className="py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">{log.schoolLevel}</td>
-                  <td className="py-4 px-2 text-right text-base font-black text-slate-900">{Number(log.hours).toFixed(1)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-slate-900">
-                <td colSpan={3} className="py-8 px-2 text-xs font-black uppercase tracking-[0.4em] text-slate-900">Total Internship Engagement</td>
-                <td className="py-8 px-2 text-right text-3xl font-black text-slate-900">{totalHours.toFixed(1)}</td>
-              </tr>
-            </tfoot>
-          </table>
+                  ) : (
+                    <p className="text-sm font-medium text-slate-300 italic">
+                      No title provided for this entry
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 flex justify-between items-center py-8 px-2 border-t-2 border-slate-900">
+            <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-900">Total Internship Engagement</span>
+            <span className="text-3xl font-black text-slate-900">{totalHours.toFixed(1)}</span>
+          </div>
         </div>
 
         {/* Footer */}
