@@ -17,6 +17,7 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
     startTime: '08:00',
     endTime: '12:00',
     hours: 4,
+    title: '',
     activity: '',
     location: '',
     schoolLevel: 'Middle',
@@ -45,6 +46,7 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
       startTime: '08:00',
       endTime: '12:00',
       hours: 4,
+      title: '',
       activity: '',
       location: '',
       schoolLevel: 'Middle',
@@ -61,6 +63,7 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
       const updatedLog: InternshipLog = {
         ...formData as InternshipLog,
         hours: Number(formData.hours),
+        title: formData.title || '',
         taggedCompetencyIds: formData.taggedCompetencyIds || [],
         reflections: formData.reflections || '',
         artifactIds: formData.artifactIds || []
@@ -74,6 +77,7 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
         startTime: formData.startTime!,
         endTime: formData.endTime!,
         hours: Number(formData.hours),
+        title: formData.title || '',
         activity: formData.activity!,
         location: formData.location!,
         schoolLevel: formData.schoolLevel as InternshipLog['schoolLevel'],
@@ -89,7 +93,7 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
   };
 
   const handleEditClick = (log: InternshipLog) => {
-    setFormData({ ...log });
+    setFormData({ ...log, title: log.title || '' });
     setIsAdding(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -155,6 +159,20 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
 
           <div className="space-y-3">
             <label className="flex items-center gap-2 text-[11px] font-black text-app-slate uppercase tracking-[0.2em] ml-2">
+              <Edit2 size={14} className="text-app-bright" /> Title / Overview
+            </label>
+            <textarea
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
+              placeholder="Brief summary or title for this entry..."
+              rows={1}
+              className="w-full p-5 rounded-[1.5rem] bg-white/60 border-none focus:ring-4 focus:ring-app-bright/10 outline-none font-bold text-app-dark shadow-inner placeholder:text-app-light/50 resize-none"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-[11px] font-black text-app-slate uppercase tracking-[0.2em] ml-2">
               <PencilLine size={14} className="text-app-bright" /> Description of Professional Activity
             </label>
             <textarea
@@ -203,14 +221,19 @@ const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isRead
                  <div className="w-14 h-14 rounded-2xl bg-white shadow-xl flex items-center justify-center text-app-light group-hover:bg-app-bright group-hover:text-white transition-all duration-500">
                     <Clock size={24} strokeWidth={2.5} />
                  </div>
-                 <div>
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                 <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
                       <span className="text-[11px] font-black text-app-bright bg-app-bright/5 border border-app-bright/10 px-3 py-1 rounded-lg uppercase tracking-widest">{log.date}</span>
                       <span className="text-[11px] font-black text-app-slate bg-app-dark/5 px-3 py-1 rounded-lg uppercase tracking-widest flex items-center gap-2">
                         <School size={12} strokeWidth={2.5} /> {log.schoolLevel}
                       </span>
                     </div>
-                    <h4 className="text-xl font-black text-app-dark leading-tight group-hover:text-app-bright transition-colors">{log.activity}</h4>
+                    {log.title && (
+                      <h4 className="text-xl font-black text-app-dark leading-tight group-hover:text-app-bright transition-colors mb-2">{log.title}</h4>
+                    )}
+                    <p className={`${log.title ? 'text-sm text-app-slate font-medium line-clamp-2' : 'text-xl font-black text-app-dark leading-tight group-hover:text-app-bright transition-colors'}`}>
+                      {log.activity}
+                    </p>
                  </div>
               </div>
               

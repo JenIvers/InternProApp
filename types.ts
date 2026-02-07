@@ -41,6 +41,7 @@ export interface InternshipLog {
   startTime: string;
   endTime: string;
   hours: number;
+  title?: string;
   activity: string;
   location: string;
   schoolLevel: 'Elementary' | 'Intermediate' | 'Middle' | 'High School';
