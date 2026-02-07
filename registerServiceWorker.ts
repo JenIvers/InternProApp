@@ -6,6 +6,12 @@ export const register = (onUpdate: (registration: ServiceWorkerRegistration) => 
         .then((registration) => {
           console.log('SW registered: ', registration);
 
+          // 1. Check if there is already a waiting worker (e.g. from a background check)
+          if (registration.waiting) {
+            onUpdate(registration);
+          }
+
+          // 2. Listen for future updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
@@ -17,6 +23,12 @@ export const register = (onUpdate: (registration: ServiceWorkerRegistration) => 
               });
             }
           });
+
+          // 3. Proactive check runner: Check for updates every 10 minutes
+          // This is lightweight as it only checks the server for a byte-for-byte diff of the SW script
+          setInterval(() => {
+            registration.update();
+          }, 1000 * 60 * 10);
         })
         .catch((error) => {
           console.error('SW registration failed: ', error);
