@@ -13,6 +13,62 @@ interface LogsViewProps {
 
 const LogsView: React.FC<LogsViewProps> = ({ logs, onAddLog, onUpdateLog, isReadOnly, userName }) => {
   const [isAdding, setIsAdding] = useState(false);
+
+  const initialFormData: Partial<InternshipLog> = {
+    date: new Date().toISOString().split('T')[0],
+    hours: 1,
+    schoolLevel: 'Elementary',
+    title: '',
+    activity: '',
+    taggedCompetencyIds: [],
+    startTime: '08:00',
+    endTime: '09:00',
+    location: '',
+    reflections: '',
+    artifactIds: []
+  };
+
+  const [formData, setFormData] = useState<Partial<InternshipLog>>(initialFormData);
+
+  const handleClose = () => {
+    setIsAdding(false);
+    setFormData(initialFormData);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'hours' ? parseFloat(value) : value
+    }));
+  };
+
+  const toggleCompetency = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      taggedCompetencyIds: prev.taggedCompetencyIds?.includes(id)
+        ? prev.taggedCompetencyIds.filter(cid => cid !== id)
+        : [...(prev.taggedCompetencyIds || []), id]
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.id) {
+      onUpdateLog(formData as InternshipLog);
+    } else {
+      onAddLog({
+        ...formData,
+        id: Date.now().toString(),
+      } as InternshipLog);
+    }
+    handleClose();
+  };
+
+  const handleEditClick = (log: InternshipLog) => {
+    setFormData(log);
+    setIsAdding(true);
+  };
   
   // Stats Calculations
   const sortedLogs = [...logs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());

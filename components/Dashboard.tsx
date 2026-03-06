@@ -185,7 +185,7 @@ const Dashboard: React.FC<DashboardProps> = ({ logs, progress, primarySetting, o
             </div>
         </div>
         <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart data={attainmentData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <XAxis 
                 dataKey="name" 
