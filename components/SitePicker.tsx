@@ -62,7 +62,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
         <select
           value={isCustom ? '__custom__' : (siteId || '')}
           onChange={handleSelectChange}
-          className="w-full pl-11 pr-10 py-3.5 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-bold text-app-dark appearance-none cursor-pointer"
+          className="w-full pl-11 pr-10 py-3.5 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-bold text-app-dark appearance-none cursor-pointer"
         >
           <option value="">Select a site&hellip;</option>
           {sites.map(site => (
@@ -80,7 +80,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
           value={location || ''}
           onChange={e => onChange({ siteId: undefined, location: e.target.value })}
           placeholder="Type a location name"
-          className="w-full px-4 py-3 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
+          className="w-full px-4 py-3.5 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
         />
       )}
 

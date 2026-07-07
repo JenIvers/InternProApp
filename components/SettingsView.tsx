@@ -108,7 +108,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value={draft.primaryLevelBucket}
               onChange={e => handlePrimaryBucketChange(e.target.value as LevelBucket)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2 text-sm text-app-dark disabled:opacity-60"
+              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
             >
               {LEVEL_BUCKET_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -141,7 +141,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value={draft.targets.total}
               onChange={e => handleTargetChange('total', e.target.value)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2 text-sm text-app-dark disabled:opacity-60"
+              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
             />
           </div>
           <div>
@@ -154,7 +154,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value={draft.targets.primary}
               onChange={e => handleTargetChange('primary', e.target.value)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2 text-sm text-app-dark disabled:opacity-60"
+              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
             />
           </div>
           <div>
@@ -167,7 +167,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value={draft.targets.others}
               onChange={e => handleTargetChange('others', e.target.value)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2 text-sm text-app-dark disabled:opacity-60"
+              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
             />
           </div>
         </div>

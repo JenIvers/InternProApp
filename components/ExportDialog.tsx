@@ -173,18 +173,18 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="export-dialog-title"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-xl bg-white shadow-2xl"
+        className="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
           <div className="flex items-center gap-2">
             <FileDown size={20} className="text-app-bright" />
             <h2
@@ -204,7 +204,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           </button>
         </div>
 
-        <div className="px-5 py-4">
+        <div className="flex-1 overflow-y-auto px-5 py-4">
           {/* Mode selection */}
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Document
@@ -295,12 +295,12 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-4">
+        {/* Footer — sticky above the iOS safe area on mobile */}
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-200 px-5 py-4 pb-safe sm:pb-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
           >
             Cancel
           </button>
@@ -308,7 +308,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
             type="button"
             onClick={handleExport}
             disabled={!canExport}
-            className="flex items-center gap-2 rounded-lg bg-app-bright px-4 py-2 text-sm font-semibold text-white transition hover:bg-app-deep disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-app-bright px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-app-deep disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? (
               <>

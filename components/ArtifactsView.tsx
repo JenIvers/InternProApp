@@ -233,20 +233,20 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
         )}
 
         {isCreatingShelf && (
-          <form onSubmit={handleCreateShelf} className="glass p-10 rounded-[3rem] shadow-2xl border-2 border-app-bright/20 flex gap-4 animate-in slide-in-from-top-4 duration-500">
-            <div className="flex-1">
+          <form onSubmit={handleCreateShelf} className="glass p-5 sm:p-10 rounded-3xl sm:rounded-[3rem] shadow-2xl border-2 border-app-bright/20 flex flex-col sm:flex-row gap-4 animate-in slide-in-from-top-4 duration-500">
+            <div className="flex-1 min-w-0">
               <label className="text-[11px] font-black text-app-slate uppercase tracking-widest mb-2 block ml-2">Shelf Designation</label>
-              <input 
+              <input
                 autoFocus
                 value={newShelfName}
                 onChange={(e) => setNewShelfName(e.target.value)}
-                placeholder="e.g., PLCs, Observation Cycles, Fiscal Audits..."
+                placeholder="e.g., PLCs, Observation Cycles..."
                 className="w-full bg-white/60 border-none rounded-2xl px-6 py-4 text-base outline-none focus:ring-4 focus:ring-app-bright/10 font-black text-app-dark placeholder:text-app-light/50 shadow-inner"
               />
             </div>
             <div className="flex items-end gap-3 pb-0.5">
-              <button type="submit" className="bg-app-bright text-white h-[56px] px-10 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-app-bright/20 hover:bg-app-deep active:scale-95 transition-all">Create</button>
-              <button type="button" onClick={() => setIsCreatingShelf(false)} className="h-[56px] w-[56px] flex items-center justify-center text-app-slate bg-app-dark/5 hover:text-red-500 rounded-2xl transition-colors">
+              <button type="submit" className="flex-1 sm:flex-none bg-app-bright text-white h-[56px] px-6 sm:px-10 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-app-bright/20 hover:bg-app-deep active:scale-95 transition-all">Create</button>
+              <button type="button" onClick={() => setIsCreatingShelf(false)} className="h-[56px] w-[56px] shrink-0 flex items-center justify-center text-app-slate bg-app-dark/5 hover:text-red-500 rounded-2xl transition-colors">
                 <X size={24} strokeWidth={3} />
               </button>
             </div>
@@ -273,7 +273,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="absolute inset-0 bg-app-dark/70 backdrop-blur-2xl" onClick={() => setSelectedArtifact(null)}></div>
           <div className="relative glass w-full max-w-4xl sm:rounded-[3.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in slide-in-from-bottom-12 duration-500">
-            <header className="p-10 border-b border-white/20 flex items-center justify-between sticky top-0 bg-white/70 z-10">
+            <header className="p-5 sm:p-10 border-b border-white/20 flex items-center justify-between sticky top-0 bg-white/70 z-10 pt-safe">
               <div className="flex-1 mr-6 overflow-hidden">
                  <h3 className="text-2xl font-black text-app-dark truncate">{selectedArtifact.name}</h3>
                  <div className="flex items-center gap-3 mt-2">
@@ -287,7 +287,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
               </button>
             </header>
             
-            <div className="overflow-y-auto p-10 space-y-12 no-scrollbar">
+            <div className="overflow-y-auto p-5 sm:p-10 space-y-8 sm:space-y-12 no-scrollbar">
               <div className="aspect-[16/10] glass-blue rounded-[2.5rem] overflow-hidden flex items-center justify-center border-4 border-white/60 shadow-inner group">
                 {selectedArtifact.type.startsWith('image') ? (
                   <img src={selectedArtifact.data} className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500" />
@@ -363,10 +363,10 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
               </div>
             </div>
             
-            <footer className="p-10 bg-white/70 border-t border-white/20 backdrop-blur-md">
-              <button 
+            <footer className="p-5 sm:p-10 bg-white/70 border-t border-white/20 backdrop-blur-md pb-safe">
+              <button
                 onClick={() => setSelectedArtifact(null)}
-                className="w-full bg-app-dark text-white py-6 rounded-[2.5rem] font-black uppercase text-sm tracking-[0.4em] shadow-2xl hover:bg-black transition-all active:scale-[0.98]"
+                className="w-full bg-app-dark text-white py-4 sm:py-6 rounded-2xl sm:rounded-[2.5rem] font-black uppercase text-sm tracking-[0.3em] sm:tracking-[0.4em] shadow-2xl hover:bg-black transition-all active:scale-[0.98]"
               >
                 {isReadOnly ? 'Close Artifact' : 'Sync Artifact Updates'}
               </button>

@@ -76,11 +76,11 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-[11px] uppercase tracking-wider text-app-slate/70 border-b border-app-dark/5">
-                      <th className="px-4 py-2 font-bold">Competency</th>
-                      <th className="px-4 py-2 font-bold text-right">Hours</th>
-                      <th className="px-4 py-2 font-bold text-right">Entries</th>
-                      <th className="px-4 py-2 font-bold text-right">Evidence</th>
-                      <th className="px-4 py-2 font-bold">Status</th>
+                      <th className="px-3 sm:px-4 py-2 font-bold">Competency</th>
+                      <th className="px-3 sm:px-4 py-2 font-bold text-right">Hours</th>
+                      <th className="px-4 py-2 font-bold text-right hidden sm:table-cell">Entries</th>
+                      <th className="px-4 py-2 font-bold text-right hidden sm:table-cell">Evidence</th>
+                      <th className="px-3 sm:px-4 py-2 font-bold">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -94,16 +94,16 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
                           onClick={() => onViewCompetencyLogs(c.id)}
                           className="border-b border-app-dark/5 last:border-0 cursor-pointer hover:bg-app-bg/60 transition-colors"
                         >
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-3">
                             <div className="font-bold text-app-dark">{c.id}</div>
                             <div className="text-app-slate text-xs">{c.title}</div>
                           </td>
-                          <td className="px-4 py-3 text-right font-semibold text-app-dark tabular-nums">
+                          <td className="px-3 sm:px-4 py-3 text-right font-semibold text-app-dark tabular-nums">
                             {row?.hours.toFixed(1) ?? '0.0'}
                           </td>
-                          <td className="px-4 py-3 text-right text-app-slate tabular-nums">{row?.entryCount ?? 0}</td>
-                          <td className="px-4 py-3 text-right text-app-slate tabular-nums">{row?.evidenceCount ?? 0}</td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-right text-app-slate tabular-nums hidden sm:table-cell">{row?.entryCount ?? 0}</td>
+                          <td className="px-4 py-3 text-right text-app-slate tabular-nums hidden sm:table-cell">{row?.evidenceCount ?? 0}</td>
+                          <td className="px-3 sm:px-4 py-3">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${meta.className}`}>
                               <Icon size={12} strokeWidth={2.5} />
                               {meta.label}

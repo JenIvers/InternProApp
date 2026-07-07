@@ -107,7 +107,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                     type="button"
                     onClick={() => toggleActivity(activity.id)}
                     disabled={isReadOnly}
-                    className="mt-0.5 shrink-0 disabled:opacity-50"
+                    className="mt-0.5 shrink-0 p-1.5 -m-1.5 rounded-lg disabled:opacity-50"
                     aria-label={entry?.done ? 'Mark not done' : 'Mark done'}
                   >
                     {entry?.done ? (
@@ -147,7 +147,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                         <button
                           type="button"
                           onClick={() => setPickerFor(isPicking ? null : activity.id)}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-app-bright hover:bg-app-bright/10"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-bold text-app-bright hover:bg-app-bright/10"
                         >
                           <Link2 size={11} strokeWidth={3} />
                           {isPicking ? 'Close' : 'Link entry'}
@@ -164,7 +164,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                             key={log.id}
                             type="button"
                             onClick={() => toggleLinkedEntry(activity.id, log.id)}
-                            className={`w-full text-left px-3 py-2 text-xs border-b border-app-dark/5 last:border-0 hover:bg-white transition-colors flex items-center justify-between gap-2 ${
+                            className={`w-full text-left px-3 py-2.5 min-h-[40px] text-xs border-b border-app-dark/5 last:border-0 hover:bg-white transition-colors flex items-center justify-between gap-2 ${
                               linkedIds.includes(log.id) ? 'bg-app-bright/10' : ''
                             }`}
                           >
@@ -206,7 +206,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                     type="button"
                     onClick={() => toggleDeliverable(deliverable.id)}
                     disabled={isReadOnly}
-                    className="mt-0.5 shrink-0 disabled:opacity-50"
+                    className="mt-0.5 shrink-0 p-1.5 -m-1.5 rounded-lg disabled:opacity-50"
                     aria-label={entry?.done ? 'Mark not done' : 'Mark done'}
                   >
                     {entry?.done ? (
@@ -226,7 +226,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                       onChange={e => updateDeliverableNote(deliverable.id, e.target.value)}
                       disabled={isReadOnly}
                       placeholder="Optional note (e.g. filed date, location)..."
-                      className="mt-2 w-full px-3 py-1.5 text-xs rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-50"
+                      className="mt-2 w-full px-3 py-2.5 text-base sm:text-xs rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-50"
                     />
                   </div>
                 </div>

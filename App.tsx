@@ -45,6 +45,8 @@ const App: React.FC = () => {
 
   // Cross-view jump: competency id to pre-seed the log table's filter.
   const [logPrefilterCompetencyId, setLogPrefilterCompetencyId] = useState<string | undefined>(undefined);
+  // Cross-view jump: pre-enable the log table's "Incomplete only" filter.
+  const [logPrefilterIncomplete, setLogPrefilterIncomplete] = useState(false);
 
   // Entry editor (modal) — open with an entry to edit, or undefined to create.
   const [editor, setEditor] = useState<{ open: boolean; entry?: InternshipLog }>({ open: false });
@@ -66,9 +68,10 @@ const App: React.FC = () => {
     checklists: EMPTY_CHECKLISTS,
   });
 
-  // Navigate via the nav bars: clears any cross-view competency prefilter.
+  // Navigate via the nav bars: clears any cross-view log prefilters.
   const setView = (view: string) => {
     setLogPrefilterCompetencyId(undefined);
+    setLogPrefilterIncomplete(false);
     setViewRaw(view);
   };
 
@@ -313,7 +316,15 @@ const App: React.FC = () => {
 
   // ---- Cross-view jump ----------------------------------------------------
   const handleViewCompetencyLogs = (competencyId: string) => {
+    setLogPrefilterIncomplete(false);
     setLogPrefilterCompetencyId(competencyId);
+    setViewRaw('logs');
+  };
+
+  // Jump to the Activity Log with the "Incomplete only" filter pre-enabled.
+  const handleViewIncompleteLogs = () => {
+    setLogPrefilterCompetencyId(undefined);
+    setLogPrefilterIncomplete(true);
     setViewRaw('logs');
   };
 
@@ -342,6 +353,7 @@ const App: React.FC = () => {
             settings={settings}
             needsPrimaryReview={needsPrimaryReview}
             onReviewEntry={handleReviewEntry}
+            onReviewIncomplete={handleViewIncompleteLogs}
             isReadOnly={isReadOnly}
           />
         );
@@ -379,6 +391,7 @@ const App: React.FC = () => {
               onDeleteLog={deleteLog}
               onExportFiltered={handleExportFiltered}
               initialCompetencyId={logPrefilterCompetencyId}
+              initialIncompleteOnly={logPrefilterIncomplete}
             />
           </div>
         );
@@ -430,6 +443,7 @@ const App: React.FC = () => {
             settings={settings}
             needsPrimaryReview={needsPrimaryReview}
             onReviewEntry={handleReviewEntry}
+            onReviewIncomplete={handleViewIncompleteLogs}
             isReadOnly={isReadOnly}
           />
         );
@@ -494,22 +508,20 @@ const App: React.FC = () => {
 
       <BottomNav currentView={currentView} setView={setView} onAdd={openNewEntry} isReadOnly={isReadOnly} />
 
-      {/* Entry editor modal */}
+      {/* Entry editor modal — full-screen sheet on mobile, centered card on desktop */}
       {editor.open && (
-        <div className="fixed inset-0 z-[80] bg-app-dark/40 backdrop-blur-sm overflow-y-auto">
-          <div className="min-h-full flex items-start md:items-center justify-center md:p-6">
-            <div className="bg-app-bg w-full md:max-w-2xl md:rounded-3xl md:my-6 min-h-screen md:min-h-0 shadow-2xl">
-              <EntryForm
-                entry={editor.entry}
-                logs={state.logs}
-                sites={state.sites}
-                artifacts={state.artifacts}
-                onAddSite={addSite}
-                onSave={saveEntry}
-                onCancel={closeEditor}
-                isReadOnly={isReadOnly}
-              />
-            </div>
+        <div className="fixed inset-0 z-[80] bg-app-dark/40 backdrop-blur-sm flex md:items-center md:justify-center md:p-6 md:overflow-y-auto">
+          <div className="bg-white w-full md:max-w-2xl md:rounded-3xl md:my-6 shadow-2xl flex flex-col h-[100dvh] md:h-auto md:max-h-[90vh] overflow-hidden">
+            <EntryForm
+              entry={editor.entry}
+              logs={state.logs}
+              sites={state.sites}
+              artifacts={state.artifacts}
+              onAddSite={addSite}
+              onSave={saveEntry}
+              onCancel={closeEditor}
+              isReadOnly={isReadOnly}
+            />
           </div>
         </div>
       )}

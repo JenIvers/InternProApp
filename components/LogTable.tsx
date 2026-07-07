@@ -3,6 +3,7 @@ import { InternshipLog, Site, Competency, SchoolLevel } from '../types';
 import { ALL_COMPETENCIES } from '../constants';
 import { applyLogQuery, LogQuery, LogQuerySort } from '@/lib/log-query';
 import { computeCompetencyHours, categoryGroupOf } from '@/lib/competency-metrics';
+import { validateEntry, type Warning } from '@/lib/entry-validation';
 import {
   ArrowUp,
   ArrowDown,
@@ -17,6 +18,8 @@ import {
   Link as LinkIcon,
   MessageSquare,
   Filter,
+  AlertTriangle,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 /** Props for the desktop hybrid review table (PRD stories 13–23). */
@@ -42,6 +45,8 @@ export interface LogTableProps {
   onExportFiltered: (filteredLogs: InternshipLog[]) => void;
   /** Optional competency id to pre-seed the competency filter (cross-view jump from Coverage). */
   initialCompetencyId?: string;
+  /** When true, start with the "Incomplete only" filter enabled (cross-view jump from Dashboard). */
+  initialIncompleteOnly?: boolean;
 }
 
 const SCHOOL_LEVELS: SchoolLevel[] = ['Elementary', 'Intermediate', 'Middle', 'High School'];
@@ -61,6 +66,7 @@ const LogTable: React.FC<LogTableProps> = ({
   onDeleteLog,
   onExportFiltered,
   initialCompetencyId,
+  initialIncompleteOnly,
 }) => {
   // ---- Filter / query state ----------------------------------------------
   const [search, setSearch] = useState('');
@@ -71,7 +77,11 @@ const LogTable: React.FC<LogTableProps> = ({
   const [siteFilter, setSiteFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [incompleteOnly, setIncompleteOnly] = useState(!!initialIncompleteOnly);
   const [sort, setSort] = useState<LogQuerySort>({ key: 'date', dir: 'desc' });
+  // Mobile: the secondary filters collapse behind a "Filters" toggle to keep the
+  // toolbar compact. On md+ they are always visible (the toggle is hidden).
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // ---- Row interaction state ---------------------------------------------
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -124,7 +134,25 @@ const LogTable: React.FC<LogTableProps> = ({
     };
   }, [search, competencyFilter, levelFilter, siteFilter, dateFrom, dateTo, sort, competencies]);
 
-  const filteredLogs = useMemo(() => applyLogQuery(logs, query), [logs, query]);
+  // Soft-validation warnings per entry (drives the "incomplete" badge + filter).
+  const warningsByLog = useMemo(() => {
+    const m = new Map<string, Warning[]>();
+    for (const log of logs) m.set(log.id, validateEntry(log));
+    return m;
+  }, [logs]);
+
+  const incompleteCount = useMemo(() => {
+    let n = 0;
+    for (const w of warningsByLog.values()) if (w.length > 0) n++;
+    return n;
+  }, [warningsByLog]);
+
+  const filteredLogs = useMemo(() => {
+    const base = applyLogQuery(logs, query);
+    return incompleteOnly
+      ? base.filter((l) => (warningsByLog.get(l.id)?.length ?? 0) > 0)
+      : base;
+  }, [logs, query, incompleteOnly, warningsByLog]);
 
   // ---- Totals for the current filtered set --------------------------------
   const hoursByLevel = useMemo(() => {
@@ -149,7 +177,7 @@ const LogTable: React.FC<LogTableProps> = ({
   }, [filteredLogs]);
 
   const hasActiveFilters =
-    !!search || !!competencyFilter || !!levelFilter || !!siteFilter || !!dateFrom || !!dateTo;
+    !!search || !!competencyFilter || !!levelFilter || !!siteFilter || !!dateFrom || !!dateTo || incompleteOnly;
 
   // ---- Handlers -----------------------------------------------------------
   const toggleSort = (key: LogQuerySort['key']) => {
@@ -170,6 +198,7 @@ const LogTable: React.FC<LogTableProps> = ({
     setSiteFilter('');
     setDateFrom('');
     setDateTo('');
+    setIncompleteOnly(false);
   };
 
   const commitEdit = (log: InternshipLog, field: 'date' | 'hours' | 'schoolLevel', raw: string) => {
@@ -201,127 +230,167 @@ const LogTable: React.FC<LogTableProps> = ({
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-end gap-3 bg-white border border-app-dark/10 rounded-2xl p-4 shadow-sm">
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
-            Search
-          </label>
-          <div className="relative">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-app-light" />
+      <div className="bg-white border border-app-dark/10 rounded-2xl p-3 sm:p-4 shadow-sm space-y-3">
+        {/* Search + mobile Filters toggle */}
+        <div className="flex items-end gap-2">
+          <div className="flex-1 min-w-0">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+              Search
+            </label>
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-app-light" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Title, description, location…"
+                className="w-full pl-9 pr-3 py-2.5 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            className={`md:hidden shrink-0 flex items-center gap-1.5 py-2.5 px-3 rounded-lg border text-xs font-black uppercase tracking-widest transition-colors ${
+              filtersOpen ? 'bg-app-dark text-white border-app-dark' : 'border-app-dark/10 text-app-slate'
+            }`}
+          >
+            <SlidersHorizontal size={15} /> Filters
+          </button>
+        </div>
+
+        {/* Filter controls — collapsible on mobile, inline on md+ */}
+        <div
+          className={`${filtersOpen ? 'grid grid-cols-2 gap-3' : 'hidden'} md:flex md:flex-wrap md:items-end md:gap-3`}
+        >
+          <div className="min-w-0">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+              Competency
+            </label>
+            <select
+              value={competencyFilter}
+              onChange={(e) => setCompetencyFilter(e.target.value)}
+              className="w-full md:max-w-[220px] py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+            >
+              <option value="">All competencies</option>
+              <optgroup label="By category">
+                {categoryGroups.map((g) => {
+                  const c = competencyById.get(g);
+                  return (
+                    <option key={`cat:${g}`} value={`cat:${g}`}>
+                      {g}
+                      {c ? ` — ${c.title}` : ''}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="By competency">
+                {competencies.map((c) => (
+                  <option key={`comp:${c.id}`} value={`comp:${c.id}`}>
+                    {c.id}: {c.title}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+
+          <div className="min-w-0">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+              Level
+            </label>
+            <select
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value as SchoolLevel | '')}
+              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+            >
+              <option value="">All levels</option>
+              {SCHOOL_LEVELS.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="min-w-0">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+              Site
+            </label>
+            <select
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value)}
+              className="w-full md:max-w-[180px] py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+            >
+              <option value="">All sites</option>
+              {sites.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="min-w-0">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+              From
+            </label>
             <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Title, description, location…"
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+            />
+          </div>
+          <div className="min-w-0">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+              To
+            </label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
             />
           </div>
         </div>
 
-        <div>
-          <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
-            Competency
-          </label>
-          <select
-            value={competencyFilter}
-            onChange={(e) => setCompetencyFilter(e.target.value)}
-            className="py-2 px-3 text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark max-w-[220px]"
+        {/* Actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setIncompleteOnly((v) => !v)}
+            aria-pressed={incompleteOnly}
+            title="Show only entries with missing details"
+            className={`flex items-center gap-1.5 py-2.5 px-3 text-xs font-black uppercase tracking-widest rounded-lg border transition-colors ${
+              incompleteOnly
+                ? 'bg-amber-400 border-amber-400 text-app-dark'
+                : 'border-app-dark/10 text-app-slate hover:bg-app-bg'
+            }`}
           >
-            <option value="">All competencies</option>
-            <optgroup label="By category">
-              {categoryGroups.map((g) => {
-                const c = competencyById.get(g);
-                return (
-                  <option key={`cat:${g}`} value={`cat:${g}`}>
-                    {g}
-                    {c ? ` — ${c.title}` : ''}
-                  </option>
-                );
-              })}
-            </optgroup>
-            <optgroup label="By competency">
-              {competencies.map((c) => (
-                <option key={`comp:${c.id}`} value={`comp:${c.id}`}>
-                  {c.id}: {c.title}
-                </option>
-              ))}
-            </optgroup>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
-            Level
-          </label>
-          <select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value as SchoolLevel | '')}
-            className="py-2 px-3 text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
-          >
-            <option value="">All levels</option>
-            {SCHOOL_LEVELS.map((l) => (
-              <option key={l} value={l}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
-            Site
-          </label>
-          <select
-            value={siteFilter}
-            onChange={(e) => setSiteFilter(e.target.value)}
-            className="py-2 px-3 text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark max-w-[180px]"
-          >
-            <option value="">All sites</option>
-            {sites.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
-            From
-          </label>
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            className="py-2 px-3 text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
-            To
-          </label>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="py-2 px-3 text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 ml-auto">
+            <AlertTriangle size={14} /> Incomplete only
+            {incompleteCount > 0 && (
+              <span
+                className={`ml-0.5 px-1.5 rounded-full text-[10px] tabular-nums ${
+                  incompleteOnly ? 'bg-app-dark/10 text-app-dark' : 'bg-amber-100 text-amber-700'
+                }`}
+              >
+                {incompleteCount}
+              </span>
+            )}
+          </button>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 py-2 px-3 text-xs font-black uppercase tracking-widest text-app-slate rounded-lg border border-app-dark/10 hover:bg-app-bg transition-colors"
+              className="flex items-center gap-1.5 py-2.5 px-3 text-xs font-black uppercase tracking-widest text-app-slate rounded-lg border border-app-dark/10 hover:bg-app-bg transition-colors"
             >
               <X size={14} /> Clear
             </button>
           )}
           <button
             onClick={() => onExportFiltered(filteredLogs)}
-            className="flex items-center gap-2 py-2 px-4 text-xs font-black uppercase tracking-widest text-white bg-app-dark rounded-lg hover:bg-black transition-colors active:scale-95"
+            className="flex items-center gap-2 py-2.5 px-4 text-xs font-black uppercase tracking-widest text-white bg-app-dark rounded-lg hover:bg-black transition-colors active:scale-95 ml-auto"
           >
-            <Download size={14} /> Export current view
+            <Download size={14} /> <span className="hidden sm:inline">Export current view</span><span className="sm:hidden">Export</span>
           </button>
         </div>
       </div>
@@ -332,8 +401,8 @@ const LogTable: React.FC<LogTableProps> = ({
         Showing {filteredLogs.length} of {logs.length} {logs.length === 1 ? 'entry' : 'entries'}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-app-dark/10 bg-white shadow-sm">
+      {/* Table (desktop / tablet) */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-app-dark/10 bg-white shadow-sm">
         <table className="w-full min-w-[820px] text-sm border-collapse">
           <thead>
             <tr className="bg-app-bg text-app-slate border-b border-app-dark/10">
@@ -373,6 +442,11 @@ const LogTable: React.FC<LogTableProps> = ({
             {filteredLogs.map((log) => {
               const expanded = expandedId === log.id;
               const tags = log.taggedCompetencyIds ?? [];
+              const warnings = warningsByLog.get(log.id) ?? [];
+              const incompleteTitle =
+                warnings.length > 0
+                  ? `Incomplete — ${warnings.map((w) => w.message).join(' ')}`
+                  : undefined;
               return (
                 <React.Fragment key={log.id}>
                   <tr
@@ -422,8 +496,30 @@ const LogTable: React.FC<LogTableProps> = ({
 
                     {/* Title / Activity */}
                     <td className="px-3 py-2 align-top max-w-[260px]">
-                      <div className="font-bold text-app-dark truncate">
-                        {log.title || log.activity || 'Untitled entry'}
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {warnings.length > 0 &&
+                          (isReadOnly ? (
+                            <span
+                              title={incompleteTitle}
+                              aria-label={incompleteTitle}
+                              className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100 text-amber-600"
+                            >
+                              <AlertTriangle size={11} />
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => onEditEntry(log)}
+                              title={`${incompleteTitle} — click to complete`}
+                              aria-label={`${incompleteTitle} — click to complete`}
+                              className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100 text-amber-600 hover:bg-amber-400 hover:text-app-dark transition-colors"
+                            >
+                              <AlertTriangle size={11} />
+                            </button>
+                          ))}
+                        <span className="font-bold text-app-dark truncate">
+                          {log.title || log.activity || 'Untitled entry'}
+                        </span>
                       </div>
                       {log.title && (log.description || log.activity) && (
                         <div className="text-xs text-app-slate truncate">
@@ -689,6 +785,206 @@ const LogTable: React.FC<LogTableProps> = ({
             </tfoot>
           )}
         </table>
+      </div>
+
+      {/* Mobile card list — the table degrades to a scannable, tappable list on phones */}
+      <div className="md:hidden space-y-2">
+        {filteredLogs.length === 0 && (
+          <div className="rounded-2xl border border-app-dark/10 bg-white p-8 text-center text-app-slate font-medium shadow-sm">
+            No entries match the current filters.
+          </div>
+        )}
+        {filteredLogs.map((log) => {
+          const expanded = expandedId === log.id;
+          const tags = log.taggedCompetencyIds ?? [];
+          const warnings = warningsByLog.get(log.id) ?? [];
+          const incompleteTitle =
+            warnings.length > 0
+              ? `Incomplete — ${warnings.map((w) => w.message).join(' ')}`
+              : undefined;
+          return (
+            <div
+              key={log.id}
+              className="rounded-2xl border border-app-dark/10 bg-white shadow-sm overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setExpandedId(expanded ? null : log.id)}
+                aria-expanded={expanded}
+                className="w-full text-left px-4 py-3 min-h-[56px] flex items-start gap-3"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    {warnings.length > 0 && (
+                      <span
+                        title={incompleteTitle}
+                        aria-label={incompleteTitle}
+                        className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100 text-amber-600"
+                      >
+                        <AlertTriangle size={11} />
+                      </span>
+                    )}
+                    <span className="font-bold text-app-dark truncate">
+                      {log.title || log.activity || 'Untitled entry'}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-semibold text-app-slate">
+                    <span className="tabular-nums">{log.date}</span>
+                    <span className="opacity-40">·</span>
+                    <span className="tabular-nums font-black text-app-dark">{fmtHours(log.hours)}h</span>
+                    <span className="opacity-40">·</span>
+                    <span className="uppercase tracking-wide text-[11px]">{log.schoolLevel}</span>
+                    <span className="opacity-40">·</span>
+                    <span className="truncate max-w-[120px]">{locationLabel(log)}</span>
+                  </div>
+                  {(log.primaryCompetencyId || tags.length > 0) && (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {log.primaryCompetencyId && (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-app-dark text-white text-[10px] font-black">
+                          <Star size={9} className="fill-current" />
+                          {log.primaryCompetencyId}
+                        </span>
+                      )}
+                      {tags
+                        .filter((id) => id !== log.primaryCompetencyId)
+                        .slice(0, 4)
+                        .map((id) => (
+                          <span
+                            key={id}
+                            className="px-1.5 py-0.5 rounded bg-app-bright/10 text-app-slate text-[10px] font-black border border-app-bright/10"
+                          >
+                            {id}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                <ChevronRight
+                  size={18}
+                  className={`shrink-0 mt-1 text-app-slate transition-transform ${expanded ? 'rotate-90' : ''}`}
+                />
+              </button>
+
+              {expanded && (
+                <div className="px-4 pb-4 pt-1 space-y-3 border-t border-app-dark/5 bg-app-bg/40">
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1">
+                      Description
+                    </h4>
+                    <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
+                      {log.description || log.activity || 'No description recorded.'}
+                    </p>
+                  </div>
+
+                  {(log.taggedCompetencyIds ?? []).length > 0 || log.primaryCompetencyId ? (
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                        Competencies
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {log.primaryCompetencyId && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-dark text-white text-xs font-black">
+                            <Star size={11} className="fill-current" />
+                            {log.primaryCompetencyId}
+                            {competencyById.get(log.primaryCompetencyId)
+                              ? `: ${competencyById.get(log.primaryCompetencyId)!.title}`
+                              : ''}
+                          </span>
+                        )}
+                        {(log.taggedCompetencyIds ?? [])
+                          .filter((id) => id !== log.primaryCompetencyId)
+                          .map((id) => (
+                            <span
+                              key={id}
+                              className="px-2 py-1 rounded-lg bg-white border border-app-dark/10 text-app-slate text-xs font-black"
+                            >
+                              {id}
+                              {competencyById.get(id) ? `: ${competencyById.get(id)!.title}` : ''}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {log.evidenceLinks && log.evidenceLinks.length > 0 && (
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                        Evidence Links
+                      </h4>
+                      <ul className="space-y-1">
+                        {log.evidenceLinks.map((link) => (
+                          <li key={link.id}>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-sm font-bold text-app-bright hover:underline"
+                            >
+                              <LinkIcon size={13} />
+                              {link.label || link.url}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {log.meetingNotes && log.meetingNotes.reflection && (
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5 flex items-center gap-1.5">
+                        <MessageSquare size={12} /> Meeting Notes
+                      </h4>
+                      <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
+                        {log.meetingNotes.reflection}
+                      </p>
+                    </div>
+                  )}
+
+                  {log.reflections && (
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                        Reflection
+                      </h4>
+                      <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
+                        {log.reflections}
+                      </p>
+                    </div>
+                  )}
+
+                  {!isReadOnly && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={() => onEditEntry(log)}
+                        className="flex-1 flex items-center justify-center gap-1.5 min-h-[44px] px-3 text-xs font-black uppercase tracking-widest text-white bg-app-dark rounded-xl hover:bg-black transition-colors active:scale-[0.99]"
+                      >
+                        <Pencil size={14} /> Edit
+                      </button>
+                      <button
+                        onClick={() => onDeleteLog(log.id)}
+                        aria-label="Delete entry"
+                        className="flex items-center justify-center gap-1.5 min-h-[44px] px-4 text-xs font-black uppercase tracking-widest text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 size={14} /> Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Mobile totals */}
+        {filteredLogs.length > 0 && (
+          <div className="rounded-2xl border-2 border-app-dark/15 bg-app-bg px-4 py-3 flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-widest text-app-slate">
+              Total · {filteredLogs.length} {filteredLogs.length === 1 ? 'entry' : 'entries'}
+            </span>
+            <span className="text-base font-black text-app-dark tabular-nums">
+              {fmtHours(grandTotal)} hrs
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Per-competency breakdown for the filtered set */}

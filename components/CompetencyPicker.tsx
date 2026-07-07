@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ALL_COMPETENCIES } from '../constants';
 import { Competency, InternshipLog } from '../types';
-import { Search, Star, Check, ChevronDown, ChevronUp, Split } from 'lucide-react';
+import { Search, Star, Check, ChevronDown, ChevronUp, Split, X } from 'lucide-react';
 
 export interface CompetencyPickerProps {
   /** Currently tagged (coverage) competency ids. */
@@ -146,13 +146,13 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
             return (
               <span
                 key={c.id}
-                className={`flex items-center gap-1.5 pl-3 pr-2 py-2 rounded-xl text-xs font-bold border ${
+                className={`flex items-center gap-0.5 pl-3 pr-1 py-1 rounded-xl text-xs font-bold border ${
                   isPrimary
                     ? 'bg-app-dark text-white border-app-dark'
                     : 'bg-white text-app-dark border-app-dark/15'
                 }`}
               >
-                <span title={c.title}>{c.id}</span>
+                <span title={c.title} className="pr-1">{c.id}</span>
                 {!isReadOnly && (
                   <>
                     {!isPrimary && (
@@ -160,19 +160,25 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
                         type="button"
                         onClick={() => setPrimary(c.id)}
                         title="Set as primary"
-                        className="opacity-60 hover:opacity-100"
+                        aria-label={`Set ${c.id} as primary`}
+                        className="p-2 -my-1 rounded-lg opacity-60 hover:opacity-100"
                       >
-                        <Star size={12} />
+                        <Star size={14} />
                       </button>
                     )}
-                    {isPrimary && <Star size={12} className="fill-current" />}
+                    {isPrimary && (
+                      <span className="p-2 -my-1">
+                        <Star size={14} className="fill-current" />
+                      </span>
+                    )}
                     <button
                       type="button"
                       onClick={() => toggleId(c.id)}
                       title="Remove"
-                      className="opacity-60 hover:opacity-100"
+                      aria-label={`Remove ${c.id}`}
+                      className="p-2 -my-1 rounded-lg opacity-60 hover:opacity-100"
                     >
-                      &times;
+                      <X size={14} />
                     </button>
                   </>
                 )}
@@ -195,7 +201,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
                   key={id}
                   type="button"
                   onClick={() => toggleId(id)}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-colors ${
+                  className={`px-3 py-2 min-h-[38px] rounded-lg text-[11px] font-bold border transition-colors ${
                     isSelected
                       ? 'bg-app-bright/10 text-app-bright border-app-bright/30'
                       : 'bg-white text-app-slate border-app-dark/10 hover:border-app-bright/40'
@@ -220,7 +226,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search by code, title, or keyword (e.g. A3)"
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
             />
           </div>
 
@@ -280,7 +286,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
                               type="button"
                               title={c.description}
                               onClick={() => toggleId(c.id)}
-                              className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${
+                              className={`px-3 py-2.5 min-h-[40px] rounded-lg text-xs font-bold border transition-colors ${
                                 isSelected
                                   ? 'bg-app-dark text-white border-app-dark'
                                   : 'bg-white text-app-slate border-app-dark/10 hover:border-app-bright/40'
@@ -331,11 +337,12 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
                       <span className="text-xs font-bold text-app-dark">{c.id} &middot; {c.title}</span>
                       <input
                         type="number"
+                        inputMode="decimal"
                         step="0.25"
                         min="0"
                         value={hourSplit?.[c.id] ?? ''}
                         onChange={e => handleSplitChange(c.id, e.target.value)}
-                        className="w-24 px-3 py-2 rounded-lg bg-app-bg border border-app-dark/10 text-right font-bold text-sm outline-none focus:ring-2 focus:ring-app-bright/30"
+                        className="w-24 px-3 py-2.5 rounded-lg bg-app-bg border border-app-dark/10 text-right font-bold text-base sm:text-sm outline-none focus:ring-2 focus:ring-app-bright/30"
                       />
                     </div>
                   ))}

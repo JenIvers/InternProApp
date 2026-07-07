@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import type { AppSettings, Competency, InternshipLog, LevelBucket } from '../types';
 import { computeProgress } from '../lib/progress';
 import { computeCategoryRollups, computeCompetencyHours } from '../lib/competency-metrics';
+import { validateEntry } from '../lib/entry-validation';
 
 export interface DashboardNewProps {
   logs: InternshipLog[];
@@ -21,6 +22,8 @@ export interface DashboardNewProps {
   needsPrimaryReview?: string[];
   /** Navigate to the log editor for a given entry id (used by the "needs review" callout). */
   onReviewEntry?: (logId: string) => void;
+  /** Jump to the Activity Log with the "Incomplete only" filter enabled. */
+  onReviewIncomplete?: () => void;
   isReadOnly: boolean;
 }
 
@@ -41,6 +44,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
   settings,
   needsPrimaryReview = [],
   onReviewEntry,
+  onReviewIncomplete,
   isReadOnly,
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -51,6 +55,10 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
     [logs, competencies]
   );
   const competencyHours = useMemo(() => computeCompetencyHours(logs), [logs]);
+  const incompleteCount = useMemo(
+    () => logs.reduce((n, log) => (validateEntry(log).length > 0 ? n + 1 : n), 0),
+    [logs]
+  );
 
   const categoryHeaders = useMemo(
     () => competencies.filter(isCategoryHeader).sort((a, b) => a.id.localeCompare(b.id)),
@@ -127,7 +135,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
                       type="button"
                       disabled={isReadOnly}
                       onClick={() => onReviewEntry?.(id)}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors truncate max-w-[220px]"
+                      className="text-xs font-semibold px-3 py-2 rounded-lg bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors truncate max-w-[220px]"
                       title={label}
                     >
                       {label}
@@ -136,6 +144,27 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
                 );
               })}
             </ul>
+          </div>
+        </section>
+      )}
+
+      {incompleteCount > 0 && (
+        <section className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 flex items-start gap-3">
+          <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-bold text-amber-800">
+              {incompleteCount} {incompleteCount === 1 ? 'entry is' : 'entries are'} missing details
+            </h2>
+            <p className="text-xs text-amber-700 opacity-80 mb-2">
+              Quick-capture entries with no description, competency, or other gaps. Tap to finish them.
+            </p>
+            <button
+              type="button"
+              onClick={() => onReviewIncomplete?.()}
+              className="text-xs font-semibold px-3 py-2 rounded-lg bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 transition-colors"
+            >
+              Review in Activity Log
+            </button>
           </div>
         </section>
       )}

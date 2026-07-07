@@ -22,6 +22,46 @@ export interface EntryFormProps {
 
 const SCHOOL_LEVELS: SchoolLevel[] = ['Elementary', 'Intermediate', 'Middle', 'High School'];
 
+/**
+ * Collapsible section used for the non-essential parts of the entry form
+ * (Description, Competencies, Evidence). Defined at module scope so it is a
+ * stable component identity — nesting it inside EntryForm would remount its
+ * children (and drop input focus) on every keystroke.
+ */
+const Section: React.FC<{
+  title: string;
+  icon?: React.ReactNode;
+  open: boolean;
+  onToggle: () => void;
+  summary?: React.ReactNode;
+  warn?: boolean;
+  children: React.ReactNode;
+}> = ({ title, icon, open, onToggle, summary, warn, children }) => (
+  <div className="border border-app-dark/10 rounded-xl overflow-hidden">
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open}
+      className="w-full flex items-center justify-between px-4 py-3 bg-app-bg hover:bg-app-bg/60 transition-colors"
+    >
+      <span className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
+        {icon} {title}
+        {warn && (
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"
+            title="Recommended — not yet filled in"
+          />
+        )}
+      </span>
+      <span className="flex items-center gap-2 text-[11px] font-bold text-app-slate/60">
+        {!open && summary}
+        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </span>
+    </button>
+    {open && <div className="p-4 pt-4 space-y-3 bg-white">{children}</div>}
+  </div>
+);
+
 const makeEmptyEntry = (): InternshipLog => ({
   id: crypto.randomUUID(),
   date: new Date().toISOString().split('T')[0],
@@ -61,7 +101,24 @@ const EntryForm: React.FC<EntryFormProps> = ({
   const [artifactPickerOpen, setArtifactPickerOpen] = useState(false);
   const [pendingConfirm, setPendingConfirm] = useState(false);
 
+  // Quick-capture: on a phone, a NEW entry collapses the non-essential sections
+  // so the essentials (date, hours, title, level, location) are all that shows.
+  // Editing an existing entry — or any desktop-width screen — starts expanded.
+  const [sectionsDefaultOpen] = useState(() => {
+    if (isEdit) return true;
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true;
+    return !window.matchMedia('(max-width: 767px)').matches;
+  });
+  const [descriptionOpen, setDescriptionOpen] = useState(sectionsDefaultOpen);
+  const [competenciesOpen, setCompetenciesOpen] = useState(sectionsDefaultOpen);
+  const [evidenceOpen, setEvidenceOpen] = useState(sectionsDefaultOpen);
+
   const liveWarnings = useMemo(() => validateEntry(form), [form]);
+  const hasDescWarning = liveWarnings.some(w => w.code === 'MISSING_DESCRIPTION');
+  const hasCompWarning = liveWarnings.some(w => w.code === 'MISSING_COMPETENCY');
+  const descFilled = !!((form.description ?? form.activity) || '').trim();
+  const compCount = form.taggedCompetencyIds?.length ?? 0;
+  const evidenceCount = (form.evidenceLinks?.length ?? 0) + (form.artifactIds?.length ?? 0);
 
   const updateField = <K extends keyof InternshipLog>(key: K, value: InternshipLog[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -149,14 +206,24 @@ const EntryForm: React.FC<EntryFormProps> = ({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-app-dark/10 shadow-sm p-5 md:p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-black text-app-dark">{isEdit ? 'Edit Activity' : 'New Activity'}</h3>
-        <button type="button" onClick={onCancel} className="text-app-slate/50 hover:text-app-dark p-1">
-          <X size={20} />
-        </button>
+    <form onSubmit={handleSubmit} className="bg-white flex flex-col flex-1 min-h-0 md:rounded-2xl">
+      {/* Header — pinned; respects the iOS safe-area inset */}
+      <div className="shrink-0 border-b border-app-dark/10 px-5 md:px-8 pt-safe">
+        <div className="flex items-center justify-between py-4">
+          <h3 className="text-lg font-black text-app-dark">{isEdit ? 'Edit Activity' : 'New Activity'}</h3>
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Close"
+            className="-mr-2 p-2 rounded-lg text-app-slate/60 hover:text-app-dark hover:bg-app-bg transition-colors"
+          >
+            <X size={22} />
+          </button>
+        </div>
       </div>
 
+      {/* Scrollable body */}
+      <div className="flex-1 overflow-y-auto px-5 md:px-8 py-6 space-y-6">
       {/* Date / Hours / Level */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-1.5">
@@ -178,6 +245,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
           <input
             type="number"
             required
+            inputMode="decimal"
             step="0.25"
             min="0"
             value={form.hours}
@@ -216,21 +284,6 @@ const EntryForm: React.FC<EntryFormProps> = ({
         />
       </div>
 
-      {/* Description */}
-      <div className="space-y-1.5">
-        <label className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
-          <FileText size={13} /> Description
-        </label>
-        <textarea
-          required
-          rows={4}
-          value={form.description ?? form.activity}
-          onChange={e => updateField('description', e.target.value)}
-          placeholder="What did you do during this activity?"
-          className="w-full px-4 py-3.5 rounded-xl bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark text-base resize-none"
-        />
-      </div>
-
       {/* Location */}
       <div className="space-y-1.5">
         <label className="text-[11px] font-black text-app-slate uppercase tracking-widest">Location</label>
@@ -244,9 +297,32 @@ const EntryForm: React.FC<EntryFormProps> = ({
         />
       </div>
 
-      {/* Competencies */}
-      <div className="space-y-1.5">
-        <label className="text-[11px] font-black text-app-slate uppercase tracking-widest">Competencies</label>
+      {/* Description (collapsible — soft-optional for quick capture) */}
+      <Section
+        title="Description"
+        icon={<FileText size={13} />}
+        open={descriptionOpen}
+        onToggle={() => setDescriptionOpen(v => !v)}
+        warn={hasDescWarning}
+        summary={descFilled ? 'Added' : 'Add later'}
+      >
+        <textarea
+          rows={4}
+          value={form.description ?? form.activity}
+          onChange={e => updateField('description', e.target.value)}
+          placeholder="What did you do during this activity?"
+          className="w-full px-4 py-3.5 rounded-xl bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark text-base resize-none"
+        />
+      </Section>
+
+      {/* Competencies (collapsible) */}
+      <Section
+        title="Competencies"
+        open={competenciesOpen}
+        onToggle={() => setCompetenciesOpen(v => !v)}
+        warn={hasCompWarning}
+        summary={compCount > 0 ? `${compCount} tagged` : 'None tagged'}
+      >
         <CompetencyPicker
           selectedIds={form.taggedCompetencyIds}
           primaryId={form.primaryCompetencyId}
@@ -257,81 +333,89 @@ const EntryForm: React.FC<EntryFormProps> = ({
           onHourSplitChange={hourSplit => updateField('hourSplit', hourSplit as InternshipLog['hourSplit'])}
           isReadOnly={isReadOnly}
         />
-      </div>
+      </Section>
 
-      {/* Evidence links */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
-          <Link2 size={13} /> Evidence Links
-        </label>
-        {(form.evidenceLinks || []).map(link => (
-          <div key={link.id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-dark/10">
-            <a href={link.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-app-bright truncate hover:underline">
-              {link.label}
-            </a>
-            <button type="button" onClick={() => removeEvidenceLink(link.id)} className="text-app-slate/50 hover:text-red-500 shrink-0">
-              <X size={16} />
+      {/* Evidence: links + artifact attachments (collapsible) */}
+      <Section
+        title="Evidence"
+        icon={<Link2 size={13} />}
+        open={evidenceOpen}
+        onToggle={() => setEvidenceOpen(v => !v)}
+        summary={evidenceCount > 0 ? `${evidenceCount} attached` : 'Add later'}
+      >
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
+            <Link2 size={13} /> Evidence Links
+          </label>
+          {(form.evidenceLinks || []).map(link => (
+            <div key={link.id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-dark/10">
+              <a href={link.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-app-bright truncate hover:underline">
+                {link.label}
+              </a>
+              <button type="button" onClick={() => removeEvidenceLink(link.id)} className="text-app-slate/50 hover:text-red-500 shrink-0">
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={newLinkLabel}
+              onChange={e => setNewLinkLabel(e.target.value)}
+              placeholder="Label (optional)"
+              className="flex-1 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+            />
+            <input
+              type="url"
+              value={newLinkUrl}
+              onChange={e => setNewLinkUrl(e.target.value)}
+              placeholder="Paste a URL"
+              className="flex-1 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+            />
+            <button
+              type="button"
+              onClick={addEvidenceLink}
+              className="px-4 py-2.5 rounded-lg bg-app-dark text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-1.5 hover:bg-black transition-colors shrink-0"
+            >
+              <Plus size={14} /> Add
             </button>
           </div>
-        ))}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            value={newLinkLabel}
-            onChange={e => setNewLinkLabel(e.target.value)}
-            placeholder="Label (optional)"
-            className="flex-1 px-3 py-2.5 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
-          />
-          <input
-            type="url"
-            value={newLinkUrl}
-            onChange={e => setNewLinkUrl(e.target.value)}
-            placeholder="Paste a URL"
-            className="flex-1 px-3 py-2.5 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
-          />
-          <button
-            type="button"
-            onClick={addEvidenceLink}
-            className="px-4 py-2.5 rounded-lg bg-app-dark text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-1.5 hover:bg-black transition-colors shrink-0"
-          >
-            <Plus size={14} /> Add
-          </button>
         </div>
-      </div>
 
-      {/* Pick from artifacts */}
-      {artifacts.length > 0 && (
-        <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => setArtifactPickerOpen(!artifactPickerOpen)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-app-bg border border-app-dark/10"
-          >
-            <span className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
-              <Paperclip size={13} /> Attach Artifacts {form.artifactIds.length > 0 && `(${form.artifactIds.length})`}
-            </span>
-            {artifactPickerOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-          {artifactPickerOpen && (
-            <div className="max-h-56 overflow-y-auto border border-app-dark/10 rounded-xl divide-y divide-app-dark/5">
-              {artifacts.map(artifact => {
-                const isSelected = form.artifactIds.includes(artifact.id);
-                return (
-                  <button
-                    key={artifact.id}
-                    type="button"
-                    onClick={() => toggleArtifact(artifact.id)}
-                    className={`w-full text-left px-4 py-2.5 text-sm font-semibold flex items-center justify-between ${isSelected ? 'bg-app-bright/5 text-app-dark' : 'text-app-slate hover:bg-app-bg'}`}
-                  >
-                    <span className="truncate">{artifact.name}</span>
-                    {isSelected && <span className="text-app-bright text-xs font-black shrink-0 ml-2">Selected</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+        {/* Pick from artifacts */}
+        {artifacts.length > 0 && (
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => setArtifactPickerOpen(!artifactPickerOpen)}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-app-bg border border-app-dark/10"
+            >
+              <span className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
+                <Paperclip size={13} /> Attach Artifacts {form.artifactIds.length > 0 && `(${form.artifactIds.length})`}
+              </span>
+              {artifactPickerOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {artifactPickerOpen && (
+              <div className="max-h-56 overflow-y-auto border border-app-dark/10 rounded-xl divide-y divide-app-dark/5">
+                {artifacts.map(artifact => {
+                  const isSelected = form.artifactIds.includes(artifact.id);
+                  return (
+                    <button
+                      key={artifact.id}
+                      type="button"
+                      onClick={() => toggleArtifact(artifact.id)}
+                      className={`w-full text-left px-4 py-2.5 text-sm font-semibold flex items-center justify-between ${isSelected ? 'bg-app-bright/5 text-app-dark' : 'text-app-slate hover:bg-app-bg'}`}
+                    >
+                      <span className="truncate">{artifact.name}</span>
+                      {isSelected && <span className="text-app-bright text-xs font-black shrink-0 ml-2">Selected</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </Section>
 
       {/* Meeting notes (collapsible) */}
       <div className="space-y-2">
@@ -381,39 +465,41 @@ const EntryForm: React.FC<EntryFormProps> = ({
           ))}
         </div>
       )}
+      </div>
 
-      {pendingConfirm && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 space-y-3">
-          <p className="text-sm font-bold text-red-700">
-            This entry has no competency tagged or set as primary. Save anyway?
-          </p>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={confirmSaveAnyway}
-              className="px-4 py-2 rounded-lg bg-red-600 text-white font-black text-xs uppercase tracking-widest"
-            >
-              Save Anyway
-            </button>
-            <button
-              type="button"
-              onClick={() => setPendingConfirm(false)}
-              className="px-4 py-2 rounded-lg bg-white border border-app-dark/10 text-app-dark font-black text-xs uppercase tracking-widest"
-            >
-              Go Back
-            </button>
+      {/* Footer — pinned above the iOS safe area; holds Save / the confirm prompt */}
+      <div className="shrink-0 border-t border-app-dark/10 bg-white px-5 md:px-8 py-4 pb-safe">
+        {pendingConfirm ? (
+          <div className="space-y-3">
+            <p className="text-sm font-bold text-red-700">
+              This entry has no competency tagged or set as primary. Save anyway?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={confirmSaveAnyway}
+                className="flex-1 py-3.5 rounded-xl bg-red-600 text-white font-black text-xs uppercase tracking-widest active:scale-[0.99] transition-transform"
+              >
+                Save Anyway
+              </button>
+              <button
+                type="button"
+                onClick={() => setPendingConfirm(false)}
+                className="flex-1 py-3.5 rounded-xl bg-white border border-app-dark/10 text-app-dark font-black text-xs uppercase tracking-widest"
+              >
+                Go Back
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-
-      {!pendingConfirm && (
-        <button
-          type="submit"
-          className="w-full py-4 bg-app-dark text-white rounded-xl font-black uppercase text-sm tracking-widest shadow-lg flex items-center justify-center gap-2 hover:bg-black active:scale-[0.99] transition-all"
-        >
-          <Save size={18} /> {isEdit ? 'Update Entry' : 'Save Entry'}
-        </button>
-      )}
+        ) : (
+          <button
+            type="submit"
+            className="w-full py-4 bg-app-dark text-white rounded-xl font-black uppercase text-sm tracking-widest shadow-lg flex items-center justify-center gap-2 hover:bg-black active:scale-[0.99] transition-all"
+          >
+            <Save size={18} /> {isEdit ? 'Update Entry' : 'Save Entry'}
+          </button>
+        )}
+      </div>
     </form>
   );
 };
