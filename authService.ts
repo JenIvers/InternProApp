@@ -44,13 +44,16 @@ export const signInWithGoogle = async (): Promise<void> => {
 
     console.log("Auth attempt:", { isMobile, isIOS, isAndroid, isStandalone });
 
-    // For PWAs and mobile, use redirect (popups are unreliable)
-    if (isMobile || isStandalone) {
+    // Redirect only in the installed/standalone PWA, where popups are
+    // unreliable. In mobile *browsers*, redirect silently loses the result
+    // when the page origin differs from authDomain (third-party storage
+    // partitioning — e.g. on hosting preview channels), so popup is safer.
+    if (isStandalone) {
       // Set flag BEFORE redirect so we know to check result on return
       sessionStorage.setItem(REDIRECT_KEY, 'true');
       await signInWithRedirect(auth, provider);
     } else {
-      // Desktop: try popup first
+      // Browsers (desktop and mobile): try popup first
       try {
         await signInWithPopup(auth, provider);
       } catch (popupError) {
