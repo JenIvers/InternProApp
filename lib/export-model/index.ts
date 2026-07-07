@@ -122,6 +122,14 @@ function competencyText(log: InternshipLog): string {
   return ids.join(', ');
 }
 
+/**
+ * An entry counts as a meeting only when its notes carry a real reflection;
+ * an empty reflection would render a blank meetings row.
+ */
+export function hasMeetingNotes(log: InternshipLog): boolean {
+  return !!log.meetingNotes && log.meetingNotes.reflection.trim().length > 0;
+}
+
 function activityRow(log: InternshipLog, includeMeetingNotes: boolean): ExportRow {
   const row: ExportRow = {
     entryId: log.id,
@@ -134,7 +142,7 @@ function activityRow(log: InternshipLog, includeMeetingNotes: boolean): ExportRo
       level: log.schoolLevel,
     },
   };
-  if (includeMeetingNotes && log.meetingNotes) {
+  if (includeMeetingNotes && hasMeetingNotes(log)) {
     row.meetingNotes = {
       competencyIds:
         log.meetingNotes.competencyIds.length > 0
@@ -205,7 +213,7 @@ export function buildExportModel(
   const ordered = sortByDate(logs);
 
   if (mode === 'meetings') {
-    const rows = ordered.filter((l) => l.meetingNotes).map(meetingRow);
+    const rows = ordered.filter(hasMeetingNotes).map(meetingRow);
     const section: ExportSection = {
       title: TITLES.meetings,
       columns: MEETING_COLUMNS,

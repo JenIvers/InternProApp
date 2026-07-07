@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { FileDown, X, FileText, ClipboardList, MessageSquare, Loader2 } from 'lucide-react';
 import type { AppSettings, InternshipLog } from '../types';
-import { buildExportModel, type ExportMode } from '../lib/export-model';
+import { buildExportModel, hasMeetingNotes, type ExportMode } from '../lib/export-model';
 import LogPdf from './pdf/LogPdf';
 
 /**
@@ -70,7 +70,7 @@ const MODES: {
 
 function countForMode(logs: InternshipLog[], mode: ExportMode): number {
   if (mode === 'meetings') {
-    return logs.filter((l) => l.meetingNotes && l.meetingNotes.reflection.trim().length > 0).length;
+    return logs.filter(hasMeetingNotes).length;
   }
   return logs.length;
 }

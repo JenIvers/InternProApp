@@ -265,7 +265,7 @@ const Totals: React.FC<{ model: ExportModel }> = ({ model }) => {
   const { byBucket, grandTotal } = model.totals;
   const bucketKeys = Object.keys(byBucket);
   return (
-    <View style={styles.totals} wrap={false}>
+    <View style={styles.totals} wrap={false} break>
       <Text style={styles.totalsTitle}>Hours by Level</Text>
       {bucketKeys.map((key) => (
         <View key={key} style={styles.totalsRow}>
