@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
     "firebase": "^12.7.0",
     "lucide-react": "0.475.0",
     "react": "^19.2.3",

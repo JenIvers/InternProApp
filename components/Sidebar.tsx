@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Clock, Target, Folder, School, LogOut, Share2, Check } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Grid3x3, ListChecks, Folder, Settings, LogOut, Share2, Check } from 'lucide-react';
 import { signOut } from '../authService';
 import logo from '../bethel-logo.png';
 
@@ -20,10 +20,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly, use
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'logs', label: 'Activity Log', icon: Clock },
-    { id: 'competencies', label: 'Competencies', icon: Target },
+    { id: 'logs', label: 'Activity Log', icon: ClipboardList },
+    { id: 'coverage', label: 'Coverage', icon: Grid3x3 },
+    { id: 'checklists', label: 'Checklists', icon: ListChecks },
     { id: 'artifacts', label: 'Artifact Vault', icon: Folder },
-    { id: 'sites', label: 'Sites', icon: School },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   const handleShare = () => {

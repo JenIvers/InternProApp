@@ -1,22 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
-import Dashboard from './components/Dashboard';
-import LogsView from './components/LogsView';
-import CompetenciesView from './components/CompetenciesView';
+import DashboardNew from './components/DashboardNew';
+import LogTable from './components/LogTable';
+import CoverageView from './components/CoverageView';
+import ChecklistsView from './components/ChecklistsView';
 import ArtifactsView from './components/ArtifactsView';
-import SitesView from './components/SitesView';
+import SettingsView from './components/SettingsView';
+import EntryForm from './components/EntryForm';
+import ExportDialog from './components/ExportDialog';
 import LoginView from './components/LoginView';
-import { AppState, InternshipLog, AttainmentLevel, Artifact, Shelf, Site } from './types';
-import { loadStateFromFirestore, saveStateToFirestore } from './firestoreService';
+import {
+  AppState, InternshipLog, Artifact, Shelf, Site,
+  AppSettings, AppChecklists,
+} from './types';
+import { loadStateWithMigration, saveStateToFirestore } from './firestoreService';
+import { CURRENT_SCHEMA_VERSION } from '@/lib/state-migration';
+import { ALL_COMPETENCIES } from './constants';
 import { subscribeToAuthChanges, checkRedirectResult } from './authService';
 import { User } from 'firebase/auth';
 import logo from './bethel-logo.png';
 import { register as registerSW } from './registerServiceWorker';
-import { RefreshCw, AlertCircle } from 'lucide-react';
+import { RefreshCw, AlertCircle, Plus, FileDown } from 'lucide-react';
+
+/** Fallback requirement settings for brand-new portfolios (Jen's config). */
+const DEFAULT_SETTINGS: AppSettings = {
+  primaryLevelBucket: 'HighSchool',
+  intermediateMapsTo: 'Elementary',
+  targets: { total: 320, primary: 240, others: 40 },
+};
+
+const EMPTY_CHECKLISTS: AppChecklists = { suggestedActivities: {}, deliverables: {} };
 
 const App: React.FC = () => {
-  const [currentView, setView] = useState<string>('dashboard');
+  const [currentView, setViewRaw] = useState<string>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthInitializing, setIsAuthInitializing] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(false);
@@ -24,15 +41,36 @@ const App: React.FC = () => {
   const [showUpdateToast, setShowUpdateToast] = useState(false);
   const [swRegistration, setSwRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [needsPrimaryReview, setNeedsPrimaryReview] = useState<string[]>([]);
+
+  // Cross-view jump: competency id to pre-seed the log table's filter.
+  const [logPrefilterCompetencyId, setLogPrefilterCompetencyId] = useState<string | undefined>(undefined);
+
+  // Entry editor (modal) — open with an entry to edit, or undefined to create.
+  const [editor, setEditor] = useState<{ open: boolean; entry?: InternshipLog }>({ open: false });
+
+  // Export dialog.
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportFilteredLogs, setExportFilteredLogs] = useState<InternshipLog[] | undefined>(undefined);
+
   const [state, setState] = useState<AppState>({
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     logs: [],
     artifacts: [],
     progress: {},
     shelves: [],
     sites: [],
     competencyReflections: {},
-    primarySetting: 'Secondary'
+    primarySetting: 'Secondary',
+    settings: DEFAULT_SETTINGS,
+    checklists: EMPTY_CHECKLISTS,
   });
+
+  // Navigate via the nav bars: clears any cross-view competency prefilter.
+  const setView = (view: string) => {
+    setLogPrefilterCompetencyId(undefined);
+    setViewRaw(view);
+  };
 
   // Combined Auth and Initial Data Load
   useEffect(() => {
@@ -59,7 +97,7 @@ const App: React.FC = () => {
         console.log("Subscribing to auth changes...");
         const unsubscribe = subscribeToAuthChanges(async (currentUser) => {
           if (!isMounted) return;
-          
+
           console.log("Auth state changed:", currentUser ? currentUser.email : "no user");
           setUser(currentUser);
           setIsAuthInitializing(false);
@@ -71,7 +109,7 @@ const App: React.FC = () => {
           if (viewId) {
             console.log("Loading viewer mode data for:", viewId);
             setIsReadOnly(true);
-            const sharedData = await loadStateFromFirestore(viewId);
+            const { state: sharedData } = await loadStateWithMigration(viewId, { readOnly: true });
             if (isMounted && sharedData) {
               setState(sharedData);
             }
@@ -79,8 +117,10 @@ const App: React.FC = () => {
           } else if (currentUser) {
             console.log("Loading editor mode data for:", currentUser.uid);
             setIsReadOnly(false);
-            const firestoreData = await loadStateFromFirestore(currentUser.uid);
+            const { state: firestoreData, needsPrimaryReview: review } =
+              await loadStateWithMigration(currentUser.uid);
             if (isMounted) {
+              setNeedsPrimaryReview(review);
               if (firestoreData) {
                 // If we have existing data, make sure the profile is up to date
                 setState({
@@ -88,8 +128,8 @@ const App: React.FC = () => {
                   userProfile: {
                     displayName: currentUser.displayName,
                     email: currentUser.email,
-                    photoURL: currentUser.photoURL
-                  }
+                    photoURL: currentUser.photoURL,
+                  },
                 });
               } else {
                 // Initialize with user profile
@@ -98,8 +138,8 @@ const App: React.FC = () => {
                   userProfile: {
                     displayName: currentUser.displayName,
                     email: currentUser.email,
-                    photoURL: currentUser.photoURL
-                  }
+                    photoURL: currentUser.photoURL,
+                  },
                 }));
               }
             }
@@ -164,7 +204,6 @@ const App: React.FC = () => {
   }, [state, isLoading, isAuthInitializing, isReadOnly, user, performSave]);
 
   // Save when user leaves the tab/app (mobile-optimized)
-  // Uses multiple events for maximum reliability on iOS PWAs
   useEffect(() => {
     if (isReadOnly || !user) return;
 
@@ -174,23 +213,13 @@ const App: React.FC = () => {
       }
     };
 
-    // visibilitychange: fires when switching tabs or apps
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         triggerSave();
       }
     };
-
-    // pagehide: more reliable than beforeunload on iOS/mobile
-    // Using capture phase ensures earliest possible execution
-    const handlePageHide = () => {
-      triggerSave();
-    };
-
-    // blur: fires when PWA loses focus (user taps outside)
-    const handleBlur = () => {
-      triggerSave();
-    };
+    const handlePageHide = () => triggerSave();
+    const handleBlur = () => triggerSave();
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pagehide', handlePageHide, { capture: true });
@@ -203,31 +232,54 @@ const App: React.FC = () => {
     };
   }, [performSave, isReadOnly, user]);
 
-  const addLog = (log: InternshipLog) => {
-    setState(prev => ({ ...prev, logs: [...prev.logs, log] }));
-  };
-
+  // ---- Log CRUD -----------------------------------------------------------
   const updateLog = (updatedLog: InternshipLog) => {
     setState(prev => ({
       ...prev,
-      logs: prev.logs.map(log => log.id === updatedLog.id ? updatedLog : log)
+      logs: prev.logs.map(log => log.id === updatedLog.id ? updatedLog : log),
     }));
   };
 
-  const updateProgress = (id: string, level: AttainmentLevel) => {
-    setState(prev => ({
-      ...prev,
-      progress: { ...prev.progress, [id]: level }
-    }));
+  const deleteLog = (id: string) => {
+    setState(prev => ({ ...prev, logs: prev.logs.filter(log => log.id !== id) }));
+    setNeedsPrimaryReview(prev => prev.filter(rid => rid !== id));
   };
 
-  const updateCompetencyReflection = (id: string, reflection: string) => {
-    setState(prev => ({
-      ...prev,
-      competencyReflections: { ...prev.competencyReflections, [id]: reflection }
-    }));
+  // Save from the EntryForm modal: add when new, update when the id already exists.
+  const saveEntry = (entry: InternshipLog) => {
+    setState(prev => {
+      const exists = prev.logs.some(l => l.id === entry.id);
+      return {
+        ...prev,
+        logs: exists
+          ? prev.logs.map(l => (l.id === entry.id ? entry : l))
+          : [...prev.logs, entry],
+      };
+    });
+    // A saved entry has been reviewed — clear it from the migration review list.
+    setNeedsPrimaryReview(prev => prev.filter(rid => rid !== entry.id));
+    setEditor({ open: false });
   };
 
+  const openNewEntry = () => setEditor({ open: true, entry: undefined });
+  const openEditEntry = (log: InternshipLog) => setEditor({ open: true, entry: log });
+  const closeEditor = () => setEditor({ open: false });
+
+  const handleReviewEntry = (logId: string) => {
+    const log = state.logs.find(l => l.id === logId);
+    if (log) openEditEntry(log);
+  };
+
+  // ---- Settings / checklists ---------------------------------------------
+  const updateSettings = (settings: AppSettings) => {
+    setState(prev => ({ ...prev, settings }));
+  };
+
+  const updateChecklists = (checklists: AppChecklists) => {
+    setState(prev => ({ ...prev, checklists }));
+  };
+
+  // ---- Artifacts / shelves / sites ---------------------------------------
   const addArtifact = (artifact: Artifact) => {
     setState(prev => ({ ...prev, artifacts: [...prev.artifacts, artifact] }));
   };
@@ -235,7 +287,7 @@ const App: React.FC = () => {
   const updateArtifact = (updated: Artifact) => {
     setState(prev => ({
       ...prev,
-      artifacts: prev.artifacts.map(a => a.id === updated.id ? updated : a)
+      artifacts: prev.artifacts.map(a => a.id === updated.id ? updated : a),
     }));
   };
 
@@ -248,12 +300,21 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, sites: [...prev.sites, site] }));
   };
 
-  const removeSite = (id: string) => {
-    setState(prev => ({ ...prev, sites: prev.sites.filter(s => s.id !== id) }));
+  // ---- Export -------------------------------------------------------------
+  const handleExportFiltered = (filtered: InternshipLog[]) => {
+    setExportFilteredLogs(filtered);
+    setExportOpen(true);
   };
 
-  const setPrimarySetting = (setting: 'Primary' | 'Secondary') => {
-    setState(prev => ({ ...prev, primarySetting: setting }));
+  const openExportAll = () => {
+    setExportFilteredLogs(undefined);
+    setExportOpen(true);
+  };
+
+  // ---- Cross-view jump ----------------------------------------------------
+  const handleViewCompetencyLogs = (competencyId: string) => {
+    setLogPrefilterCompetencyId(competencyId);
+    setViewRaw('logs');
   };
 
   const onUpdate = () => {
@@ -268,38 +329,75 @@ const App: React.FC = () => {
     return <LoginView />;
   }
 
+  const settings = state.settings ?? DEFAULT_SETTINGS;
+  const authorName = isReadOnly ? state.userProfile?.displayName : user?.displayName;
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
         return (
-          <Dashboard 
-            logs={state.logs} 
-            progress={state.progress} 
-            primarySetting={state.primarySetting}
-            onSetPrimarySetting={setPrimarySetting}
+          <DashboardNew
+            logs={state.logs}
+            competencies={ALL_COMPETENCIES}
+            settings={settings}
+            needsPrimaryReview={needsPrimaryReview}
+            onReviewEntry={handleReviewEntry}
             isReadOnly={isReadOnly}
           />
         );
       case 'logs':
         return (
-          <LogsView 
-            logs={state.logs} 
-            onAddLog={addLog} 
-            onUpdateLog={updateLog} 
-            isReadOnly={isReadOnly} 
-            userName={isReadOnly ? state.userProfile?.displayName : user?.displayName}
+          <div className="space-y-4 pb-20 md:pb-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-bold text-app-dark tracking-tight">Activity Log</h2>
+                <p className="text-app-slate text-sm">Search, sort, and total your internship entries.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={openExportAll}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-app-dark/10 bg-white text-app-deep text-xs font-bold hover:bg-app-bg transition-all"
+                >
+                  <FileDown size={16} /> Export
+                </button>
+                {!isReadOnly && (
+                  <button
+                    onClick={openNewEntry}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-app-dark text-white text-xs font-bold hover:bg-app-deep transition-all shadow-sm"
+                  >
+                    <Plus size={16} strokeWidth={2.5} /> Add entry
+                  </button>
+                )}
+              </div>
+            </div>
+            <LogTable
+              logs={state.logs}
+              sites={state.sites}
+              isReadOnly={isReadOnly}
+              onUpdateLog={updateLog}
+              onEditEntry={openEditEntry}
+              onDeleteLog={deleteLog}
+              onExportFiltered={handleExportFiltered}
+              initialCompetencyId={logPrefilterCompetencyId}
+            />
+          </div>
+        );
+      case 'coverage':
+        return (
+          <CoverageView
+            logs={state.logs}
+            competencies={ALL_COMPETENCIES}
+            isReadOnly={isReadOnly}
+            onViewCompetencyLogs={handleViewCompetencyLogs}
           />
         );
-      case 'competencies':
+      case 'checklists':
         return (
-          <CompetenciesView 
-            progress={state.progress} 
-            logs={state.logs} 
-            artifacts={state.artifacts}
-            competencyReflections={state.competencyReflections}
-            onUpdateProgress={updateProgress}
-            onUpdateReflection={updateCompetencyReflection}
+          <ChecklistsView
+            checklists={state.checklists ?? EMPTY_CHECKLISTS}
+            logs={state.logs}
             isReadOnly={isReadOnly}
+            onUpdateChecklists={updateChecklists}
           />
         );
       case 'artifacts':
@@ -314,22 +412,24 @@ const App: React.FC = () => {
             user={user}
           />
         );
-      case 'sites':
+      case 'settings':
         return (
-          <SitesView 
-            sites={state.sites}
-            onAddSite={addSite}
-            onRemoveSite={removeSite}
+          <SettingsView
+            appState={state}
+            settings={settings}
+            userProfile={state.userProfile}
+            onUpdateSettings={updateSettings}
             isReadOnly={isReadOnly}
           />
         );
       default:
         return (
-          <Dashboard 
-            logs={state.logs} 
-            progress={state.progress} 
-            primarySetting={state.primarySetting}
-            onSetPrimarySetting={setPrimarySetting}
+          <DashboardNew
+            logs={state.logs}
+            competencies={ALL_COMPETENCIES}
+            settings={settings}
+            needsPrimaryReview={needsPrimaryReview}
+            onReviewEntry={handleReviewEntry}
             isReadOnly={isReadOnly}
           />
         );
@@ -338,14 +438,14 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex">
-      <Sidebar 
-        currentView={currentView} 
-        setView={setView} 
-        isReadOnly={isReadOnly} 
-        userId={user?.uid} 
+      <Sidebar
+        currentView={currentView}
+        setView={setView}
+        isReadOnly={isReadOnly}
+        userId={user?.uid}
         user={isReadOnly ? state.userProfile : user}
       />
-      
+
       <main className="flex-1 md:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
@@ -392,7 +492,38 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <BottomNav currentView={currentView} setView={setView} />
+      <BottomNav currentView={currentView} setView={setView} onAdd={openNewEntry} isReadOnly={isReadOnly} />
+
+      {/* Entry editor modal */}
+      {editor.open && (
+        <div className="fixed inset-0 z-[80] bg-app-dark/40 backdrop-blur-sm overflow-y-auto">
+          <div className="min-h-full flex items-start md:items-center justify-center md:p-6">
+            <div className="bg-app-bg w-full md:max-w-2xl md:rounded-3xl md:my-6 min-h-screen md:min-h-0 shadow-2xl">
+              <EntryForm
+                entry={editor.entry}
+                logs={state.logs}
+                sites={state.sites}
+                artifacts={state.artifacts}
+                onAddSite={addSite}
+                onSave={saveEntry}
+                onCancel={closeEditor}
+                isReadOnly={isReadOnly}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export dialog */}
+      <ExportDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        logs={state.logs}
+        filteredLogs={exportFilteredLogs}
+        settings={settings}
+        authorName={authorName}
+        isReadOnly={false}
+      />
 
       {/* Update Notification Toast */}
       {showUpdateToast && (
@@ -437,18 +568,6 @@ const App: React.FC = () => {
               Dismiss
             </button>
           </div>
-        </div>
-      )}
-
-      {!isReadOnly && (currentView === 'dashboard' || currentView === 'sites') && (
-        <div className="md:hidden fixed bottom-20 right-6 z-40">
-          <button 
-            onClick={() => setView('logs')}
-            className="w-14 h-14 bg-[#162D34] rounded-2xl shadow-xl shadow-[#162D3433] text-white flex items-center justify-center text-2xl active:scale-95 transition-all"
-            aria-label="Add log"
-          >
-            +
-          </button>
         </div>
       )}
     </div>
