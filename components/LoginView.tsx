@@ -14,10 +14,10 @@ const LoginView: React.FC = () => {
       await signInWithGoogle();
       // Note: For redirect flow, the page will reload/redirect away.
       // For popup flow, it will finish and App.tsx will pick up the user change.
-    } catch (err: any) {
+    } catch (err) {
       console.error("Login failed:", err);
       setIsLoading(false);
-      setError(err.message || "Failed to sign in. Please try again.");
+      setError(err instanceof Error && err.message ? err.message : "Failed to sign in. Please try again.");
     }
   };
 
