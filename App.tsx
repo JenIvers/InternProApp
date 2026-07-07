@@ -21,6 +21,7 @@ import { subscribeToAuthChanges, checkRedirectResult } from './authService';
 import { User } from 'firebase/auth';
 import logo from './bethel-logo.png';
 import { register as registerSW } from './registerServiceWorker';
+import { useBodyScrollLock } from './useBodyScrollLock';
 import { RefreshCw, AlertCircle, Plus, FileDown } from 'lucide-react';
 
 /** Fallback requirement settings for brand-new portfolios (Jen's config). */
@@ -54,6 +55,10 @@ const App: React.FC = () => {
   // Export dialog.
   const [exportOpen, setExportOpen] = useState(false);
   const [exportFilteredLogs, setExportFilteredLogs] = useState<InternshipLog[] | undefined>(undefined);
+
+  // Lock background scroll while a full-screen sheet/modal owns the viewport,
+  // so the page underneath can't rubber-band on mobile.
+  useBodyScrollLock(editor.open || exportOpen);
 
   const [state, setState] = useState<AppState>({
     schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -511,7 +516,7 @@ const App: React.FC = () => {
       {/* Entry editor modal — full-screen sheet on mobile, centered card on desktop */}
       {editor.open && (
         <div className="fixed inset-0 z-[80] bg-app-dark/40 backdrop-blur-sm flex md:items-center md:justify-center md:p-6 md:overflow-y-auto">
-          <div className="bg-white w-full md:max-w-2xl md:rounded-3xl md:my-6 shadow-2xl flex flex-col h-[100dvh] md:h-auto md:max-h-[90vh] overflow-hidden">
+          <div className="bg-white w-full md:max-w-2xl md:rounded-3xl md:my-6 shadow-2xl flex flex-col h-dvh md:h-auto md:max-h-[90vh] overflow-hidden">
             <EntryForm
               entry={editor.entry}
               logs={state.logs}

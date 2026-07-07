@@ -111,7 +111,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
             <select
               value={newSite.level}
               onChange={e => setNewSite({ ...newSite, level: e.target.value as Site['level'] })}
-              className="w-full px-4 py-2.5 rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
+              className="w-full min-w-0 px-4 py-2.5 rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
             >
               <option value="Primary">Primary (K-6)</option>
               <option value="Secondary">Secondary (6-12)</option>
@@ -121,7 +121,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
               value={newSite.mentorName || ''}
               onChange={e => setNewSite({ ...newSite, mentorName: e.target.value })}
               placeholder="Mentor name"
-              className="w-full px-4 py-2.5 rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
+              className="w-full min-w-0 px-4 py-2.5 rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
             />
           </div>
           <button

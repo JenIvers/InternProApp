@@ -204,7 +204,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
           {/* Mode selection */}
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Document

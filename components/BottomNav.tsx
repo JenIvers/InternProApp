@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, ClipboardList, Grid3x3, Plus, MoreHorizontal, ListChecks, Folder, Settings, X } from 'lucide-react';
+import { useBodyScrollLock } from '../useBodyScrollLock';
 
 interface BottomNavProps {
   currentView: string;
@@ -10,6 +11,7 @@ interface BottomNavProps {
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isReadOnly }) => {
   const [moreOpen, setMoreOpen] = useState(false);
+  useBodyScrollLock(moreOpen);
 
   const primaryItems = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },

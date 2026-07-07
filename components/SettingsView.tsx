@@ -100,7 +100,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
               Primary level
             </label>
@@ -116,7 +116,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
             </select>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
               Intermediate maps to
             </label>
@@ -131,7 +131,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
               Total hours
             </label>
@@ -144,7 +144,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
               Primary level hours
             </label>
@@ -157,7 +157,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
               Each other level hours
             </label>

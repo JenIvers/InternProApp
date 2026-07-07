@@ -231,7 +231,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
           </div>
 
           {query.trim() ? (
-            <div className="max-h-64 overflow-y-auto border border-app-dark/10 rounded-xl divide-y divide-app-dark/5 bg-white">
+            <div className="max-h-64 overflow-y-auto overscroll-contain border border-app-dark/10 rounded-xl divide-y divide-app-dark/5 bg-white">
               {searchResults.length === 0 && (
                 <p className="p-4 text-sm text-app-slate/60 font-semibold">No competencies match &ldquo;{query}&rdquo;.</p>
               )}
@@ -334,7 +334,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
                 <div className="p-4 space-y-2 bg-white">
                   {selectedCompetencies.map(c => (
                     <div key={c.id} className="flex items-center justify-between gap-3">
-                      <span className="text-xs font-bold text-app-dark">{c.id} &middot; {c.title}</span>
+                      <span className="min-w-0 truncate text-xs font-bold text-app-dark">{c.id} &middot; {c.title}</span>
                       <input
                         type="number"
                         inputMode="decimal"

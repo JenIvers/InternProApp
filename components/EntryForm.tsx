@@ -223,10 +223,10 @@ const EntryForm: React.FC<EntryFormProps> = ({
       </div>
 
       {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto px-5 md:px-8 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto overscroll-contain px-5 md:px-8 py-6 space-y-6">
       {/* Date / Hours / Level */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 min-w-0">
           <label className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
             <Calendar size={13} /> Date
           </label>
@@ -238,7 +238,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
             className="w-full px-4 py-3.5 rounded-xl bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 min-w-0">
           <label className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
             <Clock size={13} /> Hours
           </label>
@@ -253,7 +253,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
             className="w-full px-4 py-3.5 rounded-xl bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 min-w-0">
           <label className="flex items-center gap-1.5 text-[11px] font-black text-app-slate uppercase tracking-widest">
             <School size={13} /> School Level
           </label>
@@ -363,14 +363,14 @@ const EntryForm: React.FC<EntryFormProps> = ({
               value={newLinkLabel}
               onChange={e => setNewLinkLabel(e.target.value)}
               placeholder="Label (optional)"
-              className="flex-1 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+              className="flex-1 min-w-0 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
             />
             <input
               type="url"
               value={newLinkUrl}
               onChange={e => setNewLinkUrl(e.target.value)}
               placeholder="Paste a URL"
-              className="flex-1 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+              className="flex-1 min-w-0 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
             />
             <button
               type="button"
@@ -396,7 +396,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
               {artifactPickerOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
             {artifactPickerOpen && (
-              <div className="max-h-56 overflow-y-auto border border-app-dark/10 rounded-xl divide-y divide-app-dark/5">
+              <div className="max-h-56 overflow-y-auto overscroll-contain border border-app-dark/10 rounded-xl divide-y divide-app-dark/5">
                 {artifacts.map(artifact => {
                   const isSelected = form.artifactIds.includes(artifact.id);
                   return (

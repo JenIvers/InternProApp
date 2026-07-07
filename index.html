@@ -53,6 +53,25 @@
                               radial-gradient(circle at 100% 100%, rgba(66, 131, 164, 0.03) 0%, transparent 45%);
             background-attachment: fixed;
         }
+        /* Stop the whole page from rubber-band/overscroll-chaining on mobile
+           (the "bouncing around when scrolling" report). Inner scroll regions
+           opt into containment with .overscroll-contain; full-screen sheets use
+           .h-dvh for a correct height under the iOS URL bar. */
+        html, body {
+            overscroll-behavior-y: none;
+        }
+        .overscroll-contain {
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        .h-dvh {
+            height: 100vh;   /* fallback for browsers without dvh */
+            height: 100dvh;
+        }
+        .max-h-dvh {
+            max-height: 100vh;
+            max-height: 100dvh;
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
