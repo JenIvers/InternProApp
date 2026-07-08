@@ -1,5 +1,5 @@
-// Version: 1.1.1 - Improved iOS PWA navigation and cache handling
-const CACHE_NAME = 'internpro-v1.1.1';
+// Version: 1.2.0 - Activity log refresh (preview)
+const CACHE_NAME = 'internpro-v1.2.0';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

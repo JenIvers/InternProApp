@@ -179,6 +179,35 @@ const LogTable: React.FC<LogTableProps> = ({
   const hasActiveFilters =
     !!search || !!competencyFilter || !!levelFilter || !!siteFilter || !!dateFrom || !!dateTo || incompleteOnly;
 
+  /** One chip per active filter (search excluded — it's visible in the input itself). */
+  const filterChips = useMemo(() => {
+    const chips: { key: string; label: string; onClear: () => void }[] = [];
+    if (competencyFilter) {
+      const id = competencyFilter.slice(competencyFilter.indexOf(':') + 1);
+      const c = competencyById.get(id);
+      chips.push({
+        key: 'competency',
+        label: c ? `${id} — ${c.title.length > 24 ? c.title.slice(0, 24) + '…' : c.title}` : id,
+        onClear: () => setCompetencyFilter(''),
+      });
+    }
+    if (levelFilter) chips.push({ key: 'level', label: levelFilter, onClear: () => setLevelFilter('') });
+    if (siteFilter) {
+      chips.push({
+        key: 'site',
+        label: siteById.get(siteFilter)?.name ?? 'Site',
+        onClear: () => setSiteFilter(''),
+      });
+    }
+    if (dateFrom) chips.push({ key: 'from', label: `From ${dateFrom}`, onClear: () => setDateFrom('') });
+    if (dateTo) chips.push({ key: 'to', label: `To ${dateTo}`, onClear: () => setDateTo('') });
+    if (incompleteOnly)
+      chips.push({ key: 'incomplete', label: 'Incomplete only', onClear: () => setIncompleteOnly(false) });
+    return chips;
+  }, [competencyFilter, levelFilter, siteFilter, dateFrom, dateTo, incompleteOnly, competencyById, siteById]);
+
+  const activeFilterCount = filterChips.length;
+
   // ---- Handlers -----------------------------------------------------------
   const toggleSort = (key: LogQuerySort['key']) => {
     setSort((prev) =>
@@ -229,9 +258,8 @@ const LogTable: React.FC<LogTableProps> = ({
   // ---- Render -------------------------------------------------------------
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
+      {/* Toolbar: one persistent row — search, Filters disclosure, Export. */}
       <div className="bg-white border border-app-slate/15 rounded-xl p-3 sm:p-4 space-y-3">
-        {/* Search + mobile Filters toggle */}
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
             <div className="relative">
@@ -240,8 +268,8 @@ const LogTable: React.FC<LogTableProps> = ({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Title, description, location…"
-                className="w-full pl-9 pr-3 py-2.5 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
+                placeholder="Search entries…"
+                className="w-full pl-9 pr-3 py-2.5 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark min-h-[44px]"
               />
             </div>
           </div>
@@ -249,18 +277,56 @@ const LogTable: React.FC<LogTableProps> = ({
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
             aria-expanded={filtersOpen}
-            className={`md:hidden shrink-0 flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] rounded-lg border text-sm font-semibold transition-colors ${
-              filtersOpen ? 'bg-app-dark text-white border-app-dark' : 'border-app-slate/15 text-app-slate'
+            className={`shrink-0 flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] rounded-lg border text-sm font-semibold transition-colors ${
+              filtersOpen ? 'bg-app-dark text-white border-app-dark' : 'border-app-slate/15 text-app-slate hover:bg-app-bg'
             }`}
           >
-            <SlidersHorizontal size={15} /> Filters
+            <SlidersHorizontal size={15} />
+            <span className="hidden sm:inline">Filters</span>
+            {activeFilterCount > 0 && (
+              <span
+                className={`px-1.5 rounded-full text-[10px] tabular-nums ${
+                  filtersOpen ? 'bg-white/20 text-white' : 'bg-app-dark text-white'
+                }`}
+              >
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => onExportFiltered(filteredLogs)}
+            className="shrink-0 flex items-center gap-1.5 py-2.5 px-3 sm:px-4 min-h-[44px] text-sm font-bold text-white bg-app-dark rounded-lg hover:bg-app-deep transition-colors active:scale-[0.98]"
+          >
+            <Download size={15} />
+            <span className="hidden sm:inline">Export</span>
           </button>
         </div>
 
-        {/* Filter controls — collapsible on mobile, inline on md+ */}
-        <div
-          className={`${filtersOpen ? 'grid grid-cols-2 gap-3' : 'hidden'} md:flex md:flex-wrap md:items-end md:gap-3`}
-        >
+        {/* Active filters as removable chips — visible state without layout shuffle. */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {filterChips.map((chip) => (
+              <button
+                key={chip.key}
+                onClick={chip.onClear}
+                title={`Remove filter: ${chip.label}`}
+                className="flex items-center gap-1 py-1 pl-2.5 pr-1.5 rounded-full bg-app-dark/5 border border-app-slate/15 text-xs font-semibold text-app-dark hover:bg-app-dark/10 transition-colors"
+              >
+                {chip.label}
+                <X size={12} className="text-app-slate" />
+              </button>
+            ))}
+            <button
+              onClick={clearFilters}
+              className="py-1 px-2 text-xs font-semibold text-app-slate hover:text-app-dark transition-colors"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
+        {/* Filter controls — behind the Filters disclosure on every screen size. */}
+        <div className={`${filtersOpen ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3' : 'hidden'}`}>
           <div className="min-w-0">
             <label className="block text-xs font-semibold text-app-slate mb-1.5">
               Competency
@@ -350,53 +416,42 @@ const LogTable: React.FC<LogTableProps> = ({
               className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
             />
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setIncompleteOnly((v) => !v)}
-            aria-pressed={incompleteOnly}
-            title="Show only entries with missing details"
-            className={`flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] text-sm font-semibold rounded-lg border transition-colors ${
-              incompleteOnly
-                ? 'bg-amber-400 border-amber-400 text-app-dark'
-                : 'border-app-slate/15 text-app-slate hover:bg-app-bg'
-            }`}
-          >
-            <AlertTriangle size={14} /> Incomplete only
-            {incompleteCount > 0 && (
-              <span
-                className={`ml-0.5 px-1.5 rounded-full text-[10px] tabular-nums ${
-                  incompleteOnly ? 'bg-app-dark/10 text-app-dark' : 'bg-amber-100 text-amber-700'
-                }`}
-              >
-                {incompleteCount}
-              </span>
-            )}
-          </button>
-          {hasActiveFilters && (
+          <div className="col-span-2 md:col-span-3 lg:col-span-5">
             <button
-              onClick={clearFilters}
-              className="flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] text-sm font-semibold text-app-slate rounded-lg border border-app-slate/15 hover:bg-app-bg transition-colors"
+              onClick={() => setIncompleteOnly((v) => !v)}
+              aria-pressed={incompleteOnly}
+              title="Show only entries with missing details"
+              className={`flex items-center gap-1.5 py-2 px-3 min-h-[44px] text-sm font-semibold rounded-lg border transition-colors ${
+                incompleteOnly
+                  ? 'bg-app-dark border-app-dark text-white'
+                  : 'border-app-slate/15 text-app-slate hover:bg-app-bg'
+              }`}
             >
-              <X size={14} /> Clear
+              <AlertTriangle size={14} /> Incomplete only
+              {incompleteCount > 0 && (
+                <span
+                  className={`ml-0.5 px-1.5 rounded-full text-[10px] tabular-nums ${
+                    incompleteOnly ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
+                  }`}
+                >
+                  {incompleteCount}
+                </span>
+              )}
             </button>
-          )}
-          <button
-            onClick={() => onExportFiltered(filteredLogs)}
-            className="flex items-center gap-2 py-2.5 px-4 min-h-[44px] text-sm font-bold text-white bg-app-dark rounded-lg hover:bg-app-deep transition-colors active:scale-[0.98] ml-auto"
-          >
-            <Download size={15} /> Export
-          </button>
+          </div>
         </div>
       </div>
 
-      {/* Result meta */}
-      <div className="flex items-center gap-2 px-1 text-xs font-bold text-app-slate">
-        <Filter size={13} className="text-app-light" />
-        Showing {filteredLogs.length} of {logs.length} {logs.length === 1 ? 'entry' : 'entries'}
-      </div>
+      {/* Result meta — only meaningful when there's something to count. */}
+      {logs.length > 0 && (
+        <div className="flex items-center gap-2 px-1 text-xs font-semibold text-app-slate">
+          <Filter size={13} className="text-app-light" />
+          {hasActiveFilters
+            ? `Showing ${filteredLogs.length} of ${logs.length} ${logs.length === 1 ? 'entry' : 'entries'}`
+            : `${logs.length} ${logs.length === 1 ? 'entry' : 'entries'}`}
+        </div>
+      )}
 
       {/* Table (desktop / tablet) */}
       <div className="hidden md:block overflow-x-auto rounded-xl border border-app-slate/15 bg-white shadow-sm">
