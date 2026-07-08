@@ -489,7 +489,7 @@ const App: React.FC = () => {
         user={isReadOnly ? state.userProfile : user}
       />
 
-      <main className="flex-1 md:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
+      <main className="flex-1 md:ml-64 px-4 pt-1 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
             <div className="flex flex-col items-center gap-4">
@@ -502,7 +502,7 @@ const App: React.FC = () => {
         ) : (
           <>
             <header
-              className={`md:hidden sticky top-0 z-40 -mt-safe pt-safe -mx-4 px-4 mb-4 transition-[background-color,box-shadow] duration-200 ${
+              className={`md:hidden sticky top-0 z-40 -mt-safe pt-safe -mx-4 px-4 mb-2 transition-[background-color,box-shadow] duration-200 ${
                 headerScrolled
                   ? 'bg-app-bg/85 backdrop-blur-md shadow-[0_1px_0_0_rgba(94,110,120,0.15)]'
                   : 'bg-transparent'
@@ -511,7 +511,7 @@ const App: React.FC = () => {
               <div className="flex items-center justify-between h-14">
                 <div className="flex items-center gap-2.5">
                   <img src={logo} alt="Bethel University" className="w-9 h-9 object-contain" />
-                  <h1 className="text-lg font-black text-app-dark leading-none">
+                  <h1 className="text-lg font-black leading-none bg-gradient-to-r from-app-dark to-app-bright bg-clip-text text-transparent">
                     InternPro
                   </h1>
                 </div>

@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly, use
     <aside className="w-64 bg-white border-r border-app-slate/15 h-screen fixed left-0 top-0 hidden md:flex flex-col z-50">
       <div className="p-8 border-b border-app-slate/10 flex flex-col items-center text-center">
         <img src={logo} alt="Bethel University" className="w-16 mb-4 drop-shadow-sm" />
-        <h1 className="text-2xl font-black text-app-dark tracking-tighter">
+        <h1 className="text-2xl font-black tracking-tighter bg-gradient-to-br from-app-dark via-app-deep to-app-bright bg-clip-text text-transparent">
           InternPro
         </h1>
         
