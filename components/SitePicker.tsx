@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Site } from '../types';
-import { MapPin, Plus, X, ChevronDown } from 'lucide-react';
+import { MapPin, X, ChevronDown } from 'lucide-react';
 
 export interface SitePickerProps {
   sites: Site[];
@@ -19,8 +19,10 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === '__custom__') {
-      onChange({ siteId: undefined, location: location || '' });
+    if (value === '__add__') {
+      // "Add new site…" lives in the dropdown itself; selecting it opens the
+      // inline form without changing the current selection.
+      setIsAddingSite(true);
     } else if (value === '') {
       onChange({ siteId: undefined, location: undefined });
     } else {
@@ -60,7 +62,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
     <div className="space-y-3">
       <div className="relative">
         <select
-          value={isCustom ? '__custom__' : (siteId || '')}
+          value={siteId || ''}
           onChange={handleSelectChange}
           className="w-full pl-11 pr-10 py-2.5 min-h-[44px] rounded-lg bg-white border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-bold text-app-dark appearance-none cursor-pointer"
         >
@@ -68,7 +70,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
           {sites.map(site => (
             <option key={site.id} value={site.id}>{site.name} ({site.level})</option>
           ))}
-          <option value="__custom__">Other / type location&hellip;</option>
+          <option value="__add__">＋ Add new site&hellip;</option>
         </select>
         <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-app-slate/50 pointer-events-none" />
         <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-app-slate/50 pointer-events-none" />
@@ -84,15 +86,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
         />
       )}
 
-      {!isAddingSite ? (
-        <button
-          type="button"
-          onClick={() => setIsAddingSite(true)}
-          className="flex items-center gap-1.5 py-1.5 text-xs font-semibold text-app-bright"
-        >
-          <Plus size={14} /> Add new site
-        </button>
-      ) : (
+      {isAddingSite && (
         <form onSubmit={handleAddSiteSubmit} className="p-4 bg-app-bg/50 rounded-lg border border-app-slate/15 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-app-slate">New site</span>

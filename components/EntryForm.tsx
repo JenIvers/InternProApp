@@ -121,6 +121,12 @@ const EntryForm: React.FC<EntryFormProps> = ({
   const [evidenceOpen, setEvidenceOpen] = useState(sectionsDefaultOpen);
 
   const liveWarnings = useMemo(() => validateEntry(form), [form]);
+
+  // The body stays editable behind the save confirm; if the user resolves the
+  // warnings there, the confirm no longer applies — dismiss it.
+  React.useEffect(() => {
+    if (liveWarnings.length === 0) setPendingConfirm(false);
+  }, [liveWarnings.length]);
   const hasDescWarning = liveWarnings.some(w => w.code === 'MISSING_DESCRIPTION');
   const hasCompWarning = liveWarnings.some(w => w.code === 'MISSING_COMPETENCY');
   const descFilled = !!((form.description ?? form.activity) || '').trim();
@@ -229,8 +235,10 @@ const EntryForm: React.FC<EntryFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const hasBlockingMissingPrimary = !form.primaryCompetencyId && (form.taggedCompetencyIds?.length ?? 0) === 0;
-    if (hasBlockingMissingPrimary && !pendingConfirm) {
+    // Quick capture is allowed, but incomplete entries get one calm confirm at
+    // save time — the only warning surface (the amber dots on the section rows
+    // mark what's unfinished while editing).
+    if (liveWarnings.length > 0 && !pendingConfirm) {
       setPendingConfirm(true);
       return;
     }
@@ -324,20 +332,18 @@ const EntryForm: React.FC<EntryFormProps> = ({
         </div>
       </div>
 
-      {/* Title */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-semibold text-app-slate">Title</label>
+      {/* Detail sections — one grouped container, hairline dividers between rows.
+          Title is the first row: a borderless inline input, not a labeled field. */}
+      <div className="rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10 bg-white">
+      <div className="px-4 bg-white">
         <input
           type="text"
           value={form.title || ''}
           onChange={e => updateField('title', e.target.value)}
-          placeholder="Brief title for this activity"
-          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
+          placeholder="Activity title"
+          className="w-full py-3 min-h-[48px] bg-transparent outline-none font-bold text-app-dark text-base placeholder:text-app-slate/40 placeholder:font-semibold"
         />
       </div>
-
-      {/* Detail sections — one grouped container, hairline dividers between rows */}
-      <div className="rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10 bg-white">
       {/* Description (collapsible — soft-optional for quick capture) */}
       <Section
         title="Description"
@@ -509,8 +515,9 @@ const EntryForm: React.FC<EntryFormProps> = ({
           aria-expanded={meetingNotesOpen}
           className="w-full flex items-center justify-between px-4 py-3 min-h-[48px] bg-white hover:bg-app-bg/40 transition-colors"
         >
-          <span className="text-xs font-semibold text-app-slate">Meeting notes (optional)</span>
-          <span className="text-app-slate/60">
+          <span className="text-xs font-semibold text-app-slate">Meeting notes</span>
+          <span className="flex items-center gap-2 text-[11px] font-bold text-app-slate/60">
+            {!meetingNotesOpen && (form.meetingNotes ? 'Added' : 'Optional')}
             {meetingNotesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </span>
         </button>
@@ -543,72 +550,42 @@ const EntryForm: React.FC<EntryFormProps> = ({
       </div>
       </div>
 
-      {/* Soft-validation nudge — each row is a shortcut to the section it names.
-          Deliberately calm: saving incomplete is allowed (quick capture). */}
-      {liveWarnings.length > 0 && (
-        <div className="rounded-xl border border-app-slate/15 bg-white overflow-hidden">
-          <div className="px-4 py-2.5 border-l-2 border-amber-400 bg-app-bg/60">
-            <p className="text-xs font-bold text-app-dark">
-              {liveWarnings.length === 1 ? 'One detail' : `${liveWarnings.length} details`} to finish
-            </p>
-            <p className="text-[11px] font-medium text-app-slate">
-              You can save now and complete this later.
-            </p>
-          </div>
-          <div className="divide-y divide-app-slate/10">
-            {liveWarnings.map(w => {
-              const target =
-                w.code === 'MISSING_COMPETENCY'
-                  ? { label: 'Tag competencies', open: () => setCompetenciesOpen(true) }
-                  : w.code === 'MISSING_DESCRIPTION'
-                    ? { label: 'Add a description', open: () => setDescriptionOpen(true) }
-                    : null;
-              return (
-                <button
-                  key={w.code}
-                  type="button"
-                  onClick={target?.open}
-                  disabled={!target}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-2.5 min-h-[44px] text-left hover:bg-app-bg/40 transition-colors disabled:cursor-default"
-                >
-                  <span className="flex items-center gap-2 text-xs font-semibold text-app-slate">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                    {w.message}
-                  </span>
-                  {target && (
-                    <span className="shrink-0 text-[11px] font-bold text-app-bright">
-                      {target.label}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
       </div>
 
       {/* Footer — pinned above the iOS safe area; holds Save / the confirm prompt */}
       <div className="shrink-0 border-t border-app-slate/15 bg-white px-5 md:px-8 py-4 pb-safe">
         {pendingConfirm ? (
           <div className="space-y-3">
-            <p className="text-sm font-bold text-red-700">
-              This entry has no competency tagged or set as primary. Save anyway?
-            </p>
+            <div>
+              <p className="text-sm font-bold text-app-dark">Save without finishing?</p>
+              <ul className="mt-1.5 space-y-1">
+                {liveWarnings.map(w => (
+                  <li key={w.code} className="flex items-center gap-2 text-xs font-semibold text-app-slate">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                    {w.code === 'MISSING_COMPETENCY' ? 'No competencies tagged'
+                      : w.code === 'MISSING_DESCRIPTION' ? 'No description added'
+                      : w.message}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1.5 text-[11px] font-medium text-app-slate/70">
+                You can add these to the entry anytime.
+              </p>
+            </div>
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={confirmSaveAnyway}
-                className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-600 text-white font-bold text-sm active:scale-[0.99] transition-transform"
-              >
-                Save anyway
-              </button>
               <button
                 type="button"
                 onClick={() => setPendingConfirm(false)}
                 className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-white border border-app-slate/15 text-app-dark font-bold text-sm"
               >
-                Go back
+                Keep editing
+              </button>
+              <button
+                type="button"
+                onClick={confirmSaveAnyway}
+                className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-app-dark text-white font-bold text-sm hover:bg-app-deep active:scale-[0.99] transition-all"
+              >
+                Save anyway
               </button>
             </div>
           </div>
