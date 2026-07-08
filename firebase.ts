@@ -4,9 +4,20 @@ import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 
+// Serve the OAuth helper from the SAME origin as the app whenever we're on a
+// Firebase Hosting domain (Hosting exposes /__/auth/* on every domain of the
+// project, including preview channels). With the default cross-origin
+// authDomain, Safari's storage partitioning drops the redirect result in
+// installed iOS PWAs and sign-in loops back to the login screen. The domain
+// must also be listed in Firebase Auth's authorized domains.
+const isFirebaseHostedOrigin =
+  typeof window !== 'undefined' &&
+  (window.location.hostname.endsWith('.web.app') ||
+    window.location.hostname.endsWith('.firebaseapp.com'));
+
 const firebaseConfig = {
   apiKey: "AIzaSyCYtLJxoQjmcZdFvAbp_syVs1Ti5aXX3tQ",
-  authDomain: "intern-pro-app.firebaseapp.com",
+  authDomain: isFirebaseHostedOrigin ? window.location.hostname : "intern-pro-app.firebaseapp.com",
   projectId: "intern-pro-app",
   storageBucket: "intern-pro-app.firebasestorage.app",
   messagingSenderId: "788133827557",
