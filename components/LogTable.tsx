@@ -47,8 +47,12 @@ export interface LogTableProps {
   initialCompetencyId?: string;
   /** When true, start with the "Incomplete only" filter enabled (cross-view jump from Dashboard). */
   initialIncompleteOnly?: boolean;
-  /** Optional school level to pre-seed the level filter (cross-view jump from a Dashboard stat tile). */
-  initialLevel?: SchoolLevel;
+  /**
+   * Optional school levels to pre-seed the level filter (cross-view jump from
+   * a Dashboard stat tile). Plural because a requirement bucket can span
+   * levels — e.g. Intermediate folds into the Elementary bucket.
+   */
+  initialLevels?: SchoolLevel[];
 }
 
 const SCHOOL_LEVELS: SchoolLevel[] = ['Elementary', 'Intermediate', 'Middle', 'High School'];
@@ -69,14 +73,16 @@ const LogTable: React.FC<LogTableProps> = ({
   onExportFiltered,
   initialCompetencyId,
   initialIncompleteOnly,
-  initialLevel,
+  initialLevels,
 }) => {
   // ---- Filter / query state ----------------------------------------------
   const [search, setSearch] = useState('');
   const [competencyFilter, setCompetencyFilter] = useState(
     initialCompetencyId ? `comp:${initialCompetencyId}` : ''
   ); // '', 'cat:A', or 'comp:A1'
-  const [levelFilter, setLevelFilter] = useState<SchoolLevel | ''>(initialLevel ?? '');
+  // Usually 0 or 1 levels (the select is single-choice); a bucket jump from
+  // the Dashboard can seed several (e.g. Elementary + Intermediate).
+  const [levelFilter, setLevelFilter] = useState<SchoolLevel[]>(initialLevels ?? []);
   const [siteFilter, setSiteFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -130,7 +136,7 @@ const LogTable: React.FC<LogTableProps> = ({
     return {
       search: search.trim() || undefined,
       competencyIds,
-      levels: levelFilter ? [levelFilter] : undefined,
+      levels: levelFilter.length > 0 ? levelFilter : undefined,
       siteIds: siteFilter ? [siteFilter] : undefined,
       dateRange,
       sort,
@@ -180,7 +186,7 @@ const LogTable: React.FC<LogTableProps> = ({
   }, [filteredLogs]);
 
   const hasActiveFilters =
-    !!search || !!competencyFilter || !!levelFilter || !!siteFilter || !!dateFrom || !!dateTo || incompleteOnly;
+    !!search || !!competencyFilter || levelFilter.length > 0 || !!siteFilter || !!dateFrom || !!dateTo || incompleteOnly;
 
   /** One chip per active filter (search excluded — it's visible in the input itself). */
   const filterChips = useMemo(() => {
@@ -194,7 +200,8 @@ const LogTable: React.FC<LogTableProps> = ({
         onClear: () => setCompetencyFilter(''),
       });
     }
-    if (levelFilter) chips.push({ key: 'level', label: levelFilter, onClear: () => setLevelFilter('') });
+    if (levelFilter.length > 0)
+      chips.push({ key: 'level', label: levelFilter.join(' & '), onClear: () => setLevelFilter([]) });
     if (siteFilter) {
       chips.push({
         key: 'site',
@@ -226,7 +233,7 @@ const LogTable: React.FC<LogTableProps> = ({
   const clearFilters = () => {
     setSearch('');
     setCompetencyFilter('');
-    setLevelFilter('');
+    setLevelFilter([]);
     setSiteFilter('');
     setDateFrom('');
     setDateTo('');
@@ -366,8 +373,12 @@ const LogTable: React.FC<LogTableProps> = ({
               Level
             </label>
             <select
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value as SchoolLevel | '')}
+              value={levelFilter.length === 1 ? levelFilter[0] : levelFilter.length > 1 ? '__multi__' : ''}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === '__multi__') return; // synthetic display value for a bucket jump
+                setLevelFilter(v ? [v as SchoolLevel] : []);
+              }}
               className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
             >
               <option value="">All levels</option>
@@ -376,6 +387,9 @@ const LogTable: React.FC<LogTableProps> = ({
                   {l}
                 </option>
               ))}
+              {levelFilter.length > 1 && (
+                <option value="__multi__">{levelFilter.join(' & ')}</option>
+              )}
             </select>
           </div>
 

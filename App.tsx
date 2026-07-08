@@ -16,6 +16,7 @@ import {
 } from './types';
 import { loadStateWithMigration, saveStateToFirestore } from './firestoreService';
 import { CURRENT_SCHEMA_VERSION } from '@/lib/state-migration';
+import { bucketForLevel } from '@/lib/export-model';
 import { ALL_COMPETENCIES } from './constants';
 import { subscribeToAuthChanges, checkRedirectResult } from './authService';
 import { User } from 'firebase/auth';
@@ -48,8 +49,9 @@ const App: React.FC = () => {
   const [logPrefilterCompetencyId, setLogPrefilterCompetencyId] = useState<string | undefined>(undefined);
   // Cross-view jump: pre-enable the log table's "Incomplete only" filter.
   const [logPrefilterIncomplete, setLogPrefilterIncomplete] = useState(false);
-  // Cross-view jump: school level to pre-seed the log table's level filter.
-  const [logPrefilterLevel, setLogPrefilterLevel] = useState<SchoolLevel | undefined>(undefined);
+  // Cross-view jump: school levels to pre-seed the log table's level filter
+  // (plural: a requirement bucket can span levels, e.g. Elementary + Intermediate).
+  const [logPrefilterLevels, setLogPrefilterLevels] = useState<SchoolLevel[] | undefined>(undefined);
 
   // Entry editor (modal) — open with an entry to edit, or undefined to create.
   const [editor, setEditor] = useState<{ open: boolean; entry?: InternshipLog }>({ open: false });
@@ -79,7 +81,7 @@ const App: React.FC = () => {
   const setView = (view: string) => {
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(false);
-    setLogPrefilterLevel(undefined);
+    setLogPrefilterLevels(undefined);
     setViewRaw(view);
   };
 
@@ -320,7 +322,7 @@ const App: React.FC = () => {
   // ---- Cross-view jump ----------------------------------------------------
   const handleViewCompetencyLogs = (competencyId: string) => {
     setLogPrefilterIncomplete(false);
-    setLogPrefilterLevel(undefined);
+    setLogPrefilterLevels(undefined);
     setLogPrefilterCompetencyId(competencyId);
     setViewRaw('logs');
   };
@@ -329,20 +331,20 @@ const App: React.FC = () => {
   const handleViewIncompleteLogs = () => {
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(true);
-    setLogPrefilterLevel(undefined);
+    setLogPrefilterLevels(undefined);
     setViewRaw('logs');
   };
 
-  // Jump to the Activity Log filtered to a requirement bucket's school level
-  // (from a Dashboard stat tile). Intermediate folds into the Elementary
-  // bucket for hour targets, but the log filter is single-level — Elementary
-  // is the closest view of that bucket.
+  // Jump to the Activity Log filtered to a requirement bucket (from a
+  // Dashboard stat tile). Filters to every school level that folds into that
+  // bucket — per settings, Intermediate maps into Elementary for Jen — so the
+  // tile's hours and the filtered list always agree.
   const handleViewLevelLogs = (bucket: LevelBucket) => {
-    const level: SchoolLevel =
-      bucket === 'HighSchool' ? 'High School' : bucket === 'Middle' ? 'Middle' : 'Elementary';
+    const ALL_LEVELS: SchoolLevel[] = ['Elementary', 'Intermediate', 'Middle', 'High School'];
+    const levels = ALL_LEVELS.filter(l => bucketForLevel(l, settings) === bucket);
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(false);
-    setLogPrefilterLevel(level);
+    setLogPrefilterLevels(levels);
     setViewRaw('logs');
   };
 
@@ -406,7 +408,7 @@ const App: React.FC = () => {
               onExportFiltered={handleExportFiltered}
               initialCompetencyId={logPrefilterCompetencyId}
               initialIncompleteOnly={logPrefilterIncomplete}
-              initialLevel={logPrefilterLevel}
+              initialLevels={logPrefilterLevels}
             />
           </div>
         );
