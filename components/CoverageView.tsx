@@ -28,7 +28,7 @@ const CompetencyRow: React.FC<{
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-3 min-h-[52px] text-left bg-white hover:bg-app-bg/60 transition-colors"
+      className="w-full flex items-center gap-3 px-4 py-3 min-h-[52px] text-left hover:bg-app-bg/60 transition-colors"
     >
       <div className="flex-1 min-w-0">
         <div className="font-bold text-sm text-app-dark">{competency.id}</div>
@@ -123,10 +123,10 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
           </div>
         )
       ) : (
-        // Full view: categories collapsed by default; each header is a live
-        // summary (covered / thin / gap counts) so the collapsed page still reads
-        // as a dashboard.
-        <div className="space-y-3">
+        // Full view: one grouped list, not per-category cards. Each category is
+        // a summary row (covered / thin / gap counts) that expands in place;
+        // expanded rows tint their competency list so the hierarchy stays legible.
+        <div className="bg-white rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10">
           {grouped.map(([category, comps]) => {
             const open = openCategories.has(category);
             const counts = comps.reduce(
@@ -138,7 +138,7 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
               { covered: 0, thin: 0, gap: 0 } as Record<CoverageStatus, number>
             );
             return (
-              <div key={category} className="bg-white rounded-xl border border-app-slate/15 overflow-hidden">
+              <div key={category}>
                 <button
                   type="button"
                   onClick={() => toggleCategory(category)}
@@ -163,7 +163,7 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
                   </span>
                 </button>
                 {open && (
-                  <div className="border-t border-app-slate/10 divide-y divide-app-slate/10">
+                  <div className="border-t border-app-slate/10 divide-y divide-app-slate/10 bg-app-bg/30">
                     {comps.map(c => (
                       <CompetencyRow key={c.id} competency={c} row={coverage[c.id]} onClick={() => onViewCompetencyLogs(c.id)} />
                     ))}
