@@ -37,10 +37,10 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isRe
         onClick={() => setView(item.id)}
         className="flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-all active:scale-90"
       >
-        <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
-          <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+        <div className={`px-3 py-1 rounded-xl transition-all ${isActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
+          <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
         </div>
-        <span className={`text-[8px] font-bold uppercase tracking-tight text-center leading-none ${isActive ? 'text-app-dark' : 'text-app-slate/60'}`}>
+        <span className={`text-[10px] font-semibold text-center leading-none ${isActive ? 'text-app-dark' : 'text-app-slate/60'}`}>
           {item.label}
         </span>
       </button>
@@ -58,7 +58,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isRe
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3 px-1">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-app-slate">More</p>
+              <p className="text-xs font-semibold text-app-slate">More</p>
               <button onClick={() => setMoreOpen(false)} className="text-app-slate p-1"><X size={18} /></button>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -73,8 +73,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isRe
                       isActive ? 'bg-app-dark text-white border-app-dark' : 'bg-app-bg text-app-deep border-app-slate/15'
                     }`}
                   >
-                    <Icon size={22} strokeWidth={2} />
-                    <span className="text-[9px] font-bold uppercase tracking-tight text-center leading-none">{item.label}</span>
+                    <Icon size={24} strokeWidth={2} />
+                    <span className="text-[11px] font-semibold text-center leading-none">{item.label}</span>
                   </button>
                 );
               })}
@@ -107,10 +107,10 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isRe
             onClick={() => setMoreOpen(true)}
             className="flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-all active:scale-90"
           >
-            <div className={`p-1.5 rounded-xl transition-all ${moreActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
-              <MoreHorizontal size={18} strokeWidth={moreActive ? 2.5 : 2} />
+            <div className={`px-3 py-1 rounded-xl transition-all ${moreActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
+              <MoreHorizontal size={24} strokeWidth={moreActive ? 2.5 : 2} />
             </div>
-            <span className={`text-[8px] font-bold uppercase tracking-tight text-center leading-none ${moreActive ? 'text-app-dark' : 'text-app-slate/60'}`}>
+            <span className={`text-[10px] font-semibold text-center leading-none ${moreActive ? 'text-app-dark' : 'text-app-slate/60'}`}>
               More
             </span>
           </button>
