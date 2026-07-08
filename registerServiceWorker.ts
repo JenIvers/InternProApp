@@ -1,5 +1,15 @@
 export const register = (onUpdate: (registration: ServiceWorkerRegistration) => void) => {
   if ('serviceWorker' in navigator) {
+    // When the waiting worker is told to skipWaiting (via the update toast) and
+    // takes control, reload so the page never keeps running old JS against the
+    // new cache. One-shot guard prevents a reload loop.
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/service-worker.js')

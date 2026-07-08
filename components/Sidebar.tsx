@@ -57,12 +57,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly, use
             <p className="text-[11px] text-app-dark font-bold leading-tight line-clamp-1 px-2">
               {user.displayName || user.email}
             </p>
-            <p className="text-[10px] text-app-slate font-semibold uppercase tracking-wide mt-1 opacity-60">
-              Personalized Portfolio
+            <p className="text-[11px] text-app-slate font-semibold mt-1 opacity-70">
+              Personalized portfolio
             </p>
           </div>
         ) : (
-          <p className="text-[10px] text-app-slate font-semibold uppercase tracking-wide mt-2 opacity-70">
+          <p className="text-[11px] text-app-slate font-semibold mt-2 opacity-70">
             Bethel University
           </p>
         )}
@@ -99,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly, use
         )}
 
         <div className="bg-app-bg rounded-xl border border-app-slate/15 p-4">
-          <p className="text-[10px] font-semibold text-app-deep uppercase tracking-wide mb-1 opacity-60">Status</p>
+          <p className="text-[11px] font-semibold text-app-deep mb-1 opacity-70">Status</p>
           <div className="flex items-center gap-2 mt-2">
             <div className={`w-2.5 h-2.5 rounded-full ${isReadOnly ? 'bg-amber-400' : 'bg-app-bright animate-pulse'} shadow-sm`} />
             <p className="text-xs font-bold text-app-dark">{isReadOnly ? 'Viewer Mode' : 'Cloud Syncing'}</p>
@@ -109,9 +109,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isReadOnly, use
         {!isReadOnly && (
           <button 
             onClick={signOut}
-            className="w-full flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-app-slate/50 hover:text-red-500 transition-colors py-2"
+            className="w-full flex items-center justify-center gap-2 text-xs font-semibold text-app-slate/60 hover:text-red-500 transition-colors py-2"
           >
-            <LogOut size={12} /> Sign Out
+            <LogOut size={12} /> Sign out
           </button>
         )}
       </div>

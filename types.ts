@@ -97,6 +97,7 @@ export interface AppChecklists {
 
 export interface AppState {
   schemaVersion?: number; // absent => v0; drives migration
+  updatedAt?: string; // ISO timestamp stamped on each save; detects stale cross-device state
   logs: InternshipLog[];
   artifacts: Artifact[];
   progress: Record<string, AttainmentLevel>;

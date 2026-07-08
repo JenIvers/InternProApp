@@ -173,14 +173,14 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-app-dark/40 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-app-dark/40 md:items-center md:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="export-dialog-title"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
+        className="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-2xl md:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

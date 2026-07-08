@@ -187,13 +187,13 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsCreatingShelf(true)}
-                className="flex items-center gap-1.5 py-2 px-3 rounded-lg border border-app-slate/15 text-app-slate text-sm font-semibold hover:bg-app-slate/5 transition-colors"
+                className="flex items-center gap-1.5 py-2 px-3 min-h-[44px] rounded-lg border border-app-slate/15 text-app-slate text-sm font-semibold hover:bg-app-slate/5 transition-colors"
                 title="Create a new shelf"
               >
                 <FolderPlus size={16} /> <span className="hidden sm:inline">New shelf</span>
               </button>
               <label
-                className={`flex items-center gap-1.5 py-2 px-3 rounded-lg bg-app-dark text-white text-sm font-semibold transition-colors ${
+                className={`flex items-center gap-1.5 py-2 px-3 min-h-[44px] rounded-lg bg-app-dark text-white text-sm font-semibold transition-colors ${
                   isUploading ? 'cursor-wait opacity-60' : 'cursor-pointer hover:bg-app-deep'
                 }`}
               >
@@ -283,9 +283,9 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
       </div>
 
       {selectedArtifact && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4">
           <div className="absolute inset-0 bg-app-dark/40" onClick={() => setSelectedArtifact(null)}></div>
-          <div className="relative bg-white w-full max-w-3xl rounded-t-2xl sm:rounded-2xl border border-app-slate/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+          <div className="relative bg-white w-full max-w-3xl rounded-t-2xl md:rounded-2xl border border-app-slate/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             <header className="p-4 sm:p-5 border-b border-app-slate/10 flex items-center justify-between gap-3 sticky top-0 bg-white z-10 pt-safe">
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-bold text-app-dark truncate">{selectedArtifact.name}</h3>
@@ -340,7 +340,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                         onClick={() => !isReadOnly && moveArtifactToShelf(selectedArtifact, shelf.id)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                           selectedArtifact.shelfId === shelf.id
-                            ? 'bg-app-bright text-white border-app-bright'
+                            ? 'bg-app-dark text-white border-app-dark'
                             : 'bg-white text-app-slate border-app-slate/15 hover:bg-app-slate/5'
                         } ${isReadOnly ? 'cursor-default' : ''}`}
                       >

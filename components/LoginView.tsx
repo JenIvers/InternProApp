@@ -52,13 +52,13 @@ const LoginView: React.FC = () => {
 
         {error && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-left">
-            <p className="text-[10px] font-semibold text-red-600 uppercase tracking-wide mb-1">Authentication Error</p>
+            <p className="text-xs font-semibold text-red-600 mb-1">Sign-in error</p>
             <p className="text-xs text-red-600 font-medium leading-relaxed">{error}</p>
           </div>
         )}
 
         <div className="mt-10 pt-8 border-t border-app-slate/10">
-          <p className="text-[10px] uppercase font-semibold text-app-slate/50 tracking-wide">Bethel University</p>
+          <p className="text-[11px] font-semibold text-app-slate/60">Bethel University</p>
         </div>
       </div>
     </div>

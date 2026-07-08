@@ -84,6 +84,8 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
         <p className="text-app-slate text-sm">Track the Guide's suggested activities and process deliverables.</p>
       </div>
 
+      {/* Two independent lists: stacked on mobile, side by side on wide screens. */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
       {/* Suggested Activities */}
       <section className="bg-white rounded-xl border border-app-slate/15 overflow-hidden">
         <div className="flex items-center justify-between gap-2 px-4 py-3 bg-app-bg border-b border-app-slate/10">
@@ -235,6 +237,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
           })}
         </ul>
       </section>
+      </div>
       {isReadOnly && (
         <p className="text-center text-xs text-app-slate/60 font-bold">Read-only view</p>
       )}

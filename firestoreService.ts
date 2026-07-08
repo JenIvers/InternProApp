@@ -13,6 +13,8 @@ const COLLECTION_NAME = "intern_data";
 export interface SaveResult {
   success: boolean;
   error?: string;
+  /** ISO timestamp stamped onto the persisted document (successful saves only). */
+  updatedAt?: string;
 }
 
 /**
@@ -93,9 +95,13 @@ export const saveStateToFirestore = async (userId: string, state: AppState): Pro
       return backupResult;
     }
 
+    // Stamp each save so other devices can detect that the server document
+    // moved past the state they loaded (whole-document writes are last-writer-
+    // wins; the foreground refresh in App.tsx uses this stamp to re-sync).
+    const updatedAt = new Date().toISOString();
     const docRef = doc(db, COLLECTION_NAME, userId);
-    await setDoc(docRef, state);
-    return { success: true };
+    await setDoc(docRef, { ...state, updatedAt });
+    return { success: true, updatedAt };
   } catch (error) {
     console.error("Error saving state to Firestore:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";

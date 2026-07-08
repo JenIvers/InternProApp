@@ -5,15 +5,15 @@ const provider = new GoogleAuthProvider();
 const REDIRECT_KEY = 'auth_redirect_pending';
 
 export const checkRedirectResult = async (): Promise<User | null> => {
-  // Only check redirect result if we initiated a redirect
+  // Always call getRedirectResult: iOS standalone PWAs frequently return from
+  // the OAuth redirect in a fresh browsing context where sessionStorage is
+  // empty, so gating on the pending flag dead-ends the sign-in. The call is a
+  // cheap no-op when there is no pending redirect; the flag is kept only for
+  // logging.
   const isPending = sessionStorage.getItem(REDIRECT_KEY);
-  if (!isPending) {
-    console.log("No pending redirect, skipping getRedirectResult");
-    return null;
-  }
 
   try {
-    console.log("Checking redirect result (pending flag found)...");
+    console.log(`Checking redirect result (pending flag ${isPending ? 'found' : 'absent'})...`);
     const result = await getRedirectResult(auth);
 
     // Clear the flag regardless of result

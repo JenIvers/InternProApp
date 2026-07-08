@@ -95,6 +95,18 @@ const App: React.FC = () => {
     setViewRaw(view);
   };
 
+  // Sync to Firestore (only if logged in and not read-only)
+  // Uses a smart save strategy: 30s idle timeout + save on tab visibility change.
+  // These refs are declared (and mutated by the save callbacks below) BEFORE
+  // the auth/load effect that also writes them — react-hooks/immutability
+  // requires ref mutations to precede the effects that use them.
+  const pendingSaveRef = React.useRef(false);
+  const lastSavedStateRef = React.useRef<string>('');
+  // updatedAt of the server document this session last loaded or wrote. When a
+  // foreground re-fetch sees a different stamp, another device saved in the
+  // meantime and our in-memory copy is stale.
+  const lastKnownUpdatedAtRef = React.useRef<string | undefined>(undefined);
+
   // Combined Auth and Initial Data Load
   useEffect(() => {
     // Register Service Worker for updates
@@ -140,20 +152,29 @@ const App: React.FC = () => {
           } else if (currentUser) {
             console.log("Loading editor mode data for:", currentUser.uid);
             setIsReadOnly(false);
-            const { state: firestoreData, needsPrimaryReview: review } =
+            const { state: firestoreData, needsPrimaryReview: review, migrated } =
               await loadStateWithMigration(currentUser.uid);
             if (isMounted) {
               setNeedsPrimaryReview(review);
               if (firestoreData) {
                 // If we have existing data, make sure the profile is up to date
-                setState({
+                const loaded = {
                   ...firestoreData,
                   userProfile: {
                     displayName: currentUser.displayName,
                     email: currentUser.email,
                     photoURL: currentUser.photoURL,
                   },
-                });
+                };
+                setState(loaded);
+                lastKnownUpdatedAtRef.current = loaded.updatedAt;
+                if (!migrated) {
+                  // Already on the current schema: seed the snapshot so the
+                  // first idle save doesn't redundantly rewrite what we just
+                  // loaded. (When a migration ran we deliberately leave this
+                  // empty so the migrated document gets persisted.)
+                  lastSavedStateRef.current = JSON.stringify(loaded);
+                }
               } else {
                 // Initialize with user profile
                 setState(prev => ({
@@ -191,11 +212,6 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // Sync to Firestore (only if logged in and not read-only)
-  // Uses a smart save strategy: 30s idle timeout + save on tab visibility change
-  const pendingSaveRef = React.useRef(false);
-  const lastSavedStateRef = React.useRef<string>('');
-
   const performSave = React.useCallback(async () => {
     if (isLoading || isAuthInitializing || isReadOnly || !user) return;
 
@@ -211,7 +227,44 @@ const App: React.FC = () => {
     } else {
       setSaveError(null);
       lastSavedStateRef.current = currentStateJson;
+      if (result.updatedAt) lastKnownUpdatedAtRef.current = result.updatedAt;
     }
+  }, [state, isLoading, isAuthInitializing, isReadOnly, user]);
+
+  // Foreground re-sync: when the app returns to the foreground (e.g. an
+  // installed PWA resumed after sitting backgrounded), re-fetch the server
+  // document. If another device saved in the meantime, adopt the newer server
+  // state — but never while local edits are still unsaved, since those
+  // represent the most recent user intent.
+  useEffect(() => {
+    if (isLoading || isAuthInitializing || isReadOnly || !user) return;
+
+    const refreshFromServer = async () => {
+      if (document.visibilityState !== 'visible') return;
+      if (pendingSaveRef.current && JSON.stringify(state) !== lastSavedStateRef.current) return;
+      try {
+        const { state: serverState } = await loadStateWithMigration(user.uid);
+        if (!serverState) return;
+        if (serverState.updatedAt === lastKnownUpdatedAtRef.current) return;
+        const adopted = {
+          ...serverState,
+          userProfile: {
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+          },
+        };
+        setState(adopted);
+        lastKnownUpdatedAtRef.current = serverState.updatedAt;
+        lastSavedStateRef.current = JSON.stringify(adopted);
+        console.log('Adopted newer server state from another session:', serverState.updatedAt);
+      } catch (error) {
+        console.error('Foreground re-sync failed:', error);
+      }
+    };
+
+    document.addEventListener('visibilitychange', refreshFromServer);
+    return () => document.removeEventListener('visibilitychange', refreshFromServer);
   }, [state, isLoading, isAuthInitializing, isReadOnly, user]);
 
   // Idle timeout save (30 seconds after last change)
@@ -402,7 +455,7 @@ const App: React.FC = () => {
               {!isReadOnly && (
                 <button
                   onClick={openNewEntry}
-                  className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-lg bg-app-dark text-white text-xs font-bold hover:bg-app-deep transition-all shadow-sm"
+                  className="hidden md:flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-dark text-white text-sm font-bold hover:bg-app-deep transition-colors shadow-sm"
                 >
                   <Plus size={16} strokeWidth={2.5} /> Add entry
                 </button>

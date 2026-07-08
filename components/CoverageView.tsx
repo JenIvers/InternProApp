@@ -86,7 +86,7 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
   );
 
   return (
-    <div className="space-y-6 pb-20 md:pb-8 px-1">
+    <div className="space-y-6 pb-20 md:pb-8 px-1 md:max-w-4xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-app-dark tracking-tight">Coverage vs. Guide</h2>
