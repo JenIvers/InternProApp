@@ -5,8 +5,7 @@ import { uploadFileToStorage } from '../storageService';
 import CompetencyPicker from './CompetencyPicker';
 import SitePicker from './SitePicker';
 import {
-  Calendar, Clock, School, FileText, PencilLine, Link2, Paperclip,
-  Plus, X, ChevronDown, ChevronUp, AlertTriangle, Save, Upload, Loader2, Library,
+  Plus, X, ChevronDown, ChevronUp, Save, Upload, Loader2, Library,
 } from 'lucide-react';
 
 export interface EntryFormProps {
@@ -34,13 +33,12 @@ const SCHOOL_LEVELS: SchoolLevel[] = ['Elementary', 'Intermediate', 'Middle', 'H
  */
 const Section: React.FC<{
   title: string;
-  icon?: React.ReactNode;
   open: boolean;
   onToggle: () => void;
   summary?: React.ReactNode;
   warn?: boolean;
   children: React.ReactNode;
-}> = ({ title, icon, open, onToggle, summary, warn, children }) => (
+}> = ({ title, open, onToggle, summary, warn, children }) => (
   <div>
     <button
       type="button"
@@ -49,7 +47,7 @@ const Section: React.FC<{
       className="w-full flex items-center justify-between px-4 py-3 min-h-[48px] bg-white hover:bg-app-bg/40 transition-colors"
     >
       <span className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-        {icon} {title}
+        {title}
         {warn && (
           <span
             className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"
@@ -271,12 +269,11 @@ const EntryForm: React.FC<EntryFormProps> = ({
 
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto overscroll-contain px-4 md:px-8 py-4 md:py-6 space-y-4 md:space-y-5">
-      {/* Date / Hours / Level */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Essentials — paired rows sized to their content: a date and a number
+          share a row; two selects share a row; only free text runs full width. */}
+      <div className="grid grid-cols-[1fr_minmax(88px,0.5fr)] gap-3">
         <div className="space-y-1.5 min-w-0">
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-            <Calendar size={13} /> Date
-          </label>
+          <label className="block text-xs font-semibold text-app-slate">Date</label>
           <input
             type="date"
             required
@@ -286,9 +283,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
           />
         </div>
         <div className="space-y-1.5 min-w-0">
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-            <Clock size={13} /> Hours
-          </label>
+          <label className="block text-xs font-semibold text-app-slate">Hours</label>
           <input
             type="number"
             required
@@ -300,28 +295,38 @@ const EntryForm: React.FC<EntryFormProps> = ({
             className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5 min-w-0">
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-            <School size={13} /> School Level
-          </label>
+          <label className="block text-xs font-semibold text-app-slate">School level</label>
           <div className="relative">
             <select
               value={form.schoolLevel}
               onChange={e => updateField('schoolLevel', e.target.value as SchoolLevel)}
-              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base appearance-none cursor-pointer"
+              className="w-full pl-4 pr-9 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base appearance-none cursor-pointer"
             >
               {SCHOOL_LEVELS.map(level => <option key={level} value={level}>{level}</option>)}
             </select>
-            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-app-slate/50 pointer-events-none" />
+            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-app-slate/50 pointer-events-none" />
           </div>
+        </div>
+        <div className="space-y-1.5 min-w-0">
+          <label className="block text-xs font-semibold text-app-slate">Location</label>
+          <SitePicker
+            sites={sites}
+            siteId={form.siteId}
+            location={form.location}
+            onChange={handleSiteChange}
+            onAddSite={onAddSite}
+            isReadOnly={isReadOnly}
+          />
         </div>
       </div>
 
       {/* Title */}
       <div className="space-y-1.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-          <PencilLine size={13} /> Title
-        </label>
+        <label className="block text-xs font-semibold text-app-slate">Title</label>
         <input
           type="text"
           value={form.title || ''}
@@ -331,25 +336,11 @@ const EntryForm: React.FC<EntryFormProps> = ({
         />
       </div>
 
-      {/* Location */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-app-slate">Location</label>
-        <SitePicker
-          sites={sites}
-          siteId={form.siteId}
-          location={form.location}
-          onChange={handleSiteChange}
-          onAddSite={onAddSite}
-          isReadOnly={isReadOnly}
-        />
-      </div>
-
       {/* Detail sections — one grouped container, hairline dividers between rows */}
       <div className="rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10 bg-white">
       {/* Description (collapsible — soft-optional for quick capture) */}
       <Section
         title="Description"
-        icon={<FileText size={13} />}
         open={descriptionOpen}
         onToggle={() => setDescriptionOpen(v => !v)}
         warn={hasDescWarning}
@@ -387,15 +378,12 @@ const EntryForm: React.FC<EntryFormProps> = ({
       {/* Evidence: links + artifact attachments (collapsible) */}
       <Section
         title="Evidence"
-        icon={<Link2 size={13} />}
         open={evidenceOpen}
         onToggle={() => setEvidenceOpen(v => !v)}
         summary={evidenceCount > 0 ? `${evidenceCount} attached` : 'Add later'}
       >
         <div className="space-y-2">
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-            <Link2 size={13} /> Evidence Links
-          </label>
+          <label className="block text-xs font-semibold text-app-slate">Links</label>
           {(form.evidenceLinks || []).map(link => (
             <div key={link.id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-slate/15">
               <a href={link.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-app-bright truncate hover:underline">
@@ -433,9 +421,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
 
         {/* File evidence: attached artifacts + library picker + direct upload */}
         <div className="space-y-2">
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-            <Paperclip size={13} /> Files &amp; Media
-          </label>
+          <label className="block text-xs font-semibold text-app-slate">Files &amp; media</label>
 
           {/* Attached artifacts */}
           {form.artifactIds.map(id => {
@@ -557,14 +543,47 @@ const EntryForm: React.FC<EntryFormProps> = ({
       </div>
       </div>
 
-      {/* Validation warnings */}
+      {/* Soft-validation nudge — each row is a shortcut to the section it names.
+          Deliberately calm: saving incomplete is allowed (quick capture). */}
       {liveWarnings.length > 0 && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5">
-          {liveWarnings.map(w => (
-            <p key={w.code} className="flex items-start gap-2 text-xs font-bold text-amber-700">
-              <AlertTriangle size={14} className="shrink-0 mt-0.5" /> {w.message}
+        <div className="rounded-xl border border-app-slate/15 bg-white overflow-hidden">
+          <div className="px-4 py-2.5 border-l-2 border-amber-400 bg-app-bg/60">
+            <p className="text-xs font-bold text-app-dark">
+              {liveWarnings.length === 1 ? 'One detail' : `${liveWarnings.length} details`} to finish
             </p>
-          ))}
+            <p className="text-[11px] font-medium text-app-slate">
+              You can save now and complete this later.
+            </p>
+          </div>
+          <div className="divide-y divide-app-slate/10">
+            {liveWarnings.map(w => {
+              const target =
+                w.code === 'MISSING_COMPETENCY'
+                  ? { label: 'Tag competencies', open: () => setCompetenciesOpen(true) }
+                  : w.code === 'MISSING_DESCRIPTION'
+                    ? { label: 'Add a description', open: () => setDescriptionOpen(true) }
+                    : null;
+              return (
+                <button
+                  key={w.code}
+                  type="button"
+                  onClick={target?.open}
+                  disabled={!target}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-2.5 min-h-[44px] text-left hover:bg-app-bg/40 transition-colors disabled:cursor-default"
+                >
+                  <span className="flex items-center gap-2 text-xs font-semibold text-app-slate">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                    {w.message}
+                  </span>
+                  {target && (
+                    <span className="shrink-0 text-[11px] font-bold text-app-bright">
+                      {target.label}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
       </div>
