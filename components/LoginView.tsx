@@ -25,11 +25,11 @@ const LoginView: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-app-bg p-4">
       <div className="bg-white p-8 sm:p-12 rounded-2xl border border-app-slate/15 shadow-2xl max-w-md w-full text-center">
         <img src={logo} alt="Bethel University" className="w-24 mx-auto mb-8" />
-        <div className="w-16 h-16 rounded-2xl bg-app-dark flex items-center justify-center mx-auto mb-6 text-white">
+        <div className="w-16 h-16 rounded-2xl bg-brand-gradient flex items-center justify-center mx-auto mb-6 text-white">
           <ShieldCheck size={32} strokeWidth={1.5} />
         </div>
 
-        <h1 className="text-3xl font-bold text-app-dark tracking-tight mb-3">InternPro</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-3 bg-gradient-to-r from-app-dark to-app-bright bg-clip-text text-transparent">InternPro</h1>
         <p className="text-app-slate text-sm opacity-70 mb-10 leading-relaxed">
           Secure Administrative Portfolio<br/>& Internship Tracking
         </p>

@@ -130,6 +130,13 @@
         
         .border-app-light { border-color: var(--app-light); }
 
+        /* Brand gradient (the InternPro wordmark ramp: dark -> deep -> bright).
+           bg-brand-gradient = primary actions & identity surfaces;
+           bg-brand-bar = progress-bar fills. Flat bg-app-dark remains the
+           treatment for selection/state chips. */
+        .bg-brand-gradient { background-image: linear-gradient(135deg, var(--app-dark) 0%, var(--app-deep) 55%, var(--app-bright) 130%); }
+        .bg-brand-bar { background-image: linear-gradient(90deg, var(--app-deep), var(--app-bright)); }
+
         /* Safe Area Utilities for iOS PWA */
         .pt-safe { padding-top: env(safe-area-inset-top); }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }

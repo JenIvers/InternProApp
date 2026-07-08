@@ -197,7 +197,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
               </div>
               <div className="w-full h-2 rounded-full bg-app-slate/10 overflow-hidden mb-2">
                 <div
-                  className="h-full rounded-full bg-app-bright"
+                  className="h-full rounded-full bg-brand-bar"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -208,7 +208,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
           );
         })}
 
-        <div className="rounded-xl border border-app-slate/15 bg-app-dark px-4 py-4 text-white">
+        <div className="rounded-xl border border-app-slate/15 bg-app-deep px-4 py-4 text-white">
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} />
             <span className="text-xs font-bold">Total</span>
@@ -297,7 +297,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
                 </span>
                 <span className="flex-1 min-w-0 h-1.5 rounded-full bg-app-slate/10 overflow-hidden">
                   <span
-                    className="block h-full rounded-full bg-app-bright"
+                    className="block h-full rounded-full bg-brand-bar"
                     style={{ width: `${barPct}%` }}
                   />
                 </span>
