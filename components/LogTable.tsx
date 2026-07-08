@@ -47,6 +47,8 @@ export interface LogTableProps {
   initialCompetencyId?: string;
   /** When true, start with the "Incomplete only" filter enabled (cross-view jump from Dashboard). */
   initialIncompleteOnly?: boolean;
+  /** Optional school level to pre-seed the level filter (cross-view jump from a Dashboard stat tile). */
+  initialLevel?: SchoolLevel;
 }
 
 const SCHOOL_LEVELS: SchoolLevel[] = ['Elementary', 'Intermediate', 'Middle', 'High School'];
@@ -67,13 +69,14 @@ const LogTable: React.FC<LogTableProps> = ({
   onExportFiltered,
   initialCompetencyId,
   initialIncompleteOnly,
+  initialLevel,
 }) => {
   // ---- Filter / query state ----------------------------------------------
   const [search, setSearch] = useState('');
   const [competencyFilter, setCompetencyFilter] = useState(
     initialCompetencyId ? `comp:${initialCompetencyId}` : ''
   ); // '', 'cat:A', or 'comp:A1'
-  const [levelFilter, setLevelFilter] = useState<SchoolLevel | ''>('');
+  const [levelFilter, setLevelFilter] = useState<SchoolLevel | ''>(initialLevel ?? '');
   const [siteFilter, setSiteFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -460,13 +463,13 @@ const LogTable: React.FC<LogTableProps> = ({
             <tr className="bg-app-bg text-app-slate border-b border-app-slate/10">
               <th className="w-8" />
               <SortableTh label="Date" onClick={() => toggleSort('date')} icon={sortIcon('date')} />
-              <th className="text-left font-semibold uppercase tracking-wide text-[10px] px-3 py-3">
+              <th className="text-left font-semibold text-[10px] px-3 py-3">
                 Title / Activity
               </th>
-              <th className="text-left font-semibold uppercase tracking-wide text-[10px] px-3 py-3">
+              <th className="text-left font-semibold text-[10px] px-3 py-3">
                 Competencies
               </th>
-              <th className="text-left font-semibold uppercase tracking-wide text-[10px] px-3 py-3">
+              <th className="text-left font-semibold text-[10px] px-3 py-3">
                 Location
               </th>
               <SortableTh
@@ -666,7 +669,7 @@ const LogTable: React.FC<LogTableProps> = ({
                           }
                           className={isReadOnly ? 'cursor-default' : cellBtnClass}
                         >
-                          <span className="text-xs font-bold uppercase tracking-wide text-app-slate">
+                          <span className="text-xs font-bold text-app-slate">
                             {log.schoolLevel}
                           </span>
                         </button>
@@ -703,7 +706,7 @@ const LogTable: React.FC<LogTableProps> = ({
                       <td colSpan={isReadOnly ? 6 : 7} className="px-3 py-4">
                         <div className="space-y-4 max-w-3xl">
                           <div>
-                            <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1">
+                            <h4 className="text-[10px] font-bold text-app-slate mb-1">
                               Description
                             </h4>
                             <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -712,7 +715,7 @@ const LogTable: React.FC<LogTableProps> = ({
                           </div>
 
                           <div>
-                            <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
+                            <h4 className="text-[10px] font-bold text-app-slate mb-1.5">
                               Competencies
                             </h4>
                             <div className="flex flex-wrap gap-1.5">
@@ -745,8 +748,8 @@ const LogTable: React.FC<LogTableProps> = ({
 
                           {log.evidenceLinks && log.evidenceLinks.length > 0 && (
                             <div>
-                              <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
-                                Evidence Links
+                              <h4 className="text-[10px] font-bold text-app-slate mb-1.5">
+                                Evidence links
                               </h4>
                               <ul className="space-y-1">
                                 {log.evidenceLinks.map((link) => (
@@ -768,8 +771,8 @@ const LogTable: React.FC<LogTableProps> = ({
 
                           {log.meetingNotes && log.meetingNotes.reflection && (
                             <div>
-                              <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5 flex items-center gap-1.5">
-                                <MessageSquare size={12} /> Meeting Notes
+                              <h4 className="text-[10px] font-bold text-app-slate mb-1.5 flex items-center gap-1.5">
+                                <MessageSquare size={12} /> Meeting notes
                               </h4>
                               <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
                                 {log.meetingNotes.reflection}
@@ -779,7 +782,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                           {log.reflections && (
                             <div>
-                              <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
+                              <h4 className="text-[10px] font-bold text-app-slate mb-1.5">
                                 Reflection
                               </h4>
                               <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -818,7 +821,7 @@ const LogTable: React.FC<LogTableProps> = ({
             <tfoot>
               <tr className="border-t border-app-slate/10 bg-app-bg font-bold text-app-dark">
                 <td />
-                <td className="px-3 py-3 text-[10px] uppercase tracking-wide text-app-slate" colSpan={4}>
+                <td className="px-3 py-3 text-[10px] text-app-slate" colSpan={4}>
                   Totals ({filteredLogs.length} {filteredLogs.length === 1 ? 'entry' : 'entries'})
                   <span className="ml-3 font-bold normal-case tracking-normal text-app-slate">
                     {SCHOOL_LEVELS.filter((l) => hoursByLevel[l]).map((l) => (
@@ -885,7 +888,7 @@ const LogTable: React.FC<LogTableProps> = ({
                     <span className="opacity-40">·</span>
                     <span className="tabular-nums font-bold text-app-dark">{fmtHours(log.hours)}h</span>
                     <span className="opacity-40">·</span>
-                    <span className="uppercase tracking-wide text-[11px]">{log.schoolLevel}</span>
+                    <span className="text-[11px]">{log.schoolLevel}</span>
                     <span className="opacity-40">·</span>
                     <span className="truncate max-w-[120px]">{locationLabel(log)}</span>
                   </div>
@@ -920,7 +923,7 @@ const LogTable: React.FC<LogTableProps> = ({
               {expanded && (
                 <div className="px-4 pb-4 pt-1 space-y-3 border-t border-app-slate/10 bg-app-bg/40">
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1">
+                    <h4 className="text-[10px] font-bold text-app-slate mb-1">
                       Description
                     </h4>
                     <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -930,7 +933,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {(log.taggedCompetencyIds ?? []).length > 0 || log.primaryCompetencyId ? (
                     <div>
-                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
+                      <h4 className="text-[10px] font-bold text-app-slate mb-1.5">
                         Competencies
                       </h4>
                       <div className="flex flex-wrap gap-1.5">
@@ -960,8 +963,8 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {log.evidenceLinks && log.evidenceLinks.length > 0 && (
                     <div>
-                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
-                        Evidence Links
+                      <h4 className="text-[10px] font-bold text-app-slate mb-1.5">
+                        Evidence links
                       </h4>
                       <ul className="space-y-1">
                         {log.evidenceLinks.map((link) => (
@@ -983,8 +986,8 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {log.meetingNotes && log.meetingNotes.reflection && (
                     <div>
-                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5 flex items-center gap-1.5">
-                        <MessageSquare size={12} /> Meeting Notes
+                      <h4 className="text-[10px] font-bold text-app-slate mb-1.5 flex items-center gap-1.5">
+                        <MessageSquare size={12} /> Meeting notes
                       </h4>
                       <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
                         {log.meetingNotes.reflection}
@@ -994,7 +997,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {log.reflections && (
                     <div>
-                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
+                      <h4 className="text-[10px] font-bold text-app-slate mb-1.5">
                         Reflection
                       </h4>
                       <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -1031,7 +1034,7 @@ const LogTable: React.FC<LogTableProps> = ({
         {/* Mobile totals */}
         {filteredLogs.length > 0 && (
           <div className="rounded-xl border border-app-slate/15 bg-app-bg px-4 py-3 flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wide text-app-slate">
+            <span className="text-[10px] font-bold text-app-slate">
               Total · {filteredLogs.length} {filteredLogs.length === 1 ? 'entry' : 'entries'}
             </span>
             <span className="text-base font-bold text-app-dark tabular-nums">
@@ -1044,7 +1047,7 @@ const LogTable: React.FC<LogTableProps> = ({
       {/* Per-competency breakdown for the filtered set */}
       {competencyBreakdown.length > 0 && (
         <div className="rounded-xl border border-app-slate/15 bg-white shadow-sm p-4">
-          <h3 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-3">
+          <h3 className="text-[10px] font-bold text-app-slate mb-3">
             Competency Breakdown (filtered) · attributed hours
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -1074,7 +1077,7 @@ const SortableTh: React.FC<{
   <th className={`px-3 py-3 ${align === 'right' ? 'text-right' : 'text-left'}`}>
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1 font-semibold uppercase tracking-wide text-[10px] text-app-slate hover:text-app-dark transition-colors ${
+      className={`inline-flex items-center gap-1 font-semibold text-[10px] text-app-slate hover:text-app-dark transition-colors ${
         align === 'right' ? 'flex-row-reverse' : ''
       }`}
     >

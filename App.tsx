@@ -12,7 +12,7 @@ import ExportDialog from './components/ExportDialog';
 import LoginView from './components/LoginView';
 import {
   AppState, InternshipLog, Artifact, Shelf, Site,
-  AppSettings, AppChecklists,
+  AppSettings, AppChecklists, SchoolLevel, LevelBucket,
 } from './types';
 import { loadStateWithMigration, saveStateToFirestore } from './firestoreService';
 import { CURRENT_SCHEMA_VERSION } from '@/lib/state-migration';
@@ -48,6 +48,8 @@ const App: React.FC = () => {
   const [logPrefilterCompetencyId, setLogPrefilterCompetencyId] = useState<string | undefined>(undefined);
   // Cross-view jump: pre-enable the log table's "Incomplete only" filter.
   const [logPrefilterIncomplete, setLogPrefilterIncomplete] = useState(false);
+  // Cross-view jump: school level to pre-seed the log table's level filter.
+  const [logPrefilterLevel, setLogPrefilterLevel] = useState<SchoolLevel | undefined>(undefined);
 
   // Entry editor (modal) — open with an entry to edit, or undefined to create.
   const [editor, setEditor] = useState<{ open: boolean; entry?: InternshipLog }>({ open: false });
@@ -77,6 +79,7 @@ const App: React.FC = () => {
   const setView = (view: string) => {
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(false);
+    setLogPrefilterLevel(undefined);
     setViewRaw(view);
   };
 
@@ -317,6 +320,7 @@ const App: React.FC = () => {
   // ---- Cross-view jump ----------------------------------------------------
   const handleViewCompetencyLogs = (competencyId: string) => {
     setLogPrefilterIncomplete(false);
+    setLogPrefilterLevel(undefined);
     setLogPrefilterCompetencyId(competencyId);
     setViewRaw('logs');
   };
@@ -325,6 +329,20 @@ const App: React.FC = () => {
   const handleViewIncompleteLogs = () => {
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(true);
+    setLogPrefilterLevel(undefined);
+    setViewRaw('logs');
+  };
+
+  // Jump to the Activity Log filtered to a requirement bucket's school level
+  // (from a Dashboard stat tile). Intermediate folds into the Elementary
+  // bucket for hour targets, but the log filter is single-level — Elementary
+  // is the closest view of that bucket.
+  const handleViewLevelLogs = (bucket: LevelBucket) => {
+    const level: SchoolLevel =
+      bucket === 'HighSchool' ? 'High School' : bucket === 'Middle' ? 'Middle' : 'Elementary';
+    setLogPrefilterCompetencyId(undefined);
+    setLogPrefilterIncomplete(false);
+    setLogPrefilterLevel(level);
     setViewRaw('logs');
   };
 
@@ -354,6 +372,7 @@ const App: React.FC = () => {
             needsPrimaryReview={needsPrimaryReview}
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
+            onViewLevelLogs={handleViewLevelLogs}
             onOpenCoverage={() => setView('coverage')}
             isReadOnly={isReadOnly}
           />
@@ -387,6 +406,7 @@ const App: React.FC = () => {
               onExportFiltered={handleExportFiltered}
               initialCompetencyId={logPrefilterCompetencyId}
               initialIncompleteOnly={logPrefilterIncomplete}
+              initialLevel={logPrefilterLevel}
             />
           </div>
         );
@@ -439,6 +459,7 @@ const App: React.FC = () => {
             needsPrimaryReview={needsPrimaryReview}
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
+            onViewLevelLogs={handleViewLevelLogs}
             onOpenCoverage={() => setView('coverage')}
             isReadOnly={isReadOnly}
           />

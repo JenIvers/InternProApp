@@ -370,7 +370,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
               {/* Frequently used (only when not searching) */}
               {!q && frequentIds.length > 0 && (
                 <div>
-                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-app-slate/70 border-b border-app-slate/10">
+                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-bold text-app-slate/70 border-b border-app-slate/10">
                     Frequently used
                   </div>
                   <div className="divide-y divide-app-slate/10">
@@ -382,7 +382,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
               {/* Flat list with sticky category headers */}
               {visibleGroups.map(group => (
                 <div key={group.key}>
-                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-app-slate/70 border-b border-app-slate/10">
+                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-bold text-app-slate/70 border-b border-app-slate/10">
                     <span className="truncate">{group.title}</span>
                   </div>
                   <div className="divide-y divide-app-slate/10">

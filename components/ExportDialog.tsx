@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { FileDown, X, FileText, ClipboardList, MessageSquare, Loader2 } from 'lucide-react';
+import { FileDown, X, FileText, ClipboardList, MessageSquare, Loader2, Check } from 'lucide-react';
 import type { AppSettings, InternshipLog } from '../types';
 import { buildExportModel, hasMeetingNotes, type ExportMode } from '../lib/export-model';
 import LogPdf from './pdf/LogPdf';
@@ -206,10 +206,10 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
           {/* Mode selection */}
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-app-slate">
+          <p className="mb-2 text-xs font-semibold text-app-slate">
             Document
           </p>
-          <div className="space-y-2">
+          <div className="rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10">
             {MODES.map((m) => {
               const disabled = m.mode === 'meetings' && meetingsDisabled;
               const active = mode === m.mode;
@@ -222,10 +222,8 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
                   disabled={disabled}
                   onClick={() => setMode(m.mode)}
                   className={[
-                    'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition',
-                    active
-                      ? 'border-app-bright bg-app-bright/10'
-                      : 'border-app-slate/15 hover:border-app-slate/30',
+                    'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+                    active ? 'bg-app-bright/5' : 'hover:bg-app-bg/40',
                     disabled ? 'cursor-not-allowed opacity-50' : '',
                   ].join(' ')}
                 >
@@ -235,13 +233,14 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-app-dark">
+                      <span className={`text-sm text-app-dark ${active ? 'font-bold' : 'font-medium'}`}>
                         {m.label}
                       </span>
-                      <span className="shrink-0 text-xs text-app-slate">
+                      <span className="shrink-0 flex items-center gap-1.5 text-xs text-app-slate">
                         {disabled
                           ? 'No meeting notes'
                           : `${count} ${count === 1 ? 'entry' : 'entries'}`}
+                        {active && <Check size={14} className="text-app-bright" strokeWidth={3} />}
                       </span>
                     </div>
                     <p className="truncate text-xs text-app-slate">
@@ -256,7 +255,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           {/* Scope selection */}
           {hasFilteredView && (
             <>
-              <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-app-slate">
+              <p className="mb-2 mt-4 text-xs font-semibold text-app-slate">
                 Scope
               </p>
               <div className="grid grid-cols-2 gap-2">

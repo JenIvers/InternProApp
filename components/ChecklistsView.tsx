@@ -89,7 +89,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
         <div className="flex items-center justify-between gap-2 px-4 py-3 bg-app-bg border-b border-app-slate/10">
           <div className="flex items-center gap-2">
             <ListChecks size={14} className="text-app-slate" strokeWidth={2.5} />
-            <h3 className="text-xs font-bold uppercase tracking-wide text-app-slate">Suggested Activities</h3>
+            <h3 className="text-xs font-bold text-app-slate">Suggested activities</h3>
           </div>
           <span className="text-xs font-bold text-app-slate tabular-nums">
             {activitiesDone} / {SUGGESTED_ACTIVITIES.length}
@@ -190,7 +190,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
         <div className="flex items-center justify-between gap-2 px-4 py-3 bg-app-bg border-b border-app-slate/10">
           <div className="flex items-center gap-2">
             <ClipboardList size={14} className="text-app-slate" strokeWidth={2.5} />
-            <h3 className="text-xs font-bold uppercase tracking-wide text-app-slate">Process Deliverables</h3>
+            <h3 className="text-xs font-bold text-app-slate">Process deliverables</h3>
           </div>
           <span className="text-xs font-bold text-app-slate tabular-nums">
             {deliverablesDone} / {DELIVERABLES.length}
@@ -236,7 +236,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
         </ul>
       </section>
       {isReadOnly && (
-        <p className="text-center text-xs text-app-slate/60 uppercase tracking-wide font-bold">Read-only view</p>
+        <p className="text-center text-xs text-app-slate/60 font-bold">Read-only view</p>
       )}
     </div>
   );

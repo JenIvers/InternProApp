@@ -390,16 +390,20 @@ const EntryForm: React.FC<EntryFormProps> = ({
       >
         <div className="space-y-2">
           <label className="block text-xs font-semibold text-app-slate">Links</label>
-          {(form.evidenceLinks || []).map(link => (
-            <div key={link.id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-slate/15">
-              <a href={link.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-app-bright truncate hover:underline">
-                {link.label}
-              </a>
-              <button type="button" onClick={() => removeEvidenceLink(link.id)} className="text-app-slate/50 hover:text-red-500 shrink-0">
-                <X size={16} />
-              </button>
+          {(form.evidenceLinks?.length ?? 0) > 0 && (
+            <div className="rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10">
+              {(form.evidenceLinks || []).map(link => (
+                <div key={link.id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-white">
+                  <a href={link.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-app-bright truncate hover:underline">
+                    {link.label}
+                  </a>
+                  <button type="button" onClick={() => removeEvidenceLink(link.id)} className="text-app-slate/50 hover:text-red-500 shrink-0">
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
@@ -430,24 +434,28 @@ const EntryForm: React.FC<EntryFormProps> = ({
           <label className="block text-xs font-semibold text-app-slate">Files &amp; media</label>
 
           {/* Attached artifacts */}
-          {form.artifactIds.map(id => {
-            const artifact = artifacts.find(a => a.id === id);
-            return (
-              <div key={id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-slate/15">
-                <span className="text-sm font-bold text-app-dark truncate">
-                  {artifact?.name ?? 'Attached file'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => toggleArtifact(id)}
-                  aria-label="Detach"
-                  className="text-app-slate/50 hover:text-red-500 shrink-0"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            );
-          })}
+          {form.artifactIds.length > 0 && (
+            <div className="rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10">
+              {form.artifactIds.map(id => {
+                const artifact = artifacts.find(a => a.id === id);
+                return (
+                  <div key={id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-white">
+                    <span className="text-sm font-bold text-app-dark truncate">
+                      {artifact?.name ?? 'Attached file'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleArtifact(id)}
+                      aria-label="Detach"
+                      className="text-app-slate/50 hover:text-red-500 shrink-0"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-2">
             <button

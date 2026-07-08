@@ -66,7 +66,7 @@ const ShelfSection: React.FC<{
         ) : (
           <Archive size={14} className="text-app-slate shrink-0" strokeWidth={2.5} />
         )}
-        <h3 className="text-xs font-bold uppercase tracking-wide text-app-slate truncate">
+        <h3 className="text-xs font-bold text-app-slate truncate">
           {shelf ? shelf.name : 'Unshelved'}
         </h3>
       </div>
@@ -236,7 +236,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
             className="rounded-xl border border-app-slate/15 bg-white p-4 flex flex-col sm:flex-row gap-3"
           >
             <div className="flex-1 min-w-0">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1.5">
+              <label className="block text-xs font-semibold text-app-slate mb-1.5">
                 Shelf name
               </label>
               <input
@@ -290,7 +290,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-bold text-app-dark truncate">{selectedArtifact.name}</h3>
                 <div className="flex items-center gap-2 mt-0.5 text-[11px] font-medium text-app-slate">
-                  <span className="uppercase tracking-wide">{selectedArtifact.type}</span>
+                  <span>{selectedArtifact.type}</span>
                   <span className="opacity-40">·</span>
                   <span>{selectedArtifact.uploadDate}</span>
                 </div>
@@ -311,7 +311,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 ) : (
                   <div className="flex flex-col items-center gap-3 text-app-slate opacity-50">
                     <ImageIcon size={56} strokeWidth={1.25} />
-                    <p className="text-xs font-bold uppercase tracking-wide">Preview unavailable</p>
+                    <p className="text-xs font-bold">Preview unavailable</p>
                   </div>
                 )}
               </div>
@@ -321,7 +321,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Folder size={14} className="text-app-slate" strokeWidth={2.5} />
-                    <label className="text-xs font-bold uppercase tracking-wide text-app-slate">Shelf</label>
+                    <label className="text-xs font-bold text-app-slate">Shelf</label>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -354,7 +354,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Tag size={14} className="text-app-slate" strokeWidth={2.5} />
-                    <label className="text-xs font-bold uppercase tracking-wide text-app-slate">Competency alignment</label>
+                    <label className="text-xs font-bold text-app-slate">Competency alignment</label>
                   </div>
                   <div className="rounded-xl border border-app-slate/15 bg-white overflow-hidden max-h-64 overflow-y-auto no-scrollbar">
                     <ul className="divide-y divide-app-slate/10">

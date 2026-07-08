@@ -23,6 +23,8 @@ export interface DashboardNewProps {
   onReviewEntry?: (logId: string) => void;
   /** Jump to the Activity Log with the "Incomplete only" filter enabled. */
   onReviewIncomplete?: () => void;
+  /** Jump to the Activity Log filtered to a requirement bucket's school level. */
+  onViewLevelLogs?: (bucket: LevelBucket) => void;
   /** Navigate to the Coverage view for full drill-down into competencies. */
   onOpenCoverage?: () => void;
   isReadOnly: boolean;
@@ -46,6 +48,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
   needsPrimaryReview = [],
   onReviewEntry,
   onReviewIncomplete,
+  onViewLevelLogs,
   onOpenCoverage,
   isReadOnly,
 }) => {
@@ -170,17 +173,20 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
           const pct = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 0;
           const isPrimary = bucket === progress.primaryLevel;
           return (
-            <div
+            <button
               key={bucket}
-              className="rounded-xl border border-app-slate/15 bg-white px-4 py-4"
+              type="button"
+              onClick={() => onViewLevelLogs?.(bucket)}
+              disabled={!onViewLevelLogs}
+              className="rounded-xl border border-app-slate/15 bg-white px-4 py-4 text-left enabled:hover:border-app-slate/30 enabled:active:scale-[0.99] transition-all enabled:cursor-pointer"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 text-app-dark">
                   <Icon size={16} />
-                  <span className="text-xs font-bold uppercase tracking-wide">{meta.label}</span>
+                  <span className="text-xs font-bold">{meta.label}</span>
                 </div>
                 {isPrimary && (
-                  <span className="text-[10px] font-bold uppercase tracking-wide text-app-bright bg-app-bright/10 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-app-bright bg-app-bright/10 px-2 py-0.5 rounded-full">
                     Primary
                   </span>
                 )}
@@ -198,14 +204,14 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
               <p className="text-[11px] font-medium text-app-slate opacity-70">
                 {remaining > 0 ? `${remaining}h remaining` : 'Target met'}
               </p>
-            </div>
+            </button>
           );
         })}
 
         <div className="rounded-xl border border-app-slate/15 bg-app-dark px-4 py-4 text-white">
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} />
-            <span className="text-xs font-bold uppercase tracking-wide">Total</span>
+            <span className="text-xs font-bold">Total</span>
           </div>
           <div className="flex items-baseline gap-1 mb-2">
             <span className="text-2xl font-bold tabular-nums">{round1(progress.total)}</span>
