@@ -359,6 +359,7 @@ const App: React.FC = () => {
             needsPrimaryReview={needsPrimaryReview}
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
+            onOpenCoverage={() => setView('coverage')}
             isReadOnly={isReadOnly}
           />
         );
@@ -449,6 +450,7 @@ const App: React.FC = () => {
             needsPrimaryReview={needsPrimaryReview}
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
+            onOpenCoverage={() => setView('coverage')}
             isReadOnly={isReadOnly}
           />
         );

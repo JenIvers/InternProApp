@@ -41,12 +41,12 @@ const Section: React.FC<{
   warn?: boolean;
   children: React.ReactNode;
 }> = ({ title, icon, open, onToggle, summary, warn, children }) => (
-  <div className="border border-app-dark/10 rounded-lg overflow-hidden">
+  <div>
     <button
       type="button"
       onClick={onToggle}
       aria-expanded={open}
-      className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] bg-app-bg hover:bg-app-bg/60 transition-colors"
+      className="w-full flex items-center justify-between px-4 py-3 min-h-[48px] bg-white hover:bg-app-bg/40 transition-colors"
     >
       <span className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
         {icon} {title}
@@ -62,7 +62,7 @@ const Section: React.FC<{
         {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </span>
     </button>
-    {open && <div className="p-4 pt-4 space-y-3 bg-white">{children}</div>}
+    {open && <div className="px-4 pb-4 pt-1 space-y-3 bg-white">{children}</div>}
   </div>
 );
 
@@ -344,6 +344,8 @@ const EntryForm: React.FC<EntryFormProps> = ({
         />
       </div>
 
+      {/* Detail sections — one grouped container, hairline dividers between rows */}
+      <div className="rounded-xl border border-app-dark/10 overflow-hidden divide-y divide-app-dark/10 bg-white">
       {/* Description (collapsible — soft-optional for quick capture) */}
       <Section
         title="Description"
@@ -514,17 +516,20 @@ const EntryForm: React.FC<EntryFormProps> = ({
       </Section>
 
       {/* Meeting notes (collapsible) */}
-      <div className="space-y-2">
+      <div>
         <button
           type="button"
           onClick={() => (meetingNotesOpen ? closeMeetingNotes() : openMeetingNotes())}
-          className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10"
+          aria-expanded={meetingNotesOpen}
+          className="w-full flex items-center justify-between px-4 py-3 min-h-[48px] bg-white hover:bg-app-bg/40 transition-colors"
         >
           <span className="text-xs font-semibold text-app-slate">Meeting notes (optional)</span>
-          {meetingNotesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          <span className="text-app-slate/60">
+            {meetingNotesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </span>
         </button>
         {meetingNotesOpen && form.meetingNotes && (
-          <div className="p-4 bg-white border border-app-dark/10 rounded-xl space-y-3">
+          <div className="px-4 pb-4 pt-1 space-y-3 bg-white">
             <p className="text-xs font-bold text-app-slate/70">
               Competencies discussed default to this entry&rsquo;s tags; adjust below if needed.
             </p>
@@ -549,6 +554,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
             />
           </div>
         )}
+      </div>
       </div>
 
       {/* Validation warnings */}

@@ -789,11 +789,12 @@ const LogTable: React.FC<LogTableProps> = ({
 
       {/* Mobile card list — the table degrades to a scannable, tappable list on phones */}
       <div className="md:hidden space-y-2">
-        {filteredLogs.length === 0 && (
-          <div className="rounded-2xl border border-app-dark/10 bg-white p-8 text-center text-app-slate font-medium shadow-sm">
+        {filteredLogs.length === 0 ? (
+          <div className="rounded-xl border border-app-slate/15 bg-white px-4 py-8 text-center text-sm text-app-slate font-medium">
             No entries match the current filters.
           </div>
-        )}
+        ) : (
+        <div className="rounded-xl border border-app-slate/15 bg-white overflow-hidden divide-y divide-app-slate/10">
         {filteredLogs.map((log) => {
           const expanded = expandedId === log.id;
           const tags = log.taggedCompetencyIds ?? [];
@@ -803,15 +804,12 @@ const LogTable: React.FC<LogTableProps> = ({
               ? `Incomplete — ${warnings.map((w) => w.message).join(' ')}`
               : undefined;
           return (
-            <div
-              key={log.id}
-              className="rounded-2xl border border-app-dark/10 bg-white shadow-sm overflow-hidden"
-            >
+            <div key={log.id}>
               <button
                 type="button"
                 onClick={() => setExpandedId(expanded ? null : log.id)}
                 aria-expanded={expanded}
-                className="w-full text-left px-4 py-3 min-h-[56px] flex items-start gap-3"
+                className="w-full text-left px-4 py-3 min-h-[56px] flex items-start gap-3 hover:bg-app-slate/5 transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
@@ -973,6 +971,8 @@ const LogTable: React.FC<LogTableProps> = ({
             </div>
           );
         })}
+        </div>
+        )}
 
         {/* Mobile totals */}
         {filteredLogs.length > 0 && (

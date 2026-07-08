@@ -62,12 +62,12 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex items-center gap-3">
-        <div className="p-2 rounded-xl glass-blue">
-          <SettingsIcon className="text-app-bright" size={24} />
+        <div className="p-2 rounded-xl bg-app-bright/10">
+          <SettingsIcon className="text-app-bright" size={22} />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-app-dark tracking-tight">Settings</h1>
-          <p className="text-app-slate text-sm font-medium opacity-80">Manage your requirement targets and profile.</p>
+          <h1 className="text-2xl font-bold text-app-dark tracking-tight">Settings</h1>
+          <p className="text-app-slate text-sm font-medium opacity-70">Manage your requirement targets and profile.</p>
         </div>
       </header>
 

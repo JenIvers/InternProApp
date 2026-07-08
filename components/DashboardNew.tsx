@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   AlertTriangle,
-  ChevronDown,
   ChevronRight,
   Clock,
   GraduationCap,
@@ -11,7 +10,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import type { AppSettings, Competency, InternshipLog, LevelBucket } from '../types';
 import { computeProgress } from '../lib/progress';
-import { computeCategoryRollups, computeCompetencyHours } from '../lib/competency-metrics';
+import { computeCategoryRollups } from '../lib/competency-metrics';
 import { validateEntry } from '../lib/entry-validation';
 
 export interface DashboardNewProps {
@@ -24,6 +23,8 @@ export interface DashboardNewProps {
   onReviewEntry?: (logId: string) => void;
   /** Jump to the Activity Log with the "Incomplete only" filter enabled. */
   onReviewIncomplete?: () => void;
+  /** Navigate to the Coverage view for full drill-down into competencies. */
+  onOpenCoverage?: () => void;
   isReadOnly: boolean;
 }
 
@@ -45,16 +46,14 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
   needsPrimaryReview = [],
   onReviewEntry,
   onReviewIncomplete,
+  onOpenCoverage,
   isReadOnly,
 }) => {
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-
   const progress = useMemo(() => computeProgress(logs, settings), [logs, settings]);
   const categoryRollups = useMemo(
     () => computeCategoryRollups(logs, competencies),
     [logs, competencies]
   );
-  const competencyHours = useMemo(() => computeCompetencyHours(logs), [logs]);
   const incompleteCount = useMemo(
     () => logs.reduce((n, log) => (validateEntry(log).length > 0 ? n + 1 : n), 0),
     [logs]
@@ -64,18 +63,18 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
     () => competencies.filter(isCategoryHeader).sort((a, b) => a.id.localeCompare(b.id)),
     [competencies]
   );
-  const subCompetenciesByCategory = useMemo(() => {
-    const map = new Map<string, Competency[]>();
-    for (const c of competencies) {
-      if (isCategoryHeader(c)) continue;
-      const group = c.id.replace(/\d+$/, '');
-      const list = map.get(group) ?? [];
-      list.push(c);
-      map.set(group, list);
-    }
-    for (const list of map.values()) list.sort((a, b) => a.id.localeCompare(b.id));
-    return map;
-  }, [competencies]);
+
+  const rankedCategories = useMemo(() => {
+    const withHours = categoryHeaders
+      .map((cat) => ({ cat, hours: round1(categoryRollups[cat.id]?.hours ?? 0) }))
+      .filter((c) => c.hours > 0)
+      .sort((a, b) => b.hours - a.hours);
+    const empty = categoryHeaders
+      .filter((cat) => round1(categoryRollups[cat.id]?.hours ?? 0) === 0)
+      .map((cat) => cat.id);
+    const maxHours = withHours.length > 0 ? withHours[0].hours : 0;
+    return { withHours, empty, maxHours };
+  }, [categoryHeaders, categoryRollups]);
 
   const hoursOverTimeData = useMemo(() => {
     const byMonth = new Map<string, number>();
@@ -88,15 +87,6 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([month, hours]) => ({ month, hours }));
   }, [logs]);
-
-  const toggleCategory = (id: string) => {
-    setExpandedCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   const reviewLogsById = useMemo(() => {
     const map = new Map<string, InternshipLog>();
@@ -267,77 +257,85 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
         </section>
       )}
 
-      {/* Hours by competency, grouped by category */}
+      {/* Hours by competency, ranked by category */}
       <section className="rounded-xl border border-app-slate/15 bg-white overflow-hidden">
-        <div className="px-5 py-4 border-b border-app-slate/10">
-          <h2 className="text-sm font-bold text-app-dark">Hours by competency</h2>
-          <p className="text-[11px] font-medium text-app-slate opacity-70">
-            Grouped by category. Expand a category to see sub-competencies.
-          </p>
+        <div className="px-5 py-4 border-b border-app-slate/10 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold text-app-dark">Hours by competency</h2>
+            <p className="text-[11px] font-medium text-app-slate opacity-70">
+              Ranked by category. Tap a row for full coverage detail.
+            </p>
+          </div>
+          {onOpenCoverage && (
+            <button
+              type="button"
+              onClick={onOpenCoverage}
+              className="flex items-center gap-1 shrink-0 text-[11px] font-bold text-app-bright hover:text-app-deep transition-colors"
+            >
+              View details
+              <ChevronRight size={12} />
+            </button>
+          )}
         </div>
         <ul className="divide-y divide-app-slate/10">
-          {categoryHeaders.map((cat) => {
+          {rankedCategories.withHours.map(({ cat, hours }) => {
             const rollup = categoryRollups[cat.id];
-            const subs = subCompetenciesByCategory.get(cat.id) ?? [];
-            const expanded = expandedCategories.has(cat.id);
-            const hours = rollup ? round1(rollup.hours) : 0;
+            const barPct = rankedCategories.maxHours > 0 ? Math.max(4, Math.round((hours / rankedCategories.maxHours) * 100)) : 0;
+            const rowContent = (
+              <>
+                <span className="shrink-0 w-6 text-center text-[11px] font-bold text-app-dark bg-app-slate/10 rounded px-1 py-0.5">
+                  {cat.id}
+                </span>
+                <span className="text-xs font-semibold text-app-dark truncate min-w-0 max-w-[9rem] sm:max-w-[14rem]">
+                  {cat.title}
+                </span>
+                <span className="flex-1 min-w-0 h-1.5 rounded-full bg-app-slate/10 overflow-hidden">
+                  <span
+                    className="block h-full rounded-full bg-app-bright"
+                    style={{ width: `${barPct}%` }}
+                  />
+                </span>
+                {rollup && (
+                  <span className="hidden sm:inline shrink-0 text-[10px] font-medium text-app-slate opacity-60">
+                    {rollup.covered} covered · {rollup.thin} thin · {rollup.gap} gap
+                  </span>
+                )}
+                <span className="shrink-0 text-xs font-bold text-app-dark tabular-nums w-12 text-right">
+                  {hours}h
+                </span>
+              </>
+            );
             return (
               <li key={cat.id}>
-                <button
-                  type="button"
-                  onClick={() => toggleCategory(cat.id)}
-                  className="w-full flex items-center justify-between px-5 py-3 hover:bg-app-slate/5 transition-colors text-left"
-                >
-                  <span className="flex items-center gap-2 min-w-0">
-                    {expanded ? (
-                      <ChevronDown size={14} className="text-app-slate shrink-0" />
-                    ) : (
-                      <ChevronRight size={14} className="text-app-slate shrink-0" />
-                    )}
-                    <span className="text-xs font-bold text-app-dark truncate">
-                      {cat.id} · {cat.title}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-3 shrink-0 text-[11px] font-semibold text-app-slate">
-                    {rollup && (
-                      <span className="hidden sm:inline opacity-60">
-                        {rollup.covered} covered · {rollup.thin} thin · {rollup.gap} gap
-                      </span>
-                    )}
-                    <span className="tabular-nums text-app-dark">{hours}h</span>
-                  </span>
-                </button>
-                {expanded && (
-                  <ul className="pb-2">
-                    {subs.map((sub) => (
-                      <li
-                        key={sub.id}
-                        className="flex items-center justify-between pl-11 pr-5 py-1.5 text-xs"
-                      >
-                        <span className="text-app-slate truncate mr-3">
-                          {sub.id} · {sub.title}
-                        </span>
-                        <span className="tabular-nums font-semibold text-app-dark shrink-0">
-                          {round1(competencyHours[sub.id] ?? 0)}h
-                        </span>
-                      </li>
-                    ))}
-                    {subs.length === 0 && (
-                      <li className="pl-11 pr-5 py-1.5 text-xs text-app-slate opacity-60">
-                        No sub-competencies.
-                      </li>
-                    )}
-                  </ul>
+                {onOpenCoverage ? (
+                  <button
+                    type="button"
+                    onClick={onOpenCoverage}
+                    className="w-full flex items-center gap-3 px-5 py-2 h-10 text-left hover:bg-app-slate/5 transition-colors cursor-pointer"
+                  >
+                    {rowContent}
+                  </button>
+                ) : (
+                  <div className="w-full flex items-center gap-3 px-5 py-2 h-10 text-left">
+                    {rowContent}
+                  </div>
                 )}
               </li>
             );
           })}
-          {categoryHeaders.length === 0 && (
+          {rankedCategories.withHours.length === 0 && (
             <li className="px-5 py-6 text-xs text-app-slate opacity-60 text-center">
-              No competencies configured.
+              No hours logged yet.
             </li>
           )}
         </ul>
+        {rankedCategories.empty.length > 0 && (
+          <div className="px-5 py-2.5 border-t border-app-slate/10 text-[11px] font-medium text-app-slate opacity-60">
+            {rankedCategories.empty.length}{' '}
+            {rankedCategories.empty.length === 1 ? 'category' : 'categories'} with no hours yet:{' '}
+            {rankedCategories.empty.join(', ')}
+          </div>
+        )}
       </section>
     </div>
   );
