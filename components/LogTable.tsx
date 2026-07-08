@@ -230,13 +230,10 @@ const LogTable: React.FC<LogTableProps> = ({
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="bg-white border border-app-dark/10 rounded-2xl p-3 sm:p-4 shadow-sm space-y-3">
+      <div className="bg-white border border-app-slate/15 rounded-xl p-3 sm:p-4 space-y-3">
         {/* Search + mobile Filters toggle */}
-        <div className="flex items-end gap-2">
+        <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
-              Search
-            </label>
             <div className="relative">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-app-light" />
               <input
@@ -252,7 +249,7 @@ const LogTable: React.FC<LogTableProps> = ({
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
             aria-expanded={filtersOpen}
-            className={`md:hidden shrink-0 flex items-center gap-1.5 py-2.5 px-3 rounded-lg border text-xs font-black uppercase tracking-widest transition-colors ${
+            className={`md:hidden shrink-0 flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] rounded-lg border text-sm font-semibold transition-colors ${
               filtersOpen ? 'bg-app-dark text-white border-app-dark' : 'border-app-dark/10 text-app-slate'
             }`}
           >
@@ -265,7 +262,7 @@ const LogTable: React.FC<LogTableProps> = ({
           className={`${filtersOpen ? 'grid grid-cols-2 gap-3' : 'hidden'} md:flex md:flex-wrap md:items-end md:gap-3`}
         >
           <div className="min-w-0">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+            <label className="block text-xs font-semibold text-app-slate mb-1.5">
               Competency
             </label>
             <select
@@ -296,7 +293,7 @@ const LogTable: React.FC<LogTableProps> = ({
           </div>
 
           <div className="min-w-0">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+            <label className="block text-xs font-semibold text-app-slate mb-1.5">
               Level
             </label>
             <select
@@ -314,7 +311,7 @@ const LogTable: React.FC<LogTableProps> = ({
           </div>
 
           <div className="min-w-0">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+            <label className="block text-xs font-semibold text-app-slate mb-1.5">
               Site
             </label>
             <select
@@ -332,7 +329,7 @@ const LogTable: React.FC<LogTableProps> = ({
           </div>
 
           <div className="min-w-0">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+            <label className="block text-xs font-semibold text-app-slate mb-1.5">
               From
             </label>
             <input
@@ -343,7 +340,7 @@ const LogTable: React.FC<LogTableProps> = ({
             />
           </div>
           <div className="min-w-0">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+            <label className="block text-xs font-semibold text-app-slate mb-1.5">
               To
             </label>
             <input
@@ -361,7 +358,7 @@ const LogTable: React.FC<LogTableProps> = ({
             onClick={() => setIncompleteOnly((v) => !v)}
             aria-pressed={incompleteOnly}
             title="Show only entries with missing details"
-            className={`flex items-center gap-1.5 py-2.5 px-3 text-xs font-black uppercase tracking-widest rounded-lg border transition-colors ${
+            className={`flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] text-sm font-semibold rounded-lg border transition-colors ${
               incompleteOnly
                 ? 'bg-amber-400 border-amber-400 text-app-dark'
                 : 'border-app-dark/10 text-app-slate hover:bg-app-bg'
@@ -381,16 +378,16 @@ const LogTable: React.FC<LogTableProps> = ({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 py-2.5 px-3 text-xs font-black uppercase tracking-widest text-app-slate rounded-lg border border-app-dark/10 hover:bg-app-bg transition-colors"
+              className="flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] text-sm font-semibold text-app-slate rounded-lg border border-app-dark/10 hover:bg-app-bg transition-colors"
             >
               <X size={14} /> Clear
             </button>
           )}
           <button
             onClick={() => onExportFiltered(filteredLogs)}
-            className="flex items-center gap-2 py-2.5 px-4 text-xs font-black uppercase tracking-widest text-white bg-app-dark rounded-lg hover:bg-black transition-colors active:scale-95 ml-auto"
+            className="flex items-center gap-2 py-2.5 px-4 min-h-[44px] text-sm font-bold text-white bg-app-dark rounded-lg hover:bg-black transition-colors active:scale-[0.98] ml-auto"
           >
-            <Download size={14} /> <span className="hidden sm:inline">Export current view</span><span className="sm:hidden">Export</span>
+            <Download size={15} /> Export
           </button>
         </div>
       </div>
@@ -435,7 +432,7 @@ const LogTable: React.FC<LogTableProps> = ({
             {filteredLogs.length === 0 && (
               <tr>
                 <td colSpan={isReadOnly ? 7 : 8} className="text-center py-12 text-app-slate font-medium">
-                  No entries match the current filters.
+                  {logs.length === 0 ? 'No activities logged yet.' : 'No entries match the current filters.'}
                 </td>
               </tr>
             )}
@@ -790,8 +787,10 @@ const LogTable: React.FC<LogTableProps> = ({
       {/* Mobile card list — the table degrades to a scannable, tappable list on phones */}
       <div className="md:hidden space-y-2">
         {filteredLogs.length === 0 ? (
-          <div className="rounded-xl border border-app-slate/15 bg-white px-4 py-8 text-center text-sm text-app-slate font-medium">
-            No entries match the current filters.
+          <div className="rounded-xl border border-app-slate/15 bg-white px-4 py-6 text-center text-sm text-app-slate font-medium">
+            {logs.length === 0
+              ? 'No activities logged yet — tap + to add your first.'
+              : 'No entries match the current filters.'}
           </div>
         ) : (
         <div className="rounded-xl border border-app-slate/15 bg-white overflow-hidden divide-y divide-app-slate/10">

@@ -22,7 +22,7 @@ import { User } from 'firebase/auth';
 import logo from './bethel-logo.png';
 import { register as registerSW } from './registerServiceWorker';
 import { useBodyScrollLock } from './useBodyScrollLock';
-import { RefreshCw, AlertCircle, Plus, FileDown } from 'lucide-react';
+import { RefreshCw, AlertCircle, Plus } from 'lucide-react';
 
 /** Fallback requirement settings for brand-new portfolios (Jen's config). */
 const DEFAULT_SETTINGS: AppSettings = {
@@ -314,11 +314,6 @@ const App: React.FC = () => {
     setExportOpen(true);
   };
 
-  const openExportAll = () => {
-    setExportFilteredLogs(undefined);
-    setExportOpen(true);
-  };
-
   // ---- Cross-view jump ----------------------------------------------------
   const handleViewCompetencyLogs = (competencyId: string) => {
     setLogPrefilterIncomplete(false);
@@ -371,22 +366,16 @@ const App: React.FC = () => {
                 <h2 className="text-2xl font-bold text-app-dark tracking-tight">Activity Log</h2>
                 <p className="text-app-slate text-sm">Search, sort, and total your internship entries.</p>
               </div>
-              <div className="flex items-center gap-2">
+              {/* Export lives in the log toolbar; on mobile the bottom-nav "+" adds
+                  entries, so the header button appears only on md+. */}
+              {!isReadOnly && (
                 <button
-                  onClick={openExportAll}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-app-dark/10 bg-white text-app-deep text-xs font-bold hover:bg-app-bg transition-all"
+                  onClick={openNewEntry}
+                  className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-lg bg-app-dark text-white text-xs font-bold hover:bg-app-deep transition-all shadow-sm"
                 >
-                  <FileDown size={16} /> Export
+                  <Plus size={16} strokeWidth={2.5} /> Add entry
                 </button>
-                {!isReadOnly && (
-                  <button
-                    onClick={openNewEntry}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-app-dark text-white text-xs font-bold hover:bg-app-deep transition-all shadow-sm"
-                  >
-                    <Plus size={16} strokeWidth={2.5} /> Add entry
-                  </button>
-                )}
-              </div>
+              )}
             </div>
             <LogTable
               logs={state.logs}
