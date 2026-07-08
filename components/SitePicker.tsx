@@ -62,7 +62,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
         <select
           value={isCustom ? '__custom__' : (siteId || '')}
           onChange={handleSelectChange}
-          className="w-full pl-11 pr-10 py-3.5 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-bold text-app-dark appearance-none cursor-pointer"
+          className="w-full pl-11 pr-10 py-2.5 min-h-[44px] rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-bold text-app-dark appearance-none cursor-pointer"
         >
           <option value="">Select a site&hellip;</option>
           {sites.map(site => (
@@ -80,7 +80,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
           value={location || ''}
           onChange={e => onChange({ siteId: undefined, location: e.target.value })}
           placeholder="Type a location name"
-          className="w-full px-4 py-3.5 rounded-xl bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
         />
       )}
 
@@ -88,14 +88,14 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
         <button
           type="button"
           onClick={() => setIsAddingSite(true)}
-          className="flex items-center gap-1.5 text-[11px] font-black text-app-bright uppercase tracking-widest"
+          className="flex items-center gap-1.5 py-1.5 text-xs font-semibold text-app-bright"
         >
-          <Plus size={14} /> Add New Site
+          <Plus size={14} /> Add new site
         </button>
       ) : (
-        <form onSubmit={handleAddSiteSubmit} className="p-4 bg-app-bg/50 rounded-xl border border-app-dark/10 space-y-3">
+        <form onSubmit={handleAddSiteSubmit} className="p-4 bg-app-bg/50 rounded-lg border border-app-dark/10 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black text-app-slate uppercase tracking-widest">New Site</span>
+            <span className="text-xs font-semibold text-app-slate">New site</span>
             <button type="button" onClick={() => setIsAddingSite(false)} className="text-app-slate/50 hover:text-app-dark">
               <X size={16} />
             </button>
@@ -126,9 +126,9 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
           </div>
           <button
             type="submit"
-            className="w-full py-2.5 bg-app-dark text-white rounded-lg font-black uppercase text-xs tracking-widest hover:bg-black transition-colors"
+            className="w-full py-2.5 min-h-[44px] bg-app-dark text-white rounded-lg font-bold text-sm hover:bg-black transition-colors"
           >
-            Save Site
+            Save site
           </button>
         </form>
       )}

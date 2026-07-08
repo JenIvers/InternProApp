@@ -78,7 +78,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
   );
 
   return (
-    <div className="space-y-8 pb-20 md:pb-8 px-1">
+    <div className="space-y-6 pb-20 md:pb-8 px-1">
       <div>
         <h2 className="text-2xl font-bold text-app-dark tracking-tight">Cross-check vs. Guide</h2>
         <p className="text-app-slate text-sm">Track the Guide's suggested activities and process deliverables.</p>

@@ -116,7 +116,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
       </header>
 
       {needsPrimaryReview.length > 0 && (
-        <section className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 flex items-start gap-3">
+        <section className="rounded-xl border border-amber-300 bg-amber-50 px-4 sm:px-5 py-4 flex items-start gap-3">
           <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <h2 className="text-sm font-bold text-amber-800">
@@ -149,7 +149,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
       )}
 
       {incompleteCount > 0 && (
-        <section className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 flex items-start gap-3">
+        <section className="rounded-xl border border-amber-300 bg-amber-50 px-4 sm:px-5 py-4 flex items-start gap-3">
           <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <h2 className="text-sm font-bold text-amber-800">

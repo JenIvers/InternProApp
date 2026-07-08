@@ -60,7 +60,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex items-center gap-3">
         <div className="p-2 rounded-xl glass-blue">
           <SettingsIcon className="text-app-bright" size={24} />
@@ -72,7 +72,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
       </header>
 
       {/* Profile */}
-      <section className="bg-white/60 border border-app-slate/10 rounded-2xl p-6 space-y-4">
+      <section className="bg-white/60 border border-app-slate/10 rounded-xl p-4 sm:p-6 space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <User size={18} className="text-app-bright" />
           <h2 className="text-lg font-bold text-app-dark">Profile</h2>
@@ -93,7 +93,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
       </section>
 
       {/* Targets */}
-      <section className="bg-white/60 border border-app-slate/10 rounded-2xl p-6 space-y-5">
+      <section className="bg-white/60 border border-app-slate/10 rounded-xl p-4 sm:p-6 space-y-5">
         <div className="flex items-center gap-2 mb-2">
           <ShieldCheck size={18} className="text-app-bright" />
           <h2 className="text-lg font-bold text-app-dark">Requirement targets</h2>
@@ -190,7 +190,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
       </section>
 
       {/* Data backup */}
-      <section className="bg-white/60 border border-app-slate/10 rounded-2xl p-6 space-y-3">
+      <section className="bg-white/60 border border-app-slate/10 rounded-xl p-4 sm:p-6 space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Download size={18} className="text-app-bright" />
           <h2 className="text-lg font-bold text-app-dark">Data backup</h2>
