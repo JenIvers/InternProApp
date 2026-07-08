@@ -56,6 +56,16 @@ const App: React.FC = () => {
   // Entry editor (modal) — open with an entry to edit, or undefined to create.
   const [editor, setEditor] = useState<{ open: boolean; entry?: InternshipLog }>({ open: false });
 
+  // Mobile header: show a hairline + stronger blur only once content has
+  // scrolled underneath it, iOS-style.
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setHeaderScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // Export dialog.
   const [exportOpen, setExportOpen] = useState(false);
   const [exportFilteredLogs, setExportFilteredLogs] = useState<InternshipLog[] | undefined>(undefined);
@@ -491,34 +501,48 @@ const App: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="md:hidden flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <img src={logo} alt="Bethel" className="w-10 h-10 object-contain" />
-                <h1 className="text-lg font-black text-app-dark">
-                  InternPro
-                </h1>
+            <header
+              className={`md:hidden sticky top-0 z-40 -mt-safe pt-safe -mx-4 px-4 mb-4 transition-[background-color,box-shadow] duration-200 ${
+                headerScrolled
+                  ? 'bg-app-bg/85 backdrop-blur-md shadow-[0_1px_0_0_rgba(94,110,120,0.15)]'
+                  : 'bg-transparent'
+              }`}
+            >
+              <div className="flex items-center justify-between h-14">
+                <div className="flex items-center gap-2.5">
+                  <img src={logo} alt="Bethel University" className="w-9 h-9 object-contain" />
+                  <h1 className="text-lg font-black text-app-dark leading-none">
+                    InternPro
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isReadOnly && (
+                    <span className="bg-app-bright/10 text-app-bright text-[11px] font-bold px-3 py-1 rounded-full">Viewer mode</span>
+                  )}
+                  {(isReadOnly ? state.userProfile : user) ? (
+                    <button
+                      type="button"
+                      onClick={isReadOnly ? undefined : () => setView('settings')}
+                      aria-label="Settings"
+                      disabled={isReadOnly}
+                      className="p-1.5 -mr-1.5 rounded-full transition-transform enabled:active:scale-90"
+                    >
+                      <div className="w-8 h-8 rounded-full border border-app-bright/20 p-0.5">
+                        {(isReadOnly ? state.userProfile : user)?.photoURL ? (
+                          <img src={(isReadOnly ? state.userProfile : user)?.photoURL || ''} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full rounded-full bg-app-bright/10 flex items-center justify-center text-app-bright font-bold text-[10px]">
+                            {(isReadOnly ? state.userProfile : user)?.displayName?.charAt(0) || '?'}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-app-slate font-semibold opacity-70">Bethel University</span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                {isReadOnly && (
-                  <span className="bg-app-bright/10 text-app-bright text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide mr-2">Viewer Mode</span>
-                )}
-                {(isReadOnly ? state.userProfile : user) ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full border border-app-bright/20 p-0.5">
-                      {(isReadOnly ? state.userProfile : user)?.photoURL ? (
-                        <img src={(isReadOnly ? state.userProfile : user)?.photoURL || ''} alt="Profile" className="w-full h-full rounded-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full rounded-full bg-app-bright/10 flex items-center justify-center text-app-bright font-bold text-[10px]">
-                          {(isReadOnly ? state.userProfile : user)?.displayName?.charAt(0) || '?'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-[10px] text-app-slate font-semibold uppercase tracking-wide opacity-70">Bethel University</span>
-                )}
-              </div>
-            </div>
+            </header>
 
             {renderView()}
           </>
