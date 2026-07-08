@@ -1,5 +1,5 @@
-// Version: 1.3.0 - PWA hardening (preview)
-const CACHE_NAME = 'internpro-v1.3.0';
+// Version: 2.0.0 - Whole-app refresh
+const CACHE_NAME = 'internpro-v2.0.0';
 
 // Same-origin app shell: precached atomically (these must all succeed).
 const SHELL_ASSETS = [
