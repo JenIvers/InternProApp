@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Artifact, InternshipLog, SchoolLevel, Site } from '../types';
 import { validateEntry } from '@/lib/entry-validation';
+import { uploadFileToStorage } from '../storageService';
 import CompetencyPicker from './CompetencyPicker';
 import SitePicker from './SitePicker';
 import {
   Calendar, Clock, School, FileText, PencilLine, Link2, Paperclip,
-  Plus, X, ChevronDown, ChevronUp, AlertTriangle, Save,
+  Plus, X, ChevronDown, ChevronUp, AlertTriangle, Save, Upload, Loader2, Library,
 } from 'lucide-react';
 
 export interface EntryFormProps {
@@ -15,9 +16,12 @@ export interface EntryFormProps {
   sites: Site[];
   artifacts: Artifact[];
   onAddSite: (site: Site) => void;
+  onAddArtifact: (artifact: Artifact) => void;
   onSave: (entry: InternshipLog) => void;
   onCancel: () => void;
   isReadOnly?: boolean;
+  /** Signed-in owner's uid — required for direct evidence uploads. */
+  userId?: string | null;
 }
 
 const SCHOOL_LEVELS: SchoolLevel[] = ['Elementary', 'Intermediate', 'Middle', 'High School'];
@@ -89,9 +93,11 @@ const EntryForm: React.FC<EntryFormProps> = ({
   sites,
   artifacts,
   onAddSite,
+  onAddArtifact,
   onSave,
   onCancel,
   isReadOnly,
+  userId,
 }) => {
   const isEdit = !!entry;
   const [form, setForm] = useState<InternshipLog>(() => entry ? { ...makeEmptyEntry(), ...entry } : makeEmptyEntry());
@@ -100,6 +106,9 @@ const EntryForm: React.FC<EntryFormProps> = ({
   const [newLinkLabel, setNewLinkLabel] = useState('');
   const [artifactPickerOpen, setArtifactPickerOpen] = useState(false);
   const [pendingConfirm, setPendingConfirm] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Quick-capture: on a phone, a NEW entry collapses the non-essential sections
   // so the essentials (date, hours, title, level, location) are all that shows.
@@ -156,6 +165,44 @@ const EntryForm: React.FC<EntryFormProps> = ({
       const has = prev.artifactIds.includes(id);
       return { ...prev, artifactIds: has ? prev.artifactIds.filter(a => a !== id) : [...prev.artifactIds, id] };
     });
+  };
+
+  // Direct evidence upload: the file goes to Storage, becomes a library
+  // artifact (so it also shows in the Portfolio Vault), and is attached to
+  // this entry in one step. On iOS the plain file input natively offers
+  // Take Photo / Photo Library / Choose File.
+  const handleEvidenceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!userId) {
+      setUploadError('You must be signed in to upload files.');
+      return;
+    }
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const artifactId = crypto.randomUUID();
+      const result = await uploadFileToStorage(userId, file, artifactId);
+      if (!result.success) {
+        setUploadError(result.error || 'Upload failed.');
+        return;
+      }
+      onAddArtifact({
+        id: artifactId,
+        name: file.name,
+        type: file.type,
+        data: result.url!, // Storage URL, not base64
+        uploadDate: new Date().toLocaleDateString(),
+        taggedCompetencyIds: form.taggedCompetencyIds,
+        shelfId: undefined,
+      });
+      setForm(prev => ({ ...prev, artifactIds: [...prev.artifactIds, artifactId] }));
+    } catch {
+      setUploadError('An unexpected error occurred during upload.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const openMeetingNotes = () => {
@@ -382,39 +429,88 @@ const EntryForm: React.FC<EntryFormProps> = ({
           </div>
         </div>
 
-        {/* Pick from artifacts */}
-        {artifacts.length > 0 && (
-          <div className="space-y-2">
+        {/* File evidence: attached artifacts + library picker + direct upload */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
+            <Paperclip size={13} /> Files &amp; Media
+          </label>
+
+          {/* Attached artifacts */}
+          {form.artifactIds.map(id => {
+            const artifact = artifacts.find(a => a.id === id);
+            return (
+              <div key={id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-dark/10">
+                <span className="text-sm font-bold text-app-dark truncate">
+                  {artifact?.name ?? 'Attached file'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => toggleArtifact(id)}
+                  aria-label="Detach"
+                  className="text-app-slate/50 hover:text-red-500 shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            );
+          })}
+
+          <div className="flex flex-col sm:flex-row gap-2">
             <button
               type="button"
-              onClick={() => setArtifactPickerOpen(!artifactPickerOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10"
+              onClick={() => setArtifactPickerOpen(v => !v)}
+              disabled={artifacts.length === 0}
+              className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 text-sm font-bold text-app-dark flex items-center justify-center gap-1.5 hover:bg-app-bg/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-app-slate">
-                <Paperclip size={13} /> Attach Artifacts {form.artifactIds.length > 0 && `(${form.artifactIds.length})`}
-              </span>
-              {artifactPickerOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              <Library size={15} /> From library
+              {artifactPickerOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
-            {artifactPickerOpen && (
-              <div className="max-h-56 overflow-y-auto overscroll-contain border border-app-dark/10 rounded-xl divide-y divide-app-dark/5">
-                {artifacts.map(artifact => {
-                  const isSelected = form.artifactIds.includes(artifact.id);
-                  return (
-                    <button
-                      key={artifact.id}
-                      type="button"
-                      onClick={() => toggleArtifact(artifact.id)}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-semibold flex items-center justify-between ${isSelected ? 'bg-app-bright/5 text-app-dark' : 'text-app-slate hover:bg-app-bg'}`}
-                    >
-                      <span className="truncate">{artifact.name}</span>
-                      {isSelected && <span className="text-app-bright text-xs font-black shrink-0 ml-2">Selected</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 text-sm font-bold text-app-dark flex items-center justify-center gap-1.5 hover:bg-app-bg/60 transition-colors disabled:opacity-60"
+            >
+              {isUploading
+                ? <><Loader2 size={15} className="animate-spin" /> Uploading…</>
+                : <><Upload size={15} /> Upload file</>}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*,audio/*,application/pdf"
+              onChange={handleEvidenceUpload}
+              className="hidden"
+            />
           </div>
-        )}
+          {artifacts.length === 0 && (
+            <p className="text-[11px] font-semibold text-app-slate/60">
+              Your library is empty — upload a file here and it&rsquo;s saved to your Portfolio Vault too.
+            </p>
+          )}
+          {uploadError && (
+            <p className="text-xs font-bold text-red-600">{uploadError}</p>
+          )}
+
+          {artifactPickerOpen && artifacts.length > 0 && (
+            <div className="max-h-56 overflow-y-auto overscroll-contain border border-app-dark/10 rounded-xl divide-y divide-app-dark/5">
+              {artifacts.map(artifact => {
+                const isSelected = form.artifactIds.includes(artifact.id);
+                return (
+                  <button
+                    key={artifact.id}
+                    type="button"
+                    onClick={() => toggleArtifact(artifact.id)}
+                    className={`w-full text-left px-4 py-2.5 text-sm font-semibold flex items-center justify-between ${isSelected ? 'bg-app-bright/5 text-app-dark' : 'text-app-slate hover:bg-app-bg'}`}
+                  >
+                    <span className="truncate">{artifact.name}</span>
+                    {isSelected && <span className="text-app-bright text-xs font-black shrink-0 ml-2">Attached</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </Section>
 
       {/* Meeting notes (collapsible) */}

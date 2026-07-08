@@ -14,7 +14,7 @@ service firebase.storage {
       allow create: if request.auth != null
                     && request.auth.uid == userId
                     && request.resource.size < 10 * 1024 * 1024
-                    && request.resource.contentType.matches('image/.*|application/pdf');
+                    && request.resource.contentType.matches('image/.*|video/.*|audio/.*|application/pdf');
     }
 
     // Deny all other paths

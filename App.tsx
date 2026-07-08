@@ -523,9 +523,11 @@ const App: React.FC = () => {
               sites={state.sites}
               artifacts={state.artifacts}
               onAddSite={addSite}
+              onAddArtifact={addArtifact}
               onSave={saveEntry}
               onCancel={closeEditor}
               isReadOnly={isReadOnly}
+              userId={user?.uid}
             />
           </div>
         </div>
