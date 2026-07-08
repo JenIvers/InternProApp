@@ -97,7 +97,11 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
     return map;
   }, [logs]);
 
-  const buckets: LevelBucket[] = ['HighSchool', 'Elementary', 'Middle'];
+  // Primary level leads; the remaining levels keep a stable order after it.
+  const buckets: LevelBucket[] = (['HighSchool', 'Elementary', 'Middle'] as LevelBucket[])
+    .sort((a, b) =>
+      (a === progress.primaryLevel ? 0 : 1) - (b === progress.primaryLevel ? 0 : 1)
+    );
 
   return (
     <div className="space-y-8">
@@ -162,8 +166,37 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
         </section>
       )}
 
-      {/* Requirement progress */}
+      {/* Requirement progress: Total leads as the headline stat, then the
+          primary level, then the remaining levels. */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-app-slate/15 bg-app-deep px-4 py-4 text-white">
+          <div className="flex items-center gap-2 mb-3">
+            <Clock size={16} />
+            <span className="text-xs font-bold">Total</span>
+          </div>
+          <div className="flex items-baseline gap-1 mb-2">
+            <span className="text-2xl font-bold tabular-nums">{round1(progress.total)}</span>
+            <span className="text-xs font-semibold opacity-60">
+              / {round1(progress.total + progress.remainingTotal)}h
+            </span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-white/20 overflow-hidden mb-2">
+            <div
+              className="h-full rounded-full bg-white"
+              style={{
+                width: `${
+                  progress.total + progress.remainingTotal > 0
+                    ? Math.min(100, Math.round((progress.total / (progress.total + progress.remainingTotal)) * 100))
+                    : 0
+                }%`,
+              }}
+            />
+          </div>
+          <p className="text-[11px] font-medium opacity-70">
+            {progress.remainingTotal > 0 ? `${round1(progress.remainingTotal)}h remaining` : 'Target met'}
+          </p>
+        </div>
+
         {buckets.map((bucket) => {
           const meta = BUCKET_META[bucket];
           const Icon = meta.icon;
@@ -207,34 +240,6 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
             </button>
           );
         })}
-
-        <div className="rounded-xl border border-app-slate/15 bg-app-deep px-4 py-4 text-white">
-          <div className="flex items-center gap-2 mb-3">
-            <Clock size={16} />
-            <span className="text-xs font-bold">Total</span>
-          </div>
-          <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-2xl font-bold tabular-nums">{round1(progress.total)}</span>
-            <span className="text-xs font-semibold opacity-60">
-              / {round1(progress.total + progress.remainingTotal)}h
-            </span>
-          </div>
-          <div className="w-full h-2 rounded-full bg-white/20 overflow-hidden mb-2">
-            <div
-              className="h-full rounded-full bg-white"
-              style={{
-                width: `${
-                  progress.total + progress.remainingTotal > 0
-                    ? Math.min(100, Math.round((progress.total / (progress.total + progress.remainingTotal)) * 100))
-                    : 0
-                }%`,
-              }}
-            />
-          </div>
-          <p className="text-[11px] font-medium opacity-70">
-            {progress.remainingTotal > 0 ? `${round1(progress.remainingTotal)}h remaining` : 'Target met'}
-          </p>
-        </div>
       </section>
 
       {/* Hours over time */}
