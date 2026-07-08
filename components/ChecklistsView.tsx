@@ -85,17 +85,17 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
       </div>
 
       {/* Suggested Activities */}
-      <section className="bg-white rounded-xl border border-app-dark/10 overflow-hidden">
-        <div className="flex items-center justify-between gap-2 px-4 py-3 bg-app-bg border-b border-app-dark/10">
+      <section className="bg-white rounded-xl border border-app-slate/15 overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 bg-app-bg border-b border-app-slate/10">
           <div className="flex items-center gap-2">
             <ListChecks size={14} className="text-app-slate" strokeWidth={2.5} />
-            <h3 className="text-xs font-bold uppercase tracking-widest text-app-slate">Suggested Activities</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-app-slate">Suggested Activities</h3>
           </div>
           <span className="text-xs font-bold text-app-slate tabular-nums">
             {activitiesDone} / {SUGGESTED_ACTIVITIES.length}
           </span>
         </div>
-        <ul className="divide-y divide-app-dark/5">
+        <ul className="divide-y divide-app-slate/10">
           {SUGGESTED_ACTIVITIES.map(activity => {
             const entry = data.suggestedActivities?.[activity.id];
             const linkedIds = entry?.linkedEntryIds ?? [];
@@ -127,7 +127,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                         return (
                           <span
                             key={id}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-app-bg text-[11px] font-semibold text-app-slate border border-app-dark/10"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-app-bg text-[11px] font-semibold text-app-slate border border-app-slate/15"
                           >
                             {log ? `${log.date} · ${log.title || log.activity || log.description}` : id}
                             {!isReadOnly && (
@@ -155,7 +155,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                       )}
                     </div>
                     {isPicking && !isReadOnly && (
-                      <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-app-dark/10 bg-app-bg/60">
+                      <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-app-slate/15 bg-app-bg/60">
                         {sortedLogs.length === 0 && (
                           <p className="text-xs text-app-slate px-3 py-2">No log entries yet.</p>
                         )}
@@ -164,7 +164,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                             key={log.id}
                             type="button"
                             onClick={() => toggleLinkedEntry(activity.id, log.id)}
-                            className={`w-full text-left px-3 py-2.5 min-h-[40px] text-xs border-b border-app-dark/5 last:border-0 hover:bg-white transition-colors flex items-center justify-between gap-2 ${
+                            className={`w-full text-left px-3 py-2.5 min-h-[40px] text-xs border-b border-app-slate/10 last:border-0 hover:bg-white transition-colors flex items-center justify-between gap-2 ${
                               linkedIds.includes(log.id) ? 'bg-app-bright/10' : ''
                             }`}
                           >
@@ -186,17 +186,17 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
       </section>
 
       {/* Process Deliverables */}
-      <section className="bg-white rounded-xl border border-app-dark/10 overflow-hidden">
-        <div className="flex items-center justify-between gap-2 px-4 py-3 bg-app-bg border-b border-app-dark/10">
+      <section className="bg-white rounded-xl border border-app-slate/15 overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 bg-app-bg border-b border-app-slate/10">
           <div className="flex items-center gap-2">
             <ClipboardList size={14} className="text-app-slate" strokeWidth={2.5} />
-            <h3 className="text-xs font-bold uppercase tracking-widest text-app-slate">Process Deliverables</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-app-slate">Process Deliverables</h3>
           </div>
           <span className="text-xs font-bold text-app-slate tabular-nums">
             {deliverablesDone} / {DELIVERABLES.length}
           </span>
         </div>
-        <ul className="divide-y divide-app-dark/5">
+        <ul className="divide-y divide-app-slate/10">
           {DELIVERABLES.map(deliverable => {
             const entry = data.deliverables?.[deliverable.id];
             return (
@@ -226,7 +226,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
                       onChange={e => updateDeliverableNote(deliverable.id, e.target.value)}
                       disabled={isReadOnly}
                       placeholder="Optional note (e.g. filed date, location)..."
-                      className="mt-2 w-full px-3 py-2.5 text-base sm:text-xs rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-50"
+                      className="mt-2 w-full px-3 py-2.5 text-base sm:text-xs rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -236,7 +236,7 @@ const ChecklistsView: React.FC<ChecklistsViewProps> = ({ checklists, logs, isRea
         </ul>
       </section>
       {isReadOnly && (
-        <p className="text-center text-xs text-app-slate/60 uppercase tracking-widest font-bold">Read-only view</p>
+        <p className="text-center text-xs text-app-slate/60 uppercase tracking-wide font-bold">Read-only view</p>
       )}
     </div>
   );

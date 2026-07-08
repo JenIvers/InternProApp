@@ -66,7 +66,7 @@ const ShelfSection: React.FC<{
         ) : (
           <Archive size={14} className="text-app-slate shrink-0" strokeWidth={2.5} />
         )}
-        <h3 className="text-xs font-bold uppercase tracking-widest text-app-slate truncate">
+        <h3 className="text-xs font-bold uppercase tracking-wide text-app-slate truncate">
           {shelf ? shelf.name : 'Unshelved'}
         </h3>
       </div>
@@ -236,7 +236,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
             className="rounded-xl border border-app-slate/15 bg-white p-4 flex flex-col sm:flex-row gap-3"
           >
             <div className="flex-1 min-w-0">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1.5">
                 Shelf name
               </label>
               <input
@@ -244,7 +244,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 value={newShelfName}
                 onChange={(e) => setNewShelfName(e.target.value)}
                 placeholder="e.g., PLCs, Observation Cycles…"
-                className="w-full px-3 py-2.5 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:border-app-bright font-medium text-app-dark placeholder:text-app-light/70"
+                className="w-full px-3 py-2.5 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark placeholder:text-app-light/70"
               />
             </div>
             <div className="flex items-end gap-2">
@@ -284,7 +284,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
 
       {selectedArtifact && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="absolute inset-0 bg-app-dark/60 backdrop-blur-sm" onClick={() => setSelectedArtifact(null)}></div>
+          <div className="absolute inset-0 bg-app-dark/40" onClick={() => setSelectedArtifact(null)}></div>
           <div className="relative bg-white w-full max-w-3xl rounded-t-2xl sm:rounded-2xl border border-app-slate/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             <header className="p-4 sm:p-5 border-b border-app-slate/10 flex items-center justify-between gap-3 sticky top-0 bg-white z-10 pt-safe">
               <div className="flex-1 min-w-0">
@@ -311,7 +311,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 ) : (
                   <div className="flex flex-col items-center gap-3 text-app-slate opacity-50">
                     <ImageIcon size={56} strokeWidth={1.25} />
-                    <p className="text-xs font-bold uppercase tracking-widest">Preview unavailable</p>
+                    <p className="text-xs font-bold uppercase tracking-wide">Preview unavailable</p>
                   </div>
                 )}
               </div>
@@ -321,7 +321,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Folder size={14} className="text-app-slate" strokeWidth={2.5} />
-                    <label className="text-xs font-bold uppercase tracking-widest text-app-slate">Shelf</label>
+                    <label className="text-xs font-bold uppercase tracking-wide text-app-slate">Shelf</label>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -354,7 +354,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Tag size={14} className="text-app-slate" strokeWidth={2.5} />
-                    <label className="text-xs font-bold uppercase tracking-widest text-app-slate">Competency alignment</label>
+                    <label className="text-xs font-bold uppercase tracking-wide text-app-slate">Competency alignment</label>
                   </div>
                   <div className="rounded-xl border border-app-slate/15 bg-white overflow-hidden max-h-64 overflow-y-auto no-scrollbar">
                     <ul className="divide-y divide-app-slate/10">
@@ -392,7 +392,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
             <footer className="p-4 sm:p-5 bg-white border-t border-app-slate/10 pb-safe">
               <button
                 onClick={() => setSelectedArtifact(null)}
-                className="w-full py-3 rounded-xl bg-app-dark text-white text-sm font-semibold hover:bg-app-deep transition-colors active:scale-[0.99]"
+                className="w-full py-3 rounded-lg bg-app-dark text-white text-sm font-semibold hover:bg-app-deep transition-colors active:scale-[0.99]"
               >
                 {isReadOnly ? 'Close' : 'Done'}
               </button>

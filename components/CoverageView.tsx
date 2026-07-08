@@ -51,10 +51,10 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
         <button
           type="button"
           onClick={() => setGapsOnly(v => !v)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide border transition-colors ${
             gapsOnly
               ? 'bg-app-dark text-white border-app-dark'
-              : 'bg-white text-app-slate border-app-dark/10 hover:border-app-dark/30'
+              : 'bg-white text-app-slate border-app-slate/15 hover:border-app-slate/30'
           }`}
         >
           <Filter size={14} strokeWidth={2.5} />
@@ -67,15 +67,15 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
           const rows = comps.filter(c => !gapsOnly || coverage[c.id]?.status === 'gap');
           if (rows.length === 0) return null;
           return (
-            <div key={category} className="bg-white rounded-xl border border-app-dark/10 overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 bg-app-bg border-b border-app-dark/10">
+            <div key={category} className="bg-white rounded-xl border border-app-slate/15 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 bg-app-bg border-b border-app-slate/10">
                 <Layers size={14} className="text-app-slate" strokeWidth={2.5} />
-                <h3 className="text-xs font-bold uppercase tracking-widest text-app-slate">Category {category}</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wide text-app-slate">Category {category}</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-wider text-app-slate/70 border-b border-app-dark/5">
+                    <tr className="text-left text-[11px] uppercase tracking-wide text-app-slate/70 border-b border-app-slate/10">
                       <th className="px-3 sm:px-4 py-2 font-bold">Competency</th>
                       <th className="px-3 sm:px-4 py-2 font-bold text-right">Hours</th>
                       <th className="px-4 py-2 font-bold text-right hidden sm:table-cell">Entries</th>
@@ -92,7 +92,7 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
                         <tr
                           key={c.id}
                           onClick={() => onViewCompetencyLogs(c.id)}
-                          className="border-b border-app-dark/5 last:border-0 cursor-pointer hover:bg-app-bg/60 transition-colors"
+                          className="border-b border-app-slate/10 last:border-0 cursor-pointer hover:bg-app-bg/60 transition-colors"
                         >
                           <td className="px-3 sm:px-4 py-3">
                             <div className="font-bold text-app-dark">{c.id}</div>
@@ -123,7 +123,7 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
         )}
       </div>
       {isReadOnly && (
-        <p className="text-center text-xs text-app-slate/60 uppercase tracking-widest font-bold">Read-only view</p>
+        <p className="text-center text-xs text-app-slate/60 uppercase tracking-wide font-bold">Read-only view</p>
       )}
     </div>
   );

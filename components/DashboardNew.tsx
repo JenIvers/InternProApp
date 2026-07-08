@@ -186,7 +186,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
                 )}
               </div>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-2xl font-black text-app-dark tabular-nums">{done}</span>
+                <span className="text-2xl font-bold text-app-dark tabular-nums">{done}</span>
                 <span className="text-xs font-semibold text-app-slate opacity-60">/ {target}h</span>
               </div>
               <div className="w-full h-2 rounded-full bg-app-slate/10 overflow-hidden mb-2">
@@ -202,13 +202,13 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
           );
         })}
 
-        <div className="rounded-xl border border-app-dark/15 bg-app-dark px-4 py-4 text-white">
+        <div className="rounded-xl border border-app-slate/15 bg-app-dark px-4 py-4 text-white">
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} />
             <span className="text-xs font-bold uppercase tracking-wide">Total</span>
           </div>
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-2xl font-black tabular-nums">{round1(progress.total)}</span>
+            <span className="text-2xl font-bold tabular-nums">{round1(progress.total)}</span>
             <span className="text-xs font-semibold opacity-60">
               / {round1(progress.total + progress.remainingTotal)}h
             </span>

@@ -241,7 +241,7 @@ const LogTable: React.FC<LogTableProps> = ({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Title, description, location…"
-                className="w-full pl-9 pr-3 py-2.5 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+                className="w-full pl-9 pr-3 py-2.5 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
               />
             </div>
           </div>
@@ -250,7 +250,7 @@ const LogTable: React.FC<LogTableProps> = ({
             onClick={() => setFiltersOpen((v) => !v)}
             aria-expanded={filtersOpen}
             className={`md:hidden shrink-0 flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] rounded-lg border text-sm font-semibold transition-colors ${
-              filtersOpen ? 'bg-app-dark text-white border-app-dark' : 'border-app-dark/10 text-app-slate'
+              filtersOpen ? 'bg-app-dark text-white border-app-dark' : 'border-app-slate/15 text-app-slate'
             }`}
           >
             <SlidersHorizontal size={15} /> Filters
@@ -268,7 +268,7 @@ const LogTable: React.FC<LogTableProps> = ({
             <select
               value={competencyFilter}
               onChange={(e) => setCompetencyFilter(e.target.value)}
-              className="w-full md:max-w-[220px] py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+              className="w-full md:max-w-[220px] py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
             >
               <option value="">All competencies</option>
               <optgroup label="By category">
@@ -299,7 +299,7 @@ const LogTable: React.FC<LogTableProps> = ({
             <select
               value={levelFilter}
               onChange={(e) => setLevelFilter(e.target.value as SchoolLevel | '')}
-              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
             >
               <option value="">All levels</option>
               {SCHOOL_LEVELS.map((l) => (
@@ -317,7 +317,7 @@ const LogTable: React.FC<LogTableProps> = ({
             <select
               value={siteFilter}
               onChange={(e) => setSiteFilter(e.target.value)}
-              className="w-full md:max-w-[180px] py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+              className="w-full md:max-w-[180px] py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
             >
               <option value="">All sites</option>
               {sites.map((s) => (
@@ -336,7 +336,7 @@ const LogTable: React.FC<LogTableProps> = ({
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
             />
           </div>
           <div className="min-w-0">
@@ -347,7 +347,7 @@ const LogTable: React.FC<LogTableProps> = ({
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:border-app-bright font-medium text-app-dark"
+              className="w-full py-2.5 md:py-2 px-3 text-base sm:text-sm rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark"
             />
           </div>
         </div>
@@ -361,7 +361,7 @@ const LogTable: React.FC<LogTableProps> = ({
             className={`flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] text-sm font-semibold rounded-lg border transition-colors ${
               incompleteOnly
                 ? 'bg-amber-400 border-amber-400 text-app-dark'
-                : 'border-app-dark/10 text-app-slate hover:bg-app-bg'
+                : 'border-app-slate/15 text-app-slate hover:bg-app-bg'
             }`}
           >
             <AlertTriangle size={14} /> Incomplete only
@@ -378,14 +378,14 @@ const LogTable: React.FC<LogTableProps> = ({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] text-sm font-semibold text-app-slate rounded-lg border border-app-dark/10 hover:bg-app-bg transition-colors"
+              className="flex items-center gap-1.5 py-2.5 px-3 min-h-[44px] text-sm font-semibold text-app-slate rounded-lg border border-app-slate/15 hover:bg-app-bg transition-colors"
             >
               <X size={14} /> Clear
             </button>
           )}
           <button
             onClick={() => onExportFiltered(filteredLogs)}
-            className="flex items-center gap-2 py-2.5 px-4 min-h-[44px] text-sm font-bold text-white bg-app-dark rounded-lg hover:bg-black transition-colors active:scale-[0.98] ml-auto"
+            className="flex items-center gap-2 py-2.5 px-4 min-h-[44px] text-sm font-bold text-white bg-app-dark rounded-lg hover:bg-app-deep transition-colors active:scale-[0.98] ml-auto"
           >
             <Download size={15} /> Export
           </button>
@@ -399,19 +399,19 @@ const LogTable: React.FC<LogTableProps> = ({
       </div>
 
       {/* Table (desktop / tablet) */}
-      <div className="hidden md:block overflow-x-auto rounded-2xl border border-app-dark/10 bg-white shadow-sm">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-app-slate/15 bg-white shadow-sm">
         <table className="w-full min-w-[820px] text-sm border-collapse">
           <thead>
-            <tr className="bg-app-bg text-app-slate border-b border-app-dark/10">
+            <tr className="bg-app-bg text-app-slate border-b border-app-slate/10">
               <th className="w-8" />
               <SortableTh label="Date" onClick={() => toggleSort('date')} icon={sortIcon('date')} />
-              <th className="text-left font-black uppercase tracking-widest text-[10px] px-3 py-3">
+              <th className="text-left font-semibold uppercase tracking-wide text-[10px] px-3 py-3">
                 Title / Activity
               </th>
-              <th className="text-left font-black uppercase tracking-widest text-[10px] px-3 py-3">
+              <th className="text-left font-semibold uppercase tracking-wide text-[10px] px-3 py-3">
                 Competencies
               </th>
-              <th className="text-left font-black uppercase tracking-widest text-[10px] px-3 py-3">
+              <th className="text-left font-semibold uppercase tracking-wide text-[10px] px-3 py-3">
                 Location
               </th>
               <SortableTh
@@ -447,7 +447,7 @@ const LogTable: React.FC<LogTableProps> = ({
               return (
                 <React.Fragment key={log.id}>
                   <tr
-                    className={`border-b border-app-dark/5 hover:bg-app-bright/5 transition-colors ${
+                    className={`border-b border-app-slate/10 hover:bg-app-bright/5 transition-colors ${
                       expanded ? 'bg-app-bright/5' : ''
                     }`}
                   >
@@ -531,7 +531,7 @@ const LogTable: React.FC<LogTableProps> = ({
                         {log.primaryCompetencyId && (
                           <span
                             title={competencyById.get(log.primaryCompetencyId)?.title}
-                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-app-dark text-white text-[10px] font-black"
+                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-app-dark text-white text-[10px] font-bold"
                           >
                             <Star size={9} className="fill-current" />
                             {log.primaryCompetencyId}
@@ -543,7 +543,7 @@ const LogTable: React.FC<LogTableProps> = ({
                             <span
                               key={id}
                               title={competencyById.get(id)?.title}
-                              className="px-1.5 py-0.5 rounded bg-app-bright/10 text-app-slate text-[10px] font-black border border-app-bright/10"
+                              className="px-1.5 py-0.5 rounded-md bg-app-bright/10 text-app-slate text-[10px] font-bold border border-app-bright/10"
                             >
                               {id}
                             </span>
@@ -560,7 +560,7 @@ const LogTable: React.FC<LogTableProps> = ({
                     </td>
 
                     {/* Hours (quick-edit) */}
-                    <td className="px-3 py-2 align-top text-right font-black text-app-dark whitespace-nowrap">
+                    <td className="px-3 py-2 align-top text-right font-bold text-app-dark whitespace-nowrap">
                       {!isReadOnly && isEditing(log.id, 'hours') ? (
                         <input
                           type="number"
@@ -611,7 +611,7 @@ const LogTable: React.FC<LogTableProps> = ({
                           }
                           className={isReadOnly ? 'cursor-default' : cellBtnClass}
                         >
-                          <span className="text-xs font-black uppercase tracking-wide text-app-slate">
+                          <span className="text-xs font-bold uppercase tracking-wide text-app-slate">
                             {log.schoolLevel}
                           </span>
                         </button>
@@ -643,12 +643,12 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {/* Expanded detail row */}
                   {expanded && (
-                    <tr className="bg-app-bg/60 border-b border-app-dark/10">
+                    <tr className="bg-app-bg/60 border-b border-app-slate/10">
                       <td />
                       <td colSpan={isReadOnly ? 6 : 7} className="px-3 py-4">
                         <div className="space-y-4 max-w-3xl">
                           <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1">
+                            <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1">
                               Description
                             </h4>
                             <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -657,7 +657,7 @@ const LogTable: React.FC<LogTableProps> = ({
                           </div>
 
                           <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                            <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
                               Competencies
                             </h4>
                             <div className="flex flex-wrap gap-1.5">
@@ -666,7 +666,7 @@ const LogTable: React.FC<LogTableProps> = ({
                                   <span className="text-sm text-app-slate">None tagged.</span>
                                 )}
                               {log.primaryCompetencyId && (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-dark text-white text-xs font-black">
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-dark text-white text-xs font-bold">
                                   <Star size={11} className="fill-current" />
                                   {log.primaryCompetencyId}
                                   {competencyById.get(log.primaryCompetencyId)
@@ -679,7 +679,7 @@ const LogTable: React.FC<LogTableProps> = ({
                                 .map((id) => (
                                   <span
                                     key={id}
-                                    className="px-2 py-1 rounded-lg bg-white border border-app-dark/10 text-app-slate text-xs font-black"
+                                    className="px-2 py-1 rounded-lg bg-white border border-app-slate/15 text-app-slate text-xs font-bold"
                                   >
                                     {id}
                                     {competencyById.get(id) ? `: ${competencyById.get(id)!.title}` : ''}
@@ -690,7 +690,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                           {log.evidenceLinks && log.evidenceLinks.length > 0 && (
                             <div>
-                              <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                              <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
                                 Evidence Links
                               </h4>
                               <ul className="space-y-1">
@@ -713,7 +713,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                           {log.meetingNotes && log.meetingNotes.reflection && (
                             <div>
-                              <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5 flex items-center gap-1.5">
+                              <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5 flex items-center gap-1.5">
                                 <MessageSquare size={12} /> Meeting Notes
                               </h4>
                               <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -724,7 +724,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                           {log.reflections && (
                             <div>
-                              <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                              <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
                                 Reflection
                               </h4>
                               <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -737,13 +737,13 @@ const LogTable: React.FC<LogTableProps> = ({
                             <div className="flex items-center gap-2 pt-1">
                               <button
                                 onClick={() => onEditEntry(log)}
-                                className="flex items-center gap-1.5 py-1.5 px-3 text-xs font-black uppercase tracking-widest text-white bg-app-dark rounded-lg hover:bg-black transition-colors"
+                                className="flex items-center gap-1.5 py-1.5 px-3 text-xs font-bold text-white bg-app-dark rounded-lg hover:bg-app-deep transition-colors"
                               >
                                 <Pencil size={13} /> Edit
                               </button>
                               <button
                                 onClick={() => onDeleteLog(log.id)}
-                                className="flex items-center gap-1.5 py-1.5 px-3 text-xs font-black uppercase tracking-widest text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                                className="flex items-center gap-1.5 py-1.5 px-3 text-xs font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
                               >
                                 <Trash2 size={13} /> Delete
                               </button>
@@ -761,9 +761,9 @@ const LogTable: React.FC<LogTableProps> = ({
           {/* Totals row for the current filtered set */}
           {filteredLogs.length > 0 && (
             <tfoot>
-              <tr className="border-t-2 border-app-dark/20 bg-app-bg font-black text-app-dark">
+              <tr className="border-t border-app-slate/10 bg-app-bg font-bold text-app-dark">
                 <td />
-                <td className="px-3 py-3 text-[10px] uppercase tracking-widest text-app-slate" colSpan={4}>
+                <td className="px-3 py-3 text-[10px] uppercase tracking-wide text-app-slate" colSpan={4}>
                   Totals ({filteredLogs.length} {filteredLogs.length === 1 ? 'entry' : 'entries'})
                   <span className="ml-3 font-bold normal-case tracking-normal text-app-slate">
                     {SCHOOL_LEVELS.filter((l) => hoursByLevel[l]).map((l) => (
@@ -828,7 +828,7 @@ const LogTable: React.FC<LogTableProps> = ({
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-semibold text-app-slate">
                     <span className="tabular-nums">{log.date}</span>
                     <span className="opacity-40">·</span>
-                    <span className="tabular-nums font-black text-app-dark">{fmtHours(log.hours)}h</span>
+                    <span className="tabular-nums font-bold text-app-dark">{fmtHours(log.hours)}h</span>
                     <span className="opacity-40">·</span>
                     <span className="uppercase tracking-wide text-[11px]">{log.schoolLevel}</span>
                     <span className="opacity-40">·</span>
@@ -837,7 +837,7 @@ const LogTable: React.FC<LogTableProps> = ({
                   {(log.primaryCompetencyId || tags.length > 0) && (
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {log.primaryCompetencyId && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-app-dark text-white text-[10px] font-black">
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-app-dark text-white text-[10px] font-bold">
                           <Star size={9} className="fill-current" />
                           {log.primaryCompetencyId}
                         </span>
@@ -848,7 +848,7 @@ const LogTable: React.FC<LogTableProps> = ({
                         .map((id) => (
                           <span
                             key={id}
-                            className="px-1.5 py-0.5 rounded bg-app-bright/10 text-app-slate text-[10px] font-black border border-app-bright/10"
+                            className="px-1.5 py-0.5 rounded-md bg-app-bright/10 text-app-slate text-[10px] font-bold border border-app-bright/10"
                           >
                             {id}
                           </span>
@@ -863,9 +863,9 @@ const LogTable: React.FC<LogTableProps> = ({
               </button>
 
               {expanded && (
-                <div className="px-4 pb-4 pt-1 space-y-3 border-t border-app-dark/5 bg-app-bg/40">
+                <div className="px-4 pb-4 pt-1 space-y-3 border-t border-app-slate/10 bg-app-bg/40">
                   <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1">
                       Description
                     </h4>
                     <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -875,12 +875,12 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {(log.taggedCompetencyIds ?? []).length > 0 || log.primaryCompetencyId ? (
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
                         Competencies
                       </h4>
                       <div className="flex flex-wrap gap-1.5">
                         {log.primaryCompetencyId && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-dark text-white text-xs font-black">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-dark text-white text-xs font-bold">
                             <Star size={11} className="fill-current" />
                             {log.primaryCompetencyId}
                             {competencyById.get(log.primaryCompetencyId)
@@ -893,7 +893,7 @@ const LogTable: React.FC<LogTableProps> = ({
                           .map((id) => (
                             <span
                               key={id}
-                              className="px-2 py-1 rounded-lg bg-white border border-app-dark/10 text-app-slate text-xs font-black"
+                              className="px-2 py-1 rounded-lg bg-white border border-app-slate/15 text-app-slate text-xs font-bold"
                             >
                               {id}
                               {competencyById.get(id) ? `: ${competencyById.get(id)!.title}` : ''}
@@ -905,7 +905,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {log.evidenceLinks && log.evidenceLinks.length > 0 && (
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
                         Evidence Links
                       </h4>
                       <ul className="space-y-1">
@@ -928,7 +928,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {log.meetingNotes && log.meetingNotes.reflection && (
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5 flex items-center gap-1.5">
+                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5 flex items-center gap-1.5">
                         <MessageSquare size={12} /> Meeting Notes
                       </h4>
                       <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -939,7 +939,7 @@ const LogTable: React.FC<LogTableProps> = ({
 
                   {log.reflections && (
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-1.5">
+                      <h4 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-1.5">
                         Reflection
                       </h4>
                       <p className="text-sm text-app-dark font-medium whitespace-pre-wrap">
@@ -952,14 +952,14 @@ const LogTable: React.FC<LogTableProps> = ({
                     <div className="flex items-center gap-2 pt-1">
                       <button
                         onClick={() => onEditEntry(log)}
-                        className="flex-1 flex items-center justify-center gap-1.5 min-h-[44px] px-3 text-xs font-black uppercase tracking-widest text-white bg-app-dark rounded-xl hover:bg-black transition-colors active:scale-[0.99]"
+                        className="flex-1 flex items-center justify-center gap-1.5 min-h-[44px] px-3 text-xs font-bold text-white bg-app-dark rounded-lg hover:bg-app-deep transition-colors active:scale-[0.99]"
                       >
                         <Pencil size={14} /> Edit
                       </button>
                       <button
                         onClick={() => onDeleteLog(log.id)}
                         aria-label="Delete entry"
-                        className="flex items-center justify-center gap-1.5 min-h-[44px] px-4 text-xs font-black uppercase tracking-widest text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+                        className="flex items-center justify-center gap-1.5 min-h-[44px] px-4 text-xs font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
                       >
                         <Trash2 size={14} /> Delete
                       </button>
@@ -975,11 +975,11 @@ const LogTable: React.FC<LogTableProps> = ({
 
         {/* Mobile totals */}
         {filteredLogs.length > 0 && (
-          <div className="rounded-2xl border-2 border-app-dark/15 bg-app-bg px-4 py-3 flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-app-slate">
+          <div className="rounded-xl border border-app-slate/15 bg-app-bg px-4 py-3 flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-app-slate">
               Total · {filteredLogs.length} {filteredLogs.length === 1 ? 'entry' : 'entries'}
             </span>
-            <span className="text-base font-black text-app-dark tabular-nums">
+            <span className="text-base font-bold text-app-dark tabular-nums">
               {fmtHours(grandTotal)} hrs
             </span>
           </div>
@@ -988,8 +988,8 @@ const LogTable: React.FC<LogTableProps> = ({
 
       {/* Per-competency breakdown for the filtered set */}
       {competencyBreakdown.length > 0 && (
-        <div className="rounded-2xl border border-app-dark/10 bg-white shadow-sm p-4">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-app-slate mb-3">
+        <div className="rounded-xl border border-app-slate/15 bg-white shadow-sm p-4">
+          <h3 className="text-[10px] font-bold uppercase tracking-wide text-app-slate mb-3">
             Competency Breakdown (filtered) · attributed hours
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -997,9 +997,9 @@ const LogTable: React.FC<LogTableProps> = ({
               <div
                 key={id}
                 title={competencyById.get(id)?.title}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-app-bg border border-app-dark/5"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-app-bg border border-app-slate/15"
               >
-                <span className="text-xs font-black text-app-dark">{id}</span>
+                <span className="text-xs font-bold text-app-dark">{id}</span>
                 <span className="text-xs font-bold text-app-bright">{fmtHours(hrs)} hrs</span>
               </div>
             ))}
@@ -1019,7 +1019,7 @@ const SortableTh: React.FC<{
   <th className={`px-3 py-3 ${align === 'right' ? 'text-right' : 'text-left'}`}>
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1 font-black uppercase tracking-widest text-[10px] text-app-slate hover:text-app-dark transition-colors ${
+      className={`inline-flex items-center gap-1 font-semibold uppercase tracking-wide text-[10px] text-app-slate hover:text-app-dark transition-colors ${
         align === 'right' ? 'flex-row-reverse' : ''
       }`}
     >

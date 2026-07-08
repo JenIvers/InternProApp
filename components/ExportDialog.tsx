@@ -173,23 +173,23 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-app-dark/40 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="export-dialog-title"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-xl"
+        className="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-app-slate/10 px-5 py-4">
           <div className="flex items-center gap-2">
             <FileDown size={20} className="text-app-bright" />
             <h2
               id="export-dialog-title"
-              className="text-lg font-semibold text-app-dark"
+              className="text-lg font-bold text-app-dark"
             >
               Export PDF
             </h2>
@@ -197,7 +197,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1 text-app-slate hover:bg-app-slate/5 hover:text-app-dark"
             aria-label="Close"
           >
             <X size={20} />
@@ -206,7 +206,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
           {/* Mode selection */}
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-app-slate">
             Document
           </p>
           <div className="space-y-2">
@@ -225,26 +225,26 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
                     'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition',
                     active
                       ? 'border-app-bright bg-app-bright/10'
-                      : 'border-slate-200 hover:border-slate-300',
+                      : 'border-app-slate/15 hover:border-app-slate/30',
                     disabled ? 'cursor-not-allowed opacity-50' : '',
                   ].join(' ')}
                 >
                   <Icon
                     size={18}
-                    className={active ? 'text-app-bright' : 'text-slate-400'}
+                    className={active ? 'text-app-bright' : 'text-app-slate'}
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-medium text-app-dark">
                         {m.label}
                       </span>
-                      <span className="shrink-0 text-xs text-slate-500">
+                      <span className="shrink-0 text-xs text-app-slate">
                         {disabled
                           ? 'No meeting notes'
                           : `${count} ${count === 1 ? 'entry' : 'entries'}`}
                       </span>
                     </div>
-                    <p className="truncate text-xs text-slate-500">
+                    <p className="truncate text-xs text-app-slate">
                       {m.description}
                     </p>
                   </div>
@@ -256,7 +256,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           {/* Scope selection */}
           {hasFilteredView && (
             <>
-              <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-app-slate">
                 Scope
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -267,7 +267,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
                     'rounded-lg border px-3 py-2 text-sm transition',
                     scope === 'all'
                       ? 'border-app-bright bg-app-bright/10 font-medium text-app-dark'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-300',
+                      : 'border-app-slate/15 text-app-slate hover:border-app-slate/30',
                   ].join(' ')}
                 >
                   All entries ({logs.length})
@@ -279,7 +279,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
                     'rounded-lg border px-3 py-2 text-sm transition',
                     scope === 'filtered'
                       ? 'border-app-bright bg-app-bright/10 font-medium text-app-dark'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-300',
+                      : 'border-app-slate/15 text-app-slate hover:border-app-slate/30',
                   ].join(' ')}
                 >
                   Filtered view ({filteredLogs?.length ?? 0})
@@ -289,18 +289,18 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
           )}
 
           {error && (
-            <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+            <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
               {error}
             </p>
           )}
         </div>
 
         {/* Footer — sticky above the iOS safe area on mobile */}
-        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-200 px-5 py-4 pb-safe sm:pb-4">
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-app-slate/10 px-5 py-4 pb-safe sm:pb-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-app-slate hover:bg-app-slate/5"
           >
             Cancel
           </button>
@@ -308,7 +308,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
             type="button"
             onClick={handleExport}
             disabled={!canExport}
-            className="flex items-center gap-2 rounded-lg bg-app-bright px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-app-deep disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-app-dark px-4 py-2.5 text-sm font-bold text-white transition hover:bg-app-deep disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? (
               <>

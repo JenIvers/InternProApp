@@ -60,7 +60,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6">
       <header className="flex items-center gap-3">
         <div className="p-2 rounded-xl bg-app-bright/10">
           <SettingsIcon className="text-app-bright" size={22} />
@@ -72,7 +72,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
       </header>
 
       {/* Profile */}
-      <section className="bg-white/60 border border-app-slate/10 rounded-xl p-4 sm:p-6 space-y-4">
+      <section className="bg-white border border-app-slate/15 rounded-xl p-4 sm:p-6 space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <User size={18} className="text-app-bright" />
           <h2 className="text-lg font-bold text-app-dark">Profile</h2>
@@ -93,7 +93,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
       </section>
 
       {/* Targets */}
-      <section className="bg-white/60 border border-app-slate/10 rounded-xl p-4 sm:p-6 space-y-5">
+      <section className="bg-white border border-app-slate/15 rounded-xl p-4 sm:p-6 space-y-5">
         <div className="flex items-center gap-2 mb-2">
           <ShieldCheck size={18} className="text-app-bright" />
           <h2 className="text-lg font-bold text-app-dark">Requirement targets</h2>
@@ -101,14 +101,14 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="min-w-0">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
+            <label className="block text-xs font-semibold text-app-slate mb-1">
               Primary level
             </label>
             <select
               value={draft.primaryLevelBucket}
               onChange={e => handlePrimaryBucketChange(e.target.value as LevelBucket)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
+              className="w-full min-h-[44px] rounded-lg border border-app-slate/15 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-60"
             >
               {LEVEL_BUCKET_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -117,7 +117,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
           </div>
 
           <div className="min-w-0">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
+            <label className="block text-xs font-semibold text-app-slate mb-1">
               Intermediate maps to
             </label>
             <input
@@ -125,14 +125,14 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value="Elementary"
               disabled
               readOnly
-              className="w-full rounded-lg border border-app-slate/20 bg-app-slate/5 px-3 py-2 text-sm text-app-slate"
+              className="w-full min-h-[44px] rounded-lg border border-app-slate/15 bg-app-slate/5 px-3 py-2 text-sm text-app-slate"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="min-w-0">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
+            <label className="block text-xs font-semibold text-app-slate mb-1">
               Total hours
             </label>
             <input
@@ -141,11 +141,11 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value={draft.targets.total}
               onChange={e => handleTargetChange('total', e.target.value)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
+              className="w-full min-h-[44px] rounded-lg border border-app-slate/15 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-60"
             />
           </div>
           <div className="min-w-0">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
+            <label className="block text-xs font-semibold text-app-slate mb-1">
               Primary level hours
             </label>
             <input
@@ -154,11 +154,11 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value={draft.targets.primary}
               onChange={e => handleTargetChange('primary', e.target.value)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
+              className="w-full min-h-[44px] rounded-lg border border-app-slate/15 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-60"
             />
           </div>
           <div className="min-w-0">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-app-slate mb-1">
+            <label className="block text-xs font-semibold text-app-slate mb-1">
               Each other level hours
             </label>
             <input
@@ -167,7 +167,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
               value={draft.targets.others}
               onChange={e => handleTargetChange('others', e.target.value)}
               disabled={isReadOnly}
-              className="w-full rounded-lg border border-app-slate/20 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark disabled:opacity-60"
+              className="w-full min-h-[44px] rounded-lg border border-app-slate/15 bg-white px-3 py-2.5 text-base sm:text-sm text-app-dark outline-none focus:ring-2 focus:ring-app-bright/30 disabled:opacity-60"
             />
           </div>
         </div>
@@ -177,7 +177,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
             <button
               onClick={handleSave}
               disabled={!isDirty}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-app-dark text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg bg-app-dark text-white text-sm font-semibold hover:bg-app-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Save size={16} />
               Save settings
@@ -190,7 +190,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
       </section>
 
       {/* Data backup */}
-      <section className="bg-white/60 border border-app-slate/10 rounded-xl p-4 sm:p-6 space-y-3">
+      <section className="bg-white border border-app-slate/15 rounded-xl p-4 sm:p-6 space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Download size={18} className="text-app-bright" />
           <h2 className="text-lg font-bold text-app-dark">Data backup</h2>
@@ -200,7 +200,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
         </p>
         <button
           onClick={handleDownloadData}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-app-slate/30 text-app-dark text-sm font-semibold hover:bg-app-slate/10"
+          className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg border border-app-slate/15 text-app-dark text-sm font-semibold hover:bg-app-slate/5 transition-colors"
         >
           <Download size={16} />
           Download my data (JSON)

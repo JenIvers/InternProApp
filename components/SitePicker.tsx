@@ -62,7 +62,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
         <select
           value={isCustom ? '__custom__' : (siteId || '')}
           onChange={handleSelectChange}
-          className="w-full pl-11 pr-10 py-2.5 min-h-[44px] rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-bold text-app-dark appearance-none cursor-pointer"
+          className="w-full pl-11 pr-10 py-2.5 min-h-[44px] rounded-lg bg-white border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-bold text-app-dark appearance-none cursor-pointer"
         >
           <option value="">Select a site&hellip;</option>
           {sites.map(site => (
@@ -80,7 +80,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
           value={location || ''}
           onChange={e => onChange({ siteId: undefined, location: e.target.value })}
           placeholder="Type a location name"
-          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-white border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
         />
       )}
 
@@ -93,7 +93,7 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
           <Plus size={14} /> Add new site
         </button>
       ) : (
-        <form onSubmit={handleAddSiteSubmit} className="p-4 bg-app-bg/50 rounded-lg border border-app-dark/10 space-y-3">
+        <form onSubmit={handleAddSiteSubmit} className="p-4 bg-app-bg/50 rounded-lg border border-app-slate/15 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-app-slate">New site</span>
             <button type="button" onClick={() => setIsAddingSite(false)} className="text-app-slate/50 hover:text-app-dark">
@@ -105,13 +105,13 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
             value={newSite.name || ''}
             onChange={e => setNewSite({ ...newSite, name: e.target.value })}
             placeholder="Site name"
-            className="w-full px-4 py-2.5 rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
+            className="w-full px-4 py-2.5 rounded-lg bg-white border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
           />
           <div className="grid grid-cols-2 gap-3">
             <select
               value={newSite.level}
               onChange={e => setNewSite({ ...newSite, level: e.target.value as Site['level'] })}
-              className="w-full min-w-0 px-4 py-2.5 rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
+              className="w-full min-w-0 px-4 py-2.5 rounded-lg bg-white border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
             >
               <option value="Primary">Primary (K-6)</option>
               <option value="Secondary">Secondary (6-12)</option>
@@ -121,12 +121,12 @@ const SitePicker: React.FC<SitePickerProps> = ({ sites, siteId, location, onChan
               value={newSite.mentorName || ''}
               onChange={e => setNewSite({ ...newSite, mentorName: e.target.value })}
               placeholder="Mentor name"
-              className="w-full min-w-0 px-4 py-2.5 rounded-lg bg-white border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
+              className="w-full min-w-0 px-4 py-2.5 rounded-lg bg-white border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-sm font-semibold text-app-dark"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-2.5 min-h-[44px] bg-app-dark text-white rounded-lg font-bold text-sm hover:bg-black transition-colors"
+            className="w-full py-2.5 min-h-[44px] bg-app-dark text-white rounded-lg font-bold text-sm hover:bg-app-deep transition-colors"
           >
             Save site
           </button>

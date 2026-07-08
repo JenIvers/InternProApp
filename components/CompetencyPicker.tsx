@@ -192,12 +192,12 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
       >
         <span
           className={`shrink-0 w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center transition-colors ${
-            isSelected ? 'bg-app-dark border-app-dark text-white' : 'border-app-dark/25 bg-white'
+            isSelected ? 'bg-app-dark border-app-dark text-white' : 'border-app-slate/30 bg-white'
           }`}
         >
           {isSelected && <Check size={13} strokeWidth={3} />}
         </span>
-        <span className="shrink-0 w-9 text-xs font-black text-app-dark tabular-nums">{c.id}</span>
+        <span className="shrink-0 w-9 text-xs font-bold text-app-dark tabular-nums">{c.id}</span>
         <span className="min-w-0 truncate text-sm font-semibold text-app-slate">{c.title}</span>
       </button>
     );
@@ -216,8 +216,8 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
             <span
               key={c.id}
               title={c.title}
-              className={`flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-bold border ${
-                isPrimary ? 'bg-app-dark text-white border-app-dark' : 'bg-white text-app-dark border-app-dark/15'
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border ${
+                isPrimary ? 'bg-app-dark text-white border-app-dark' : 'bg-white text-app-dark border-app-slate/15'
               }`}
             >
               {isPrimary && <Star size={12} className="fill-current" />}
@@ -239,8 +239,8 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
             return (
               <span
                 key={c.id}
-                className={`flex items-center gap-0.5 pl-3 pr-1 py-1 rounded-xl text-xs font-bold border ${
-                  isPrimary ? 'bg-app-dark text-white border-app-dark' : 'bg-white text-app-dark border-app-dark/15'
+                className={`flex items-center gap-0.5 pl-3 pr-1 py-1 rounded-lg text-xs font-bold border ${
+                  isPrimary ? 'bg-app-dark text-white border-app-dark' : 'bg-white text-app-dark border-app-slate/15'
                 }`}
               >
                 <span title={c.title} className="pr-1">{c.id}</span>
@@ -281,7 +281,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
       <button
         type="button"
         onClick={openSheet}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 text-sm font-bold text-app-dark hover:border-app-bright/40 transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 text-sm font-bold text-app-dark hover:border-app-bright/40 transition-colors"
       >
         <Plus size={16} className="text-app-bright" />
         {selectedCompetencies.length > 0 ? 'Edit selection' : 'Add competencies'}
@@ -289,7 +289,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
 
       {/* ── Inline: optional hour-split editor ──────────────────────────────── */}
       {selectedCompetencies.length > 1 && hours !== undefined && onHourSplitChange && (
-        <div className="border border-app-dark/10 rounded-lg overflow-hidden">
+        <div className="border border-app-slate/15 rounded-lg overflow-hidden">
           <button
             type="button"
             onClick={() => {
@@ -316,11 +316,11 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
                     min="0"
                     value={hourSplit?.[c.id] ?? ''}
                     onChange={e => handleSplitChange(c.id, e.target.value)}
-                    className="w-24 px-3 py-2 min-h-[40px] rounded-lg bg-app-bg border border-app-dark/10 text-right font-bold text-base sm:text-sm outline-none focus:ring-2 focus:ring-app-bright/30"
+                    className="w-24 px-3 py-2 min-h-[40px] rounded-lg bg-app-bg border border-app-slate/15 text-right font-bold text-base sm:text-sm outline-none focus:ring-2 focus:ring-app-bright/30"
                   />
                 </div>
               ))}
-              <div className={`flex items-center justify-between pt-2 border-t border-app-dark/10 text-xs font-black ${splitMismatch ? 'text-red-500' : 'text-app-slate'}`}>
+              <div className={`flex items-center justify-between pt-2 border-t border-app-slate/10 text-xs font-bold ${splitMismatch ? 'text-red-500' : 'text-app-slate'}`}>
                 <span>Split Total</span>
                 <span>{splitSum} / {hours}</span>
               </div>
@@ -336,12 +336,12 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
       {sheetOpen && createPortal(
         <div className="fixed inset-0 z-[90] flex md:items-center md:justify-center md:p-6">
           <div
-            className="absolute inset-0 bg-app-dark/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-app-dark/40"
             onClick={() => setSheetOpen(false)}
           />
           <div className="relative bg-white w-full h-dvh md:h-auto md:max-h-[80vh] md:max-w-lg md:rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             {/* Sticky header: search + close */}
-            <div className="shrink-0 border-b border-app-dark/10 px-4 pt-safe">
+            <div className="shrink-0 border-b border-app-slate/10 px-4 pt-safe">
               <div className="flex items-center gap-2 py-3">
                 <div className="relative flex-1 min-w-0">
                   <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-app-slate/50" />
@@ -351,7 +351,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
                     value={query}
                     onChange={e => setQuery(e.target.value)}
                     placeholder="Search competencies…"
-                    className="w-full pl-10 pr-3 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base font-semibold text-app-dark"
+                    className="w-full pl-10 pr-3 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-base font-semibold text-app-dark"
                   />
                 </div>
                 <button
@@ -370,10 +370,10 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
               {/* Frequently used (only when not searching) */}
               {!q && frequentIds.length > 0 && (
                 <div>
-                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-app-slate/70 border-b border-app-dark/5">
+                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-app-slate/70 border-b border-app-slate/10">
                     Frequently used
                   </div>
-                  <div className="divide-y divide-app-dark/5">
+                  <div className="divide-y divide-app-slate/10">
                     {frequentIds.map(id => renderRow(BY_ID[id]))}
                   </div>
                 </div>
@@ -382,10 +382,10 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
               {/* Flat list with sticky category headers */}
               {visibleGroups.map(group => (
                 <div key={group.key}>
-                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-app-slate/70 border-b border-app-dark/5">
+                  <div className="sticky top-0 z-10 bg-app-bg/95 backdrop-blur-sm px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-app-slate/70 border-b border-app-slate/10">
                     <span className="truncate">{group.title}</span>
                   </div>
-                  <div className="divide-y divide-app-dark/5">
+                  <div className="divide-y divide-app-slate/10">
                     {group.items.map(c => renderRow(c))}
                   </div>
                 </div>
@@ -399,7 +399,7 @@ const CompetencyPicker: React.FC<CompetencyPickerProps> = ({
             </div>
 
             {/* Footer: Done */}
-            <div className="shrink-0 border-t border-app-dark/10 bg-white px-4 py-3 pb-safe">
+            <div className="shrink-0 border-t border-app-slate/10 bg-white px-4 py-3 pb-safe">
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}

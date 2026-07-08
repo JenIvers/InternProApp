@@ -246,7 +246,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
 
   if (isReadOnly) {
     return (
-      <div className="p-6 bg-white rounded-2xl border border-app-dark/10 text-sm font-semibold text-app-slate">
+      <div className="p-6 bg-white rounded-2xl border border-app-slate/15 text-sm font-semibold text-app-slate">
         Editing is disabled in read-only viewer mode.
       </div>
     );
@@ -255,9 +255,9 @@ const EntryForm: React.FC<EntryFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="bg-white flex flex-col flex-1 min-h-0 md:rounded-2xl">
       {/* Header — pinned; respects the iOS safe-area inset */}
-      <div className="shrink-0 border-b border-app-dark/10 px-5 md:px-8 pt-safe">
+      <div className="shrink-0 border-b border-app-slate/15 px-5 md:px-8 pt-safe">
         <div className="flex items-center justify-between py-4">
-          <h3 className="text-lg font-black text-app-dark">{isEdit ? 'Edit Activity' : 'New Activity'}</h3>
+          <h3 className="text-lg font-bold text-app-dark">{isEdit ? 'Edit Activity' : 'New Activity'}</h3>
           <button
             type="button"
             onClick={onCancel}
@@ -282,7 +282,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
             required
             value={form.date}
             onChange={e => updateField('date', e.target.value)}
-            className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
+            className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
           />
         </div>
         <div className="space-y-1.5 min-w-0">
@@ -297,7 +297,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
             min="0"
             value={form.hours}
             onChange={e => updateField('hours', parseFloat(e.target.value))}
-            className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
+            className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
           />
         </div>
         <div className="space-y-1.5 min-w-0">
@@ -308,7 +308,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
             <select
               value={form.schoolLevel}
               onChange={e => updateField('schoolLevel', e.target.value as SchoolLevel)}
-              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base appearance-none cursor-pointer"
+              className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base appearance-none cursor-pointer"
             >
               {SCHOOL_LEVELS.map(level => <option key={level} value={level}>{level}</option>)}
             </select>
@@ -327,7 +327,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
           value={form.title || ''}
           onChange={e => updateField('title', e.target.value)}
           placeholder="Brief title for this activity"
-          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
+          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-bold text-app-dark text-base"
         />
       </div>
 
@@ -345,7 +345,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
       </div>
 
       {/* Detail sections — one grouped container, hairline dividers between rows */}
-      <div className="rounded-xl border border-app-dark/10 overflow-hidden divide-y divide-app-dark/10 bg-white">
+      <div className="rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10 bg-white">
       {/* Description (collapsible — soft-optional for quick capture) */}
       <Section
         title="Description"
@@ -360,7 +360,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
           value={form.description ?? form.activity}
           onChange={e => updateField('description', e.target.value)}
           placeholder="What did you do during this activity?"
-          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark text-base resize-none"
+          className="w-full px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark text-base resize-none"
         />
       </Section>
 
@@ -397,7 +397,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
             <Link2 size={13} /> Evidence Links
           </label>
           {(form.evidenceLinks || []).map(link => (
-            <div key={link.id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-dark/10">
+            <div key={link.id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-slate/15">
               <a href={link.url} target="_blank" rel="noreferrer" className="text-sm font-bold text-app-bright truncate hover:underline">
                 {link.label}
               </a>
@@ -412,19 +412,19 @@ const EntryForm: React.FC<EntryFormProps> = ({
               value={newLinkLabel}
               onChange={e => setNewLinkLabel(e.target.value)}
               placeholder="Label (optional)"
-              className="flex-1 min-w-0 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+              className="flex-1 min-w-0 px-3 py-3 rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
             />
             <input
               type="url"
               value={newLinkUrl}
               onChange={e => setNewLinkUrl(e.target.value)}
               placeholder="Paste a URL"
-              className="flex-1 min-w-0 px-3 py-3 rounded-lg bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
+              className="flex-1 min-w-0 px-3 py-3 rounded-lg bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 text-base sm:text-sm font-semibold text-app-dark"
             />
             <button
               type="button"
               onClick={addEvidenceLink}
-              className="px-4 py-2.5 min-h-[44px] rounded-lg bg-app-dark text-white font-bold text-sm flex items-center justify-center gap-1.5 hover:bg-black transition-colors shrink-0"
+              className="px-4 py-2.5 min-h-[44px] rounded-lg bg-app-dark text-white font-bold text-sm flex items-center justify-center gap-1.5 hover:bg-app-deep transition-colors shrink-0"
             >
               <Plus size={14} /> Add
             </button>
@@ -441,7 +441,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
           {form.artifactIds.map(id => {
             const artifact = artifacts.find(a => a.id === id);
             return (
-              <div key={id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-dark/10">
+              <div key={id} className="flex items-center justify-between gap-2 px-4 py-2.5 bg-app-bg rounded-xl border border-app-slate/15">
                 <span className="text-sm font-bold text-app-dark truncate">
                   {artifact?.name ?? 'Attached file'}
                 </span>
@@ -462,7 +462,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
               type="button"
               onClick={() => setArtifactPickerOpen(v => !v)}
               disabled={artifacts.length === 0}
-              className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 text-sm font-bold text-app-dark flex items-center justify-center gap-1.5 hover:bg-app-bg/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 text-sm font-bold text-app-dark flex items-center justify-center gap-1.5 hover:bg-app-bg/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Library size={15} /> From library
               {artifactPickerOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -471,7 +471,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-dark/10 text-sm font-bold text-app-dark flex items-center justify-center gap-1.5 hover:bg-app-bg/60 transition-colors disabled:opacity-60"
+              className="flex-1 px-4 py-2.5 min-h-[44px] rounded-lg bg-app-bg border border-app-slate/15 text-sm font-bold text-app-dark flex items-center justify-center gap-1.5 hover:bg-app-bg/60 transition-colors disabled:opacity-60"
             >
               {isUploading
                 ? <><Loader2 size={15} className="animate-spin" /> Uploading…</>
@@ -495,7 +495,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
           )}
 
           {artifactPickerOpen && artifacts.length > 0 && (
-            <div className="max-h-56 overflow-y-auto overscroll-contain border border-app-dark/10 rounded-xl divide-y divide-app-dark/5">
+            <div className="max-h-56 overflow-y-auto overscroll-contain border border-app-slate/15 rounded-xl divide-y divide-app-slate/10">
               {artifacts.map(artifact => {
                 const isSelected = form.artifactIds.includes(artifact.id);
                 return (
@@ -506,7 +506,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
                     className={`w-full text-left px-4 py-2.5 text-sm font-semibold flex items-center justify-between ${isSelected ? 'bg-app-bright/5 text-app-dark' : 'text-app-slate hover:bg-app-bg'}`}
                   >
                     <span className="truncate">{artifact.name}</span>
-                    {isSelected && <span className="text-app-bright text-xs font-black shrink-0 ml-2">Attached</span>}
+                    {isSelected && <span className="text-app-bright text-xs font-bold shrink-0 ml-2">Attached</span>}
                   </button>
                 );
               })}
@@ -550,7 +550,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
                 meetingNotes: prev.meetingNotes ? { ...prev.meetingNotes, reflection: e.target.value } : prev.meetingNotes,
               }))}
               placeholder="Reflection on growth from this meeting..."
-              className="w-full px-4 py-3 rounded-xl bg-app-bg border border-app-dark/10 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark text-sm resize-none"
+              className="w-full px-4 py-3 rounded-xl bg-app-bg border border-app-slate/15 outline-none focus:ring-2 focus:ring-app-bright/30 font-medium text-app-dark text-sm resize-none"
             />
           </div>
         )}
@@ -570,7 +570,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
       </div>
 
       {/* Footer — pinned above the iOS safe area; holds Save / the confirm prompt */}
-      <div className="shrink-0 border-t border-app-dark/10 bg-white px-5 md:px-8 py-4 pb-safe">
+      <div className="shrink-0 border-t border-app-slate/15 bg-white px-5 md:px-8 py-4 pb-safe">
         {pendingConfirm ? (
           <div className="space-y-3">
             <p className="text-sm font-bold text-red-700">
@@ -587,7 +587,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
               <button
                 type="button"
                 onClick={() => setPendingConfirm(false)}
-                className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-white border border-app-dark/10 text-app-dark font-bold text-sm"
+                className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-white border border-app-slate/15 text-app-dark font-bold text-sm"
               >
                 Go back
               </button>
@@ -596,7 +596,7 @@ const EntryForm: React.FC<EntryFormProps> = ({
         ) : (
           <button
             type="submit"
-            className="w-full min-h-[48px] py-3 bg-app-dark text-white rounded-lg font-bold text-sm shadow-md flex items-center justify-center gap-2 hover:bg-black active:scale-[0.99] transition-all"
+            className="w-full min-h-[48px] py-3 bg-app-dark text-white rounded-lg font-bold text-sm shadow-md flex items-center justify-center gap-2 hover:bg-app-deep active:scale-[0.99] transition-all"
           >
             <Save size={18} /> {isEdit ? 'Update entry' : 'Save entry'}
           </button>

@@ -461,7 +461,7 @@ const App: React.FC = () => {
           <div className="flex h-full items-center justify-center">
             <div className="flex flex-col items-center gap-4">
                <div className="w-12 h-12 border-4 border-app-bright border-t-transparent rounded-full animate-spin"></div>
-               <p className="text-app-slate font-black uppercase tracking-widest text-xs">
+               <p className="text-app-slate font-semibold text-xs">
                  {isReadOnly ? 'Loading Portfolio...' : 'Syncing Portfolio...'}
                </p>
             </div>
@@ -471,13 +471,13 @@ const App: React.FC = () => {
             <div className="md:hidden flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <img src={logo} alt="Bethel" className="w-10 h-10 object-contain" />
-                <h1 className="text-lg font-black text-app-dark bg-gradient-to-r from-app-dark to-app-bright bg-clip-text text-transparent">
+                <h1 className="text-lg font-black text-app-dark">
                   InternPro
                 </h1>
               </div>
               <div className="flex items-center gap-3">
                 {isReadOnly && (
-                  <span className="bg-app-bright/10 text-app-bright text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest mr-2">Viewer Mode</span>
+                  <span className="bg-app-bright/10 text-app-bright text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide mr-2">Viewer Mode</span>
                 )}
                 {(isReadOnly ? state.userProfile : user) ? (
                   <div className="flex items-center gap-2">
@@ -485,14 +485,14 @@ const App: React.FC = () => {
                       {(isReadOnly ? state.userProfile : user)?.photoURL ? (
                         <img src={(isReadOnly ? state.userProfile : user)?.photoURL || ''} alt="Profile" className="w-full h-full rounded-full object-cover" />
                       ) : (
-                        <div className="w-full h-full rounded-full bg-app-bright/10 flex items-center justify-center text-app-bright font-black text-[10px]">
+                        <div className="w-full h-full rounded-full bg-app-bright/10 flex items-center justify-center text-app-bright font-bold text-[10px]">
                           {(isReadOnly ? state.userProfile : user)?.displayName?.charAt(0) || '?'}
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <span className="text-[10px] text-app-slate font-black uppercase tracking-widest opacity-70">Bethel University</span>
+                  <span className="text-[10px] text-app-slate font-semibold uppercase tracking-wide opacity-70">Bethel University</span>
                 )}
               </div>
             </div>
@@ -506,8 +506,8 @@ const App: React.FC = () => {
 
       {/* Entry editor modal — full-screen sheet on mobile, centered card on desktop */}
       {editor.open && (
-        <div className="fixed inset-0 z-[80] bg-app-dark/40 backdrop-blur-sm flex md:items-center md:justify-center md:p-6 md:overflow-y-auto">
-          <div className="bg-white w-full md:max-w-2xl md:rounded-3xl md:my-6 shadow-2xl flex flex-col h-dvh md:h-auto md:max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 z-[80] bg-app-dark/40 flex md:items-center md:justify-center md:p-6 md:overflow-y-auto">
+          <div className="bg-white w-full md:max-w-2xl md:rounded-2xl md:my-6 shadow-2xl flex flex-col h-dvh md:h-auto md:max-h-[90vh] overflow-hidden">
             <EntryForm
               entry={editor.entry}
               logs={state.logs}
@@ -538,19 +538,19 @@ const App: React.FC = () => {
       {/* Update Notification Toast */}
       {showUpdateToast && (
         <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-8 md:bottom-8 z-[100] animate-in slide-in-from-bottom-5 duration-500">
-          <div className="glass-dark p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-white/10">
+          <div className="bg-app-dark text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-app-slate/15">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-app-bright/20 flex items-center justify-center text-app-bright">
                 <RefreshCw size={20} className="animate-spin-slow" />
               </div>
               <div>
                 <p className="text-white text-sm font-bold">New Version Available</p>
-                <p className="text-white/60 text-[10px] uppercase tracking-widest font-black">Updates are ready to install</p>
+                <p className="text-white/60 text-[10px] font-medium">Updates are ready to install</p>
               </div>
             </div>
             <button
               onClick={onUpdate}
-              className="bg-app-bright hover:bg-app-bright/90 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-app-bright/20"
+              className="bg-white hover:bg-app-bg text-app-dark px-5 py-2.5 min-h-[44px] rounded-lg text-sm font-bold transition-colors active:scale-95 shadow-sm"
             >
               Update Now
             </button>
@@ -561,19 +561,19 @@ const App: React.FC = () => {
       {/* Save Error Notification Toast */}
       {saveError && (
         <div className="fixed top-4 left-4 right-4 md:left-auto md:right-8 md:top-8 z-[100] animate-in slide-in-from-top-5 duration-500">
-          <div className="bg-red-500/95 backdrop-blur-sm p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-red-400/50">
+          <div className="bg-red-500 p-4 rounded-xl shadow-2xl flex items-center justify-between gap-4 border border-red-400/50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white">
                 <AlertCircle size={20} />
               </div>
               <div>
                 <p className="text-white text-sm font-bold">Save Failed</p>
-                <p className="text-white/90 text-[10px] uppercase tracking-widest font-black">{saveError}</p>
+                <p className="text-white/90 text-[10px] font-semibold">{saveError}</p>
               </div>
             </div>
             <button
               onClick={() => setSaveError(null)}
-              className="text-white hover:bg-white/20 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+              className="text-white hover:bg-white/20 px-3 py-2 rounded-lg text-xs font-bold transition-all active:scale-95"
             >
               Dismiss
             </button>
