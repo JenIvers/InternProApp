@@ -37,7 +37,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isRe
         onClick={() => setView(item.id)}
         className="flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-all active:scale-90"
       >
-        <div className={`px-3 py-1 rounded-xl transition-all ${isActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
+        {/* Material 3 active indicator: a wide fully-rounded pill around the
+            icon only — the label stays outside it, per spec. */}
+        <div className={`w-14 h-8 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
           <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
         </div>
         <span className={`text-[10px] font-semibold text-center leading-none ${isActive ? 'text-app-dark' : 'text-app-slate/60'}`}>
@@ -107,7 +109,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isRe
             onClick={() => setMoreOpen(true)}
             className="flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-all active:scale-90"
           >
-            <div className={`px-3 py-1 rounded-xl transition-all ${moreActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
+            <div className={`w-14 h-8 rounded-full flex items-center justify-center transition-all ${moreActive ? 'bg-app-dark text-white shadow-lg' : 'text-app-slate/60'}`}>
               <MoreHorizontal size={24} strokeWidth={moreActive ? 2.5 : 2} />
             </div>
             <span className={`text-[10px] font-semibold text-center leading-none ${moreActive ? 'text-app-dark' : 'text-app-slate/60'}`}>
