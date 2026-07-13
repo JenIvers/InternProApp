@@ -1,5 +1,5 @@
 // Version: 2.0.0 - Whole-app refresh
-const CACHE_NAME = 'internpro-v2.0.0';
+const CACHE_NAME = 'internpro-v2.1.0';
 
 // Same-origin app shell: precached atomically (these must all succeed).
 const SHELL_ASSETS = [

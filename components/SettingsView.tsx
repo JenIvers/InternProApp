@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppState, AppSettings, LevelBucket } from '../types';
-import { Settings as SettingsIcon, User, Download, Save, ShieldCheck } from 'lucide-react';
+import { Settings as SettingsIcon, User, Download, Save, ShieldCheck, LogOut } from 'lucide-react';
+import { signOut } from '../authService';
 
 export interface SettingsViewProps {
   appState: AppState;
@@ -206,6 +207,26 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
           Download my data (JSON)
         </button>
       </section>
+
+      {/* Account */}
+      {!isReadOnly && (
+        <section className="bg-white border border-app-slate/15 rounded-xl p-4 sm:p-6 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <LogOut size={18} className="text-app-bright" />
+            <h2 className="text-lg font-bold text-app-dark">Account</h2>
+          </div>
+          <p className="text-sm text-app-slate opacity-80">
+            Signed in as <span className="font-semibold text-app-dark">{userProfile?.email || 'this account'}</span>. Sign out to switch to a different Google account.
+          </p>
+          <button
+            onClick={signOut}
+            className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
+          >
+            <LogOut size={16} />
+            Sign out
+          </button>
+        </section>
+      )}
     </div>
   );
 };
