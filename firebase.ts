@@ -28,8 +28,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
-// Initialize Firestore with persistent local cache for offline support
+// Initialize Firestore with persistent local cache for offline support.
+// ignoreUndefinedProperties: the whole AppState is serialized on every save and
+// has many optional fields (siteId, hourSplit, meetingNotes, shelfId, ...) that
+// sit as `undefined` in React state. Firestore rejects nested `undefined` with
+// "Unsupported field value: undefined", which was aborting entry saves; dropping
+// undefined keys on write (equivalent to omitting them) is the correct behavior
+// for optional fields and is applied globally so no future field can regress it.
 const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager()
   })

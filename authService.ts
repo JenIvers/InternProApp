@@ -2,6 +2,10 @@ import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectRes
 import { auth } from "./firebase";
 
 const provider = new GoogleAuthProvider();
+// Always show Google's account chooser. Without this, signing out clears only
+// Firebase's session while Google's SSO session persists, so the next sign-in
+// silently reuses the same account and the user can never switch accounts.
+provider.setCustomParameters({ prompt: 'select_account' });
 const REDIRECT_KEY = 'auth_redirect_pending';
 
 export const checkRedirectResult = async (): Promise<User | null> => {

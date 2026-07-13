@@ -1,5 +1,5 @@
-// Version: 2.1.1 - PWA foreground update check
-const CACHE_NAME = 'internpro-v2.1.1';
+// Version: 2.1.2 - Fix entry-save undefined-field error + account switching
+const CACHE_NAME = 'internpro-v2.1.2';
 
 // Same-origin app shell: precached atomically (these must all succeed).
 const SHELL_ASSETS = [
