@@ -61,7 +61,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
   };
 
   return (
-    <div className="space-y-6 md:max-w-3xl">
+    <div className="space-y-6 md:max-w-3xl pb-8 mb-safe md:mb-0">
       <header className="flex items-center gap-3">
         <div className="p-2 rounded-xl bg-app-bright/10">
           <SettingsIcon className="text-app-bright" size={22} />
