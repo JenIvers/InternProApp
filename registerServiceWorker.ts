@@ -39,6 +39,16 @@ export const register = (onUpdate: (registration: ServiceWorkerRegistration) => 
           setInterval(() => {
             registration.update();
           }, 1000 * 60 * 10);
+
+          // 4. Foreground-resume check: iOS pauses the interval (and fires no
+          // load event) when the installed PWA is resumed rather than cold
+          // launched, so a backgrounded app can sit on a stale version. Re-check
+          // on return to the foreground so a resume behaves like a fresh launch.
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+              registration.update();
+            }
+          });
         })
         .catch((error) => {
           console.error('SW registration failed: ', error);
