@@ -108,6 +108,7 @@ const App: React.FC = () => {
       window.history.replaceState(null, '', canonical);
     }
     const onPopState = () => {
+      detailPushedRef.current = false;
       setLogPrefilterCompetencyId(undefined);
       setLogPrefilterIncomplete(false);
       setLogPrefilterLevels(undefined);
@@ -116,6 +117,23 @@ const App: React.FC = () => {
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
+
+  // Open or close a detail screen (/portfolio/:id, /mentors/:id). Opening from
+  // a list pushes an entry; closing then pops it, so Back and Close agree. When
+  // the detail was reached some other way (a dashboard link, a pasted URL),
+  // closing replaces it with the list so Back still leaves the list normally.
+  const detailPushedRef = React.useRef(false);
+  const selectDetail = (view: 'portfolio' | 'mentors', id: string | null) => {
+    if (id) {
+      detailPushedRef.current = true;
+      navigate({ view, id });
+    } else if (detailPushedRef.current) {
+      detailPushedRef.current = false;
+      window.history.back();
+    } else {
+      navigate({ view }, { replace: true });
+    }
+  };
 
   // Navigate via the nav bars: clears any cross-view log prefilters.
   const setView = (view: ViewId) => {
@@ -533,6 +551,8 @@ const App: React.FC = () => {
             onAddShelf={addShelf}
             isReadOnly={isReadOnly}
             user={user}
+            selectedArtifactId={route.id}
+            onSelectArtifact={(id) => selectDetail('portfolio', id)}
           />
         );
       case 'settings':

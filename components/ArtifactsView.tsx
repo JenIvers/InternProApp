@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { Artifact, Shelf } from '../types';
 import { ALL_COMPETENCIES } from '../constants';
-import { Folder, FolderPlus, Plus, FileText, X, Tag, Archive, Check, Loader, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { Folder, FolderPlus, FileText, X, Tag, Archive, Check, ChevronRight } from 'lucide-react';
 import { uploadFileToStorage } from '../storageService';
+import { pickFileFromDrive } from '../driveService';
+import { kindLabel, resolveArtifactKind } from '../lib/artifact-preview';
+import ArtifactPreview from './ArtifactPreview';
+import UploadMenu from './UploadMenu';
 import { User } from 'firebase/auth';
 
 interface ArtifactsViewProps {
@@ -13,13 +17,17 @@ interface ArtifactsViewProps {
   onAddShelf: (name: string) => void;
   isReadOnly?: boolean;
   user?: User | null;
+  /** Artifact id from the URL (/portfolio/:id); opens its preview. */
+  selectedArtifactId?: string;
+  /** Open (id) or close (null) an artifact; the host keeps the URL in sync. */
+  onSelectArtifact: (id: string | null) => void;
 }
 
 const ArtifactRow: React.FC<{
   artifact: Artifact,
   onSelect: (artifact: Artifact) => void
 }> = ({ artifact, onSelect }) => {
-  const isImage = artifact.type.startsWith('image');
+  const isImage = resolveArtifactKind(artifact) === 'image' && artifact.data.length > 0;
   const tagCount = artifact.taggedCompetencyIds?.length ?? 0;
   return (
     <button
@@ -29,7 +37,14 @@ const ArtifactRow: React.FC<{
     >
       <span className="shrink-0 w-9 h-9 rounded-lg bg-app-bg border border-app-slate/10 flex items-center justify-center overflow-hidden text-app-slate">
         {isImage ? (
-          <img src={artifact.data} alt="" className="w-full h-full object-cover" />
+          <img
+            src={artifact.data}
+            alt=""
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
         ) : (
           <FileText size={18} strokeWidth={2} />
         )}
@@ -97,18 +112,20 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
   onUpdateArtifact,
   onAddShelf,
   isReadOnly,
-  user
+  user,
+  selectedArtifactId,
+  onSelectArtifact,
 }) => {
-  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
+  const selectedArtifact = artifacts.find(a => a.id === selectedArtifactId) ?? null;
+  const setSelectedArtifact = (artifact: Artifact | null) => onSelectArtifact(artifact?.id ?? null);
   const [isCreatingShelf, setIsCreatingShelf] = useState(false);
   const [newShelfName, setNewShelfName] = useState('');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) {
-      if (!user) setUploadError("You must be logged in to upload files");
+  const uploadFile = async (file: File) => {
+    if (!user) {
+      setUploadError("You must be logged in to upload files");
       return;
     }
 
@@ -145,8 +162,19 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
       setTimeout(() => setUploadError(null), 5000);
     } finally {
       setIsUploading(false);
-      // Reset the input
-      e.target.value = '';
+    }
+  };
+
+  const handleDriveUpload = async () => {
+    setUploadError(null);
+    setIsUploading(true);
+    const result = await pickFileFromDrive();
+    setIsUploading(false);
+    if (result.status === 'picked') {
+      await uploadFile(result.file);
+    } else if (result.status === 'error') {
+      setUploadError(result.error);
+      setTimeout(() => setUploadError(null), 6000);
     }
   };
 
@@ -177,7 +205,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
       <header className="space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-app-dark tracking-tight">Portfolio Vault</h1>
+            <h1 className="text-2xl font-bold text-app-dark tracking-tight">Portfolio</h1>
             <p className="text-app-slate text-sm font-medium opacity-70">
               Curate evidence of your administrative journey.
             </p>
@@ -192,21 +220,11 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
               >
                 <FolderPlus size={16} /> <span className="hidden sm:inline">New shelf</span>
               </button>
-              <label
-                className={`flex items-center gap-1.5 py-2 px-3 min-h-[44px] rounded-lg bg-app-dark text-white text-sm font-semibold transition-colors ${
-                  isUploading ? 'cursor-wait opacity-60' : 'cursor-pointer hover:bg-app-deep'
-                }`}
-              >
-                {isUploading ? <Loader size={16} className="animate-spin" /> : <Plus size={16} />}
-                <span>{isUploading ? 'Uploading…' : 'Upload'}</span>
-                <input
-                  type="file"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  accept="image/*,application/pdf"
-                  disabled={isUploading}
-                />
-              </label>
+              <UploadMenu
+                isUploading={isUploading}
+                onPickComputerFile={uploadFile}
+                onPickDrive={handleDriveUpload}
+              />
             </div>
           )}
         </div>
@@ -290,7 +308,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-bold text-app-dark truncate">{selectedArtifact.name}</h3>
                 <div className="flex items-center gap-2 mt-0.5 text-[11px] font-medium text-app-slate">
-                  <span>{selectedArtifact.type}</span>
+                  <span>{kindLabel(resolveArtifactKind(selectedArtifact))}</span>
                   <span className="opacity-40">·</span>
                   <span>{selectedArtifact.uploadDate}</span>
                 </div>
@@ -305,16 +323,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
             </header>
 
             <div className="overflow-y-auto p-4 sm:p-5 space-y-5 no-scrollbar">
-              <div className="aspect-[16/10] bg-app-bg rounded-xl border border-app-slate/15 overflow-hidden flex items-center justify-center">
-                {selectedArtifact.type.startsWith('image') ? (
-                  <img src={selectedArtifact.data} alt={selectedArtifact.name} className="w-full h-full object-contain" />
-                ) : (
-                  <div className="flex flex-col items-center gap-3 text-app-slate opacity-50">
-                    <ImageIcon size={56} strokeWidth={1.25} />
-                    <p className="text-xs font-bold">Preview unavailable</p>
-                  </div>
-                )}
-              </div>
+              <ArtifactPreview key={selectedArtifact.id} artifact={selectedArtifact} />
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* Shelf assignment */}
