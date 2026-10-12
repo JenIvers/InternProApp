@@ -303,12 +303,15 @@ const LogTable: React.FC<LogTableProps> = ({
               </span>
             )}
           </button>
+          {/* Quiet icon button: Add entry is the page's one primary action. */}
           <button
+            type="button"
             onClick={() => onExportFiltered(filteredLogs)}
-            className="shrink-0 flex items-center gap-1.5 py-2.5 px-3 sm:px-4 min-h-[44px] text-sm font-bold text-white bg-app-dark rounded-lg hover:bg-app-deep transition-colors active:scale-[0.98]"
+            title="Export…"
+            aria-label="Export entries"
+            className="shrink-0 flex items-center justify-center w-11 h-11 rounded-lg border border-app-slate/15 text-app-slate hover:bg-app-bg hover:text-app-dark transition-colors active:scale-[0.98]"
           >
-            <Download size={15} />
-            <span className="hidden sm:inline">Export</span>
+            <Download size={16} />
           </button>
         </div>
 

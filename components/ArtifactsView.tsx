@@ -82,7 +82,7 @@ const ShelfSection: React.FC<{
           <Archive size={14} className="text-app-slate shrink-0" strokeWidth={2.5} />
         )}
         <h3 className="text-xs font-bold text-app-slate truncate">
-          {shelf ? shelf.name : 'Unshelved'}
+          {shelf ? shelf.name : 'Uncategorized'}
         </h3>
       </div>
       <span className="text-xs font-bold text-app-slate tabular-nums shrink-0">
@@ -91,7 +91,7 @@ const ShelfSection: React.FC<{
     </div>
     {artifactsInShelf.length === 0 ? (
       <div className="px-4 py-3 text-xs font-medium text-app-slate opacity-60">
-        No artifacts on this shelf yet.
+        No artifacts in this category yet.
       </div>
     ) : (
       <ul className="divide-y divide-app-slate/10">
@@ -216,9 +216,9 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 type="button"
                 onClick={() => setIsCreatingShelf(true)}
                 className="flex items-center gap-1.5 py-2 px-3 min-h-[44px] rounded-lg border border-app-slate/15 text-app-slate text-sm font-semibold hover:bg-app-slate/5 transition-colors"
-                title="Create a new shelf"
+                title="Create a new category"
               >
-                <FolderPlus size={16} /> <span className="hidden sm:inline">New shelf</span>
+                <FolderPlus size={16} /> <span className="hidden sm:inline">New category</span>
               </button>
               <UploadMenu
                 isUploading={isUploading}
@@ -255,7 +255,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
           >
             <div className="flex-1 min-w-0">
               <label className="block text-xs font-semibold text-app-slate mb-1.5">
-                Shelf name
+                Category name
               </label>
               <input
                 autoFocus
@@ -330,7 +330,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Folder size={14} className="text-app-slate" strokeWidth={2.5} />
-                    <label className="text-xs font-bold text-app-slate">Shelf</label>
+                    <label className="text-xs font-bold text-app-slate">Category</label>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -341,7 +341,7 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
                           : 'bg-white text-app-slate border-app-slate/15 hover:bg-app-slate/5'
                       } ${isReadOnly ? 'cursor-default' : ''}`}
                     >
-                      Unshelved
+                      Uncategorized
                     </button>
                     {shelves.map(shelf => (
                       <button
