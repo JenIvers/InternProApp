@@ -17,7 +17,7 @@ npm run lint         # ESLint over all .ts/.tsx
 npx tsc --noEmit     # type-check (the build uses esbuild and does NOT type-check)
 ```
 
-- **No test framework is configured** — there is no `test` script and no test files. Verify changes with `npm run lint`, `npx tsc --noEmit`, and by running the app.
+- Tests: `npm test` (Vitest) covers the pure `lib/*` modules. Also verify with `npm run lint`, `npx tsc --noEmit`, and by running the app. In dev, `/?demo=1` loads a fake portfolio (`lib/fixtures/demo.ts`) so any screen can be exercised without Google sign-in; it never ships in production builds and never saves.
 - `.env.local` can hold `GEMINI_API_KEY`, but the app runs without it (see Environment).
 
 ## Environment
@@ -26,9 +26,13 @@ npx tsc --noEmit     # type-check (the build uses esbuild and does NOT type-chec
 
 ## Architecture
 
-**Single source of truth.** The entire user portfolio is one `AppState` object (`types.ts`) held in `useState` in `App.tsx`. There is no Redux, Context, or router. All mutations are handler functions defined in `App.tsx` (`addLog`, `updateProgress`, `addArtifact`, …) and passed down as props. Each screen is a `components/*View.tsx` file; view switching is a `currentView` string + `switch` in `App.tsx`, with navigation in `Sidebar.tsx` (desktop) and `BottomNav.tsx` (mobile).
+**Single source of truth.** The entire user portfolio is one `AppState` object (`types.ts`) held in `useState` in `App.tsx`. There is no Redux or Context. All mutations are handler functions defined in `App.tsx` (`addLog`, `saveMentor`, `addArtifact`, …) and passed down as props. Each screen is a `components/*View.tsx` file; the screen is chosen by a `route` held in `App.tsx` and mirrored to the URL.
 
-**Persistence = whole-document sync.** `firestoreService.ts` reads/writes the complete `AppState` as a single document at `intern_data/{userId}`. There are no per-record documents or subcollections. Because a Firestore document is capped at ~1 MB and `Artifact.data` stores base64 file bytes *inline* in that same document, many/large artifacts are a real scaling constraint — `storageService.ts` (Firebase Storage; 10 MB limit; images/PDF only) is the intended offload path, but `types.ts` still models artifacts as inline base64.
+**Routing (History API, no router library).** `lib/routes` maps paths ↔ views (`/`, `/mentors`, `/log`, `/competencies`, `/portfolio`, `/settings`, plus `/portfolio/:id` and `/mentors/:id` for deep-linkable detail modals; retired paths like `/coverage` still resolve). `App.tsx` pushes history entries via `navigate()` and re-reads the URL on `popstate`. Every URL keeps the `?view=<userId>` viewer-mode query string. Nav lives in `Sidebar.tsx` (desktop) and `BottomNav.tsx` (mobile); Settings, sync status, and Sign out live in the profile popover (`ProfileMenu.tsx`).
+
+**Mentor Spotlight.** `AppState.mentors` (schema v2) holds mentor records; portrait photos are resized client-side and stored in Storage at `mentors/{uid}/…` (never inline). Dashboard mentor/portfolio sections are `MentorRow.tsx` / `ArtifactCarousel.tsx`; layout rules are in `lib/mentors`.
+
+**Persistence = whole-document sync.** `firestoreService.ts` reads/writes the complete `AppState` as a single document at `intern_data/{userId}`. There are no per-record documents or subcollections. Because a Firestore document is capped at ~1 MB and `Artifact.data` stores base64 file bytes *inline* in that same document, many/large artifacts are a real scaling constraint — `storageService.ts` (Firebase Storage; 10 MB limit) now holds uploads (artifacts store the download URL in `Artifact.data`; legacy records may still be inline base64 — `lib/artifact-preview` handles both). Google Drive import (`driveService.ts`, config in `driveConfig.ts`, setup in `docs/DRIVE-SETUP.md`) copies the picked file into Storage.
 
 **Save strategy (non-obvious, in `App.tsx`).** State is NOT persisted on every change. Saves are debounced: 30 s after the last edit, and also on `visibilitychange` / `pagehide` / `blur` so mobile/PWA users don't lose work when backgrounding the app. Redundant writes are skipped by comparing a JSON snapshot held in a ref.
 
