@@ -147,9 +147,27 @@ describe('migrateState v0 -> v1', () => {
     expect(state.settings.targets.total).toBe(100);
   });
 
-  it('initializes empty checklists', () => {
-    const { state } = migrateState(makeV0State());
-    expect(state.checklists).toEqual({ suggestedActivities: {}, deliverables: {} });
+  it('seeds an empty mentors list and drops the retired checklists field (v1 -> v2)', () => {
+    const v1 = {
+      ...makeV0State(),
+      schemaVersion: 1,
+      checklists: { suggestedActivities: {}, deliverables: {} },
+    } as unknown as AppState;
+    const { state } = migrateState(v1);
+    expect(state.schemaVersion).toBe(2);
+    expect(state.mentors).toEqual([]);
+    expect('checklists' in state).toBe(false);
+    // the input is not mutated
+    expect('checklists' in v1).toBe(true);
+  });
+
+  it('keeps existing mentors when migrating', () => {
+    const mentor = {
+      id: 'm1', name: 'A', title: 'Principal', organization: 'X', bio: '',
+      showOnDashboard: true, dashboardText: 'quote' as const,
+    };
+    const v1 = { ...makeV0State(), schemaVersion: 1, mentors: [mentor] } as AppState;
+    expect(migrateState(v1).state.mentors).toEqual([mentor]);
   });
 
   it('is idempotent: re-running is a deep-equal no-op with no review flags', () => {

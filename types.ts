@@ -87,12 +87,31 @@ export interface AppSettings {
     primary: number; // e.g. 240
     others: number; // e.g. 40 (each non-primary bucket)
   };
+  /** How many pinned mentors the dashboard shows (default 4). */
+  mentorDashboardCount?: number;
 }
 
-/** Cross-check checklists keyed by reference-data ids (lib/reference/guide.ts). */
-export interface AppChecklists {
-  suggestedActivities: Record<string, { done: boolean; linkedEntryIds?: string[] }>;
-  deliverables: Record<string, { done: boolean; note?: string }>;
+/** What a mentor's dashboard card shows beneath their name, role and school. */
+export type MentorCardText = 'quote' | 'bio' | 'hours';
+
+/**
+ * A mentor featured on the Mentor Spotlight page. Array order in
+ * AppState.mentors is the display order on both the page and the dashboard.
+ */
+export interface Mentor {
+  id: string;
+  name: string;
+  title: string; // role, e.g. "Principal"
+  organization: string; // school or district
+  bio: string;
+  quote?: string; // a lesson learned from this mentor
+  photoUrl?: string; // Firebase Storage download URL (never inline base64)
+  photoFocus?: { x: number; y: number }; // 0-100 object-position of the face
+  photoZoom?: number; // 1 = fit, >1 = zoomed in
+  siteId?: string; // optional link to a Site
+  isPrimary?: boolean;
+  showOnDashboard: boolean;
+  dashboardText: MentorCardText;
 }
 
 export interface AppState {
@@ -106,7 +125,7 @@ export interface AppState {
   competencyReflections: Record<string, string>;
   primarySetting: 'Primary' | 'Secondary'; // legacy; superseded by settings.primaryLevelBucket
   settings?: AppSettings;
-  checklists?: AppChecklists;
+  mentors?: Mentor[];
   userProfile?: {
     displayName: string | null;
     email: string | null;

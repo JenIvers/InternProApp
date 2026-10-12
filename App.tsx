@@ -4,7 +4,6 @@ import BottomNav from './components/BottomNav';
 import DashboardNew from './components/DashboardNew';
 import LogTable from './components/LogTable';
 import CoverageView from './components/CoverageView';
-import ChecklistsView from './components/ChecklistsView';
 import ArtifactsView from './components/ArtifactsView';
 import SettingsView from './components/SettingsView';
 import EntryForm from './components/EntryForm';
@@ -12,7 +11,7 @@ import ExportDialog from './components/ExportDialog';
 import LoginView from './components/LoginView';
 import {
   AppState, InternshipLog, Artifact, Shelf, Site,
-  AppSettings, AppChecklists, SchoolLevel, LevelBucket,
+  AppSettings, SchoolLevel, LevelBucket,
 } from './types';
 import { loadStateWithMigration, saveStateToFirestore } from './firestoreService';
 import { CURRENT_SCHEMA_VERSION } from '@/lib/state-migration';
@@ -31,8 +30,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   intermediateMapsTo: 'Elementary',
   targets: { total: 320, primary: 240, others: 40 },
 };
-
-const EMPTY_CHECKLISTS: AppChecklists = { suggestedActivities: {}, deliverables: {} };
 
 const App: React.FC = () => {
   const [currentView, setViewRaw] = useState<string>('dashboard');
@@ -84,7 +81,7 @@ const App: React.FC = () => {
     competencyReflections: {},
     primarySetting: 'Secondary',
     settings: DEFAULT_SETTINGS,
-    checklists: EMPTY_CHECKLISTS,
+    mentors: [],
   });
 
   // Navigate via the nav bars: clears any cross-view log prefilters.
@@ -346,13 +343,9 @@ const App: React.FC = () => {
     if (log) openEditEntry(log);
   };
 
-  // ---- Settings / checklists ---------------------------------------------
+  // ---- Settings ---------------------------------------------
   const updateSettings = (settings: AppSettings) => {
     setState(prev => ({ ...prev, settings }));
-  };
-
-  const updateChecklists = (checklists: AppChecklists) => {
-    setState(prev => ({ ...prev, checklists }));
   };
 
   // ---- Artifacts / shelves / sites ---------------------------------------
@@ -482,15 +475,6 @@ const App: React.FC = () => {
             competencies={ALL_COMPETENCIES}
             isReadOnly={isReadOnly}
             onViewCompetencyLogs={handleViewCompetencyLogs}
-          />
-        );
-      case 'checklists':
-        return (
-          <ChecklistsView
-            checklists={state.checklists ?? EMPTY_CHECKLISTS}
-            logs={state.logs}
-            isReadOnly={isReadOnly}
-            onUpdateChecklists={updateChecklists}
           />
         );
       case 'artifacts':

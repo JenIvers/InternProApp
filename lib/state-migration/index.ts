@@ -1,9 +1,10 @@
 /**
  * State migration for AppState documents.
  *
- * Versioned, additive, non-destructive. An AppState with no `schemaVersion`
+ * Versioned and (apart from the v1->v2 removal of the retired `checklists`
+ * field) additive. An AppState with no `schemaVersion`
  * is treated as v0. `migrateState` upgrades it step-by-step to
- * CURRENT_SCHEMA_VERSION, never deleting or overwriting existing fields.
+ * CURRENT_SCHEMA_VERSION, never overwriting existing fields.
  *
  * Design choices (documented per spec):
  * - Entries whose `primaryCompetencyId` was best-effort seeded from
@@ -21,11 +22,10 @@
 import type {
   AppState,
   AppSettings,
-  AppChecklists,
   InternshipLog,
 } from '../../types';
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 export interface MigrationResult {
   state: AppState;
@@ -39,10 +39,6 @@ function defaultSettings(primarySetting: AppState['primarySetting']): AppSetting
     intermediateMapsTo: 'Elementary',
     targets: { total: 320, primary: 240, others: 40 },
   };
-}
-
-function defaultChecklists(): AppChecklists {
-  return { suggestedActivities: {}, deliverables: {} };
 }
 
 function migrateLog(log: InternshipLog, needsPrimaryReview: string[]): InternshipLog {
@@ -67,10 +63,23 @@ function migrateV0toV1(state: AppState, needsPrimaryReview: string[]): AppState 
   if (next.settings === undefined) {
     next.settings = defaultSettings(state.primarySetting);
   }
-  if (next.checklists === undefined) {
-    next.checklists = defaultChecklists();
-  }
   next.schemaVersion = 1;
+  return next;
+}
+
+/**
+ * v1 -> v2: the Checklists feature was removed, so its (never-used) `checklists`
+ * field is dropped, and `mentors` is seeded for the Mentor Spotlight. This is
+ * the one deliberately destructive step; the persistence layer writes a
+ * pre-migration backup of the whole document before the first v2 save.
+ */
+function migrateV1toV2(state: AppState): AppState {
+  const next: AppState = { ...state };
+  delete (next as AppState & { checklists?: unknown }).checklists;
+  if (next.mentors === undefined) {
+    next.mentors = [];
+  }
+  next.schemaVersion = 2;
   return next;
 }
 
@@ -85,6 +94,9 @@ export function migrateState(oldState: AppState): MigrationResult {
   const version = state.schemaVersion ?? 0;
   if (version < 1) {
     state = migrateV0toV1(state, needsPrimaryReview);
+  }
+  if (version < 2) {
+    state = migrateV1toV2(state);
   }
   if (state === oldState) {
     // Already current: still return a copy-free result (idempotent no-op).

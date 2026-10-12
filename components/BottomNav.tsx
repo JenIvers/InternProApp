@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, ClipboardList, Grid3x3, Plus, MoreHorizontal, ListChecks, Folder, Settings, X } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Grid3x3, Plus, MoreHorizontal, Folder, Settings, X } from 'lucide-react';
 import { useBodyScrollLock } from '../useBodyScrollLock';
 
 interface BottomNavProps {
@@ -21,7 +21,6 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isRe
     { id: 'coverage', label: 'Coverage', icon: Grid3x3 },
   ];
   const moreItems = [
-    { id: 'checklists', label: 'Checklists', icon: ListChecks },
     { id: 'artifacts', label: 'Artifact Vault', icon: Folder },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];

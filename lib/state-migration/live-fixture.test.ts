@@ -39,7 +39,7 @@ describe('migrateState against the live production v0 snapshot', () => {
     expect(original).toEqual(snapshot);
   });
 
-  it('stamps schemaVersion and initializes settings and checklists', () => {
+  it('stamps schemaVersion and initializes settings and mentors', () => {
     const { state } = migrateState(loadLiveV0State());
     expect(state.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
     expect(state.settings).toEqual({
@@ -47,7 +47,8 @@ describe('migrateState against the live production v0 snapshot', () => {
       intermediateMapsTo: 'Elementary',
       targets: { total: 320, primary: 240, others: 40 },
     });
-    expect(state.checklists).toEqual({ suggestedActivities: {}, deliverables: {} });
+    expect(state.mentors).toEqual([]);
+    expect('checklists' in state).toBe(false);
   });
 
   it('seeds primaryCompetencyId from taggedCompetencyIds[0] on every tagged log and flags each for review', () => {
