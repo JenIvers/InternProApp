@@ -73,13 +73,13 @@ describe('computeCoverage', () => {
     expect(cov['A1']).toEqual({ hours: 0, entryCount: 0, evidenceCount: 0, status: 'gap' });
   });
 
-  it('tag-only entries count coverage but no hours (thin)', () => {
+  it('tag-only entries count coverage but no hours (still a gap)', () => {
     const logs = [log({ hours: 5, taggedCompetencyIds: ['A1'] })];
     const cov = computeCoverage(logs, comps);
-    expect(cov['A1']).toEqual({ hours: 0, entryCount: 1, evidenceCount: 0, status: 'thin' });
+    expect(cov['A1']).toEqual({ hours: 0, entryCount: 1, evidenceCount: 0, status: 'gap' });
   });
 
-  it('covered requires >= threshold hours and >= 1 evidence', () => {
+  it('complete requires >= threshold hours and >= 1 evidence', () => {
     const logs = [
       log({
         hours: COVERED_MIN_HOURS,
@@ -90,14 +90,14 @@ describe('computeCoverage', () => {
       }),
     ];
     const cov = computeCoverage(logs, comps);
-    expect(cov['A1'].status).toBe('covered');
+    expect(cov['A1'].status).toBe('complete');
     expect(cov['A1'].evidenceCount).toBe(2);
     expect(cov['A1'].hours).toBe(3);
   });
 
-  it('enough hours without evidence is thin', () => {
+  it('enough hours without evidence is still a gap', () => {
     const logs = [log({ hours: 10, primaryCompetencyId: 'A1' })];
-    expect(computeCoverage(logs, comps)['A1'].status).toBe('thin');
+    expect(computeCoverage(logs, comps)['A1'].status).toBe('gap');
   });
 
   it('ignores competency ids not in the catalog', () => {
@@ -145,7 +145,7 @@ describe('computeCategoryRollups', () => {
   it('status tallies add up to competencyCount', () => {
     const roll = computeCategoryRollups([], comps);
     for (const r of Object.values(roll)) {
-      expect(r.covered + r.thin + r.gap).toBe(r.competencyCount);
+      expect(r.complete + r.gap).toBe(r.competencyCount);
       expect(r.gap).toBe(r.competencyCount);
     }
   });

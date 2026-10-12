@@ -3,7 +3,7 @@ import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
 import DashboardNew from './components/DashboardNew';
 import LogTable from './components/LogTable';
-import CoverageView from './components/CoverageView';
+import CompetenciesView from './components/CompetenciesView';
 import ArtifactsView from './components/ArtifactsView';
 import SettingsView from './components/SettingsView';
 import EntryForm from './components/EntryForm';
@@ -470,7 +470,7 @@ const App: React.FC = () => {
         );
       case 'coverage':
         return (
-          <CoverageView
+          <CompetenciesView
             logs={state.logs}
             competencies={ALL_COMPETENCIES}
             isReadOnly={isReadOnly}

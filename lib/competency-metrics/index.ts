@@ -15,11 +15,11 @@
  * key of hourSplit. evidenceCount sums (evidenceLinks + artifactIds) of
  * every entry touching the competency.
  *
- * Status thresholds (documented, deliberately simple):
- *  - 'gap'     — no entries touch the competency at all.
- *  - 'covered' — at least COVERED_MIN_HOURS (3) attributed hours AND at
- *                least COVERED_MIN_EVIDENCE (1) piece of evidence.
- *  - 'thin'    — touched, but below the covered bar.
+ * Status (deliberately binary — "thin" was subjective and has been removed):
+ *  - 'complete' — at least COVERED_MIN_HOURS (3) attributed hours AND at
+ *                 least COVERED_MIN_EVIDENCE (1) piece of evidence.
+ *  - 'gap'      — everything else, including competencies that are touched
+ *                 but have not yet met the bar.
  */
 
 import type { Competency, InternshipLog } from '../../types';
@@ -27,7 +27,7 @@ import type { Competency, InternshipLog } from '../../types';
 export const COVERED_MIN_HOURS = 3;
 export const COVERED_MIN_EVIDENCE = 1;
 
-export type CoverageStatus = 'covered' | 'thin' | 'gap';
+export type CoverageStatus = 'complete' | 'gap';
 
 export interface CompetencyCoverage {
   hours: number;
@@ -41,8 +41,7 @@ export interface CategoryRollup {
   entryCount: number; // entries touching any competency in the category (deduped)
   evidenceCount: number;
   competencyCount: number;
-  covered: number;
-  thin: number;
+  complete: number;
   gap: number;
 }
 
@@ -107,10 +106,12 @@ export function computeCoverage(
     }
   }
   for (const row of Object.values(out)) {
-    if (row.entryCount === 0) row.status = 'gap';
-    else if (row.hours >= COVERED_MIN_HOURS && row.evidenceCount >= COVERED_MIN_EVIDENCE)
-      row.status = 'covered';
-    else row.status = 'thin';
+    row.status =
+      row.entryCount > 0 &&
+      row.hours >= COVERED_MIN_HOURS &&
+      row.evidenceCount >= COVERED_MIN_EVIDENCE
+        ? 'complete'
+        : 'gap';
   }
   return out;
 }
@@ -143,8 +144,7 @@ export function computeCategoryRollups(
       entryCount: 0,
       evidenceCount: 0,
       competencyCount: 0,
-      covered: 0,
-      thin: 0,
+      complete: 0,
       gap: 0,
     });
     const cov = coverage[c.id];

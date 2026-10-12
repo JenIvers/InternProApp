@@ -1,9 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { InternshipLog, Competency } from '../types';
-import { computeCoverage, categoryGroupOf, CoverageStatus, CompetencyCoverage } from '../lib/competency-metrics';
-import { CheckCircle2, AlertTriangle, XCircle, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  computeCoverage,
+  categoryGroupOf,
+  COVERED_MIN_HOURS,
+  CoverageStatus,
+  CompetencyCoverage,
+} from '../lib/competency-metrics';
+import { CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
-export interface CoverageViewProps {
+export interface CompetenciesViewProps {
   logs: InternshipLog[];
   competencies: Competency[];
   isReadOnly: boolean;
@@ -11,12 +17,13 @@ export interface CoverageViewProps {
 }
 
 const STATUS_META: Record<CoverageStatus, { label: string; icon: React.FC<{ size?: number; strokeWidth?: number; className?: string }>; className: string; dot: string }> = {
-  covered: { label: 'Covered', icon: CheckCircle2, className: 'text-emerald-600 bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500' },
-  thin: { label: 'Thin', icon: AlertTriangle, className: 'text-amber-600 bg-amber-50 border-amber-200', dot: 'bg-amber-400' },
+  complete: { label: 'Complete', icon: CheckCircle2, className: 'text-emerald-600 bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500' },
   gap: { label: 'Gap', icon: XCircle, className: 'text-rose-600 bg-rose-50 border-rose-200', dot: 'bg-rose-400' },
 };
 
-/** One competency row — shared by the expanded category tables and the flat filtered list. */
+type StatusFilter = 'all' | CoverageStatus;
+
+/** One competency row — shared by the expanded category lists and the flat filtered list. */
 const CompetencyRow: React.FC<{
   competency: Competency;
   row?: CompetencyCoverage;
@@ -48,8 +55,8 @@ const CompetencyRow: React.FC<{
   );
 };
 
-const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadOnly, onViewCompetencyLogs }) => {
-  const [gapsOnly, setGapsOnly] = useState(false);
+const CompetenciesView: React.FC<CompetenciesViewProps> = ({ logs, competencies, isReadOnly, onViewCompetencyLogs }) => {
+  const [filter, setFilter] = useState<StatusFilter>('all');
   const [openCategories, setOpenCategories] = useState<Set<string>>(() => new Set());
 
   const coverage = useMemo(() => computeCoverage(logs, competencies), [logs, competencies]);
@@ -65,10 +72,11 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
     return Array.from(byCategory.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [competencies]);
 
-  const totalGaps = useMemo(
-    () => Object.values(coverage).filter((row: CompetencyCoverage) => row.status === 'gap').length,
-    [coverage]
-  );
+  const counts = useMemo(() => {
+    const out: Record<StatusFilter, number> = { all: competencies.length, complete: 0, gap: 0 };
+    for (const c of competencies) out[coverage[c.id]?.status ?? 'gap'] += 1;
+    return out;
+  }, [competencies, coverage]);
 
   const toggleCategory = (category: string) => {
     setOpenCategories(prev => {
@@ -78,64 +86,69 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
     });
   };
 
-  // Filtered mode collapses the category structure entirely: one flat list.
-  // The competency ids (A3, B7, …) already carry the category.
-  const gapRows = useMemo(
-    () => competencies.filter(c => (coverage[c.id]?.status ?? 'gap') === 'gap'),
-    [competencies, coverage]
+  // A status filter collapses the category structure into one flat list; the
+  // competency ids (A3, B7, …) already carry the category.
+  const filteredRows = useMemo(
+    () => (filter === 'all' ? [] : competencies.filter(c => (coverage[c.id]?.status ?? 'gap') === filter)),
+    [competencies, coverage, filter]
   );
+
+  const tabs: { id: StatusFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'complete', label: 'Complete' },
+    { id: 'gap', label: 'Gap' },
+  ];
 
   return (
     <div className="space-y-6 pb-20 md:pb-8 px-1 md:max-w-4xl">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-app-dark tracking-tight">Coverage vs. Guide</h2>
-          <p className="text-app-slate text-sm">
-            {totalGaps > 0
-              ? `${totalGaps} competenc${totalGaps === 1 ? 'y has' : 'ies have'} no evidence yet.`
-              : 'Every competency has at least some evidence.'}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setGapsOnly(v => !v)}
-          aria-pressed={gapsOnly}
-          className={`flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold border transition-colors ${
-            gapsOnly
-              ? 'bg-app-dark text-white border-app-dark'
-              : 'bg-white text-app-slate border-app-slate/15 hover:border-app-slate/30'
-          }`}
-        >
-          <Filter size={14} strokeWidth={2.5} />
-          Gaps only
-        </button>
+      <header className="min-w-0">
+        <h1 className="text-2xl font-bold text-app-dark tracking-tight">Competencies</h1>
+        <p className="text-app-slate text-sm opacity-70">
+          A competency is complete once it has at least {COVERED_MIN_HOURS} hours and one piece of evidence.
+        </p>
+      </header>
+
+      <div className="inline-flex p-1 rounded-lg bg-app-slate/10" role="tablist" aria-label="Filter competencies">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={filter === tab.id}
+            onClick={() => setFilter(tab.id)}
+            className={`px-4 py-2 min-h-[40px] rounded-md text-sm font-semibold transition-colors ${
+              filter === tab.id ? 'bg-white text-app-dark shadow-sm' : 'text-app-slate hover:text-app-dark'
+            }`}
+          >
+            {tab.label} <span className="opacity-50 ml-1 tabular-nums">{counts[tab.id]}</span>
+          </button>
+        ))}
       </div>
 
-      {gapsOnly ? (
-        // Filtered: a single cohesive list — no category cards or section headers.
-        totalGaps === 0 ? (
-          <div className="text-center py-12 text-app-slate text-sm font-semibold">No gaps — nice work.</div>
+      {filter !== 'all' ? (
+        filteredRows.length === 0 ? (
+          <div className="text-center py-12 text-app-slate text-sm font-semibold">
+            {filter === 'gap' ? 'No gaps — nice work.' : 'Nothing is complete yet.'}
+          </div>
         ) : (
           <div className="bg-white rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10">
-            {gapRows.map(c => (
+            {filteredRows.map(c => (
               <CompetencyRow key={c.id} competency={c} row={coverage[c.id]} onClick={() => onViewCompetencyLogs(c.id)} />
             ))}
           </div>
         )
       ) : (
-        // Full view: one grouped list, not per-category cards. Each category is
-        // a summary row (covered / thin / gap counts) that expands in place;
-        // expanded rows tint their competency list so the hierarchy stays legible.
+        // Full view: one grouped list. Each category is a summary row
+        // (complete / gap counts) that expands in place.
         <div className="bg-white rounded-xl border border-app-slate/15 overflow-hidden divide-y divide-app-slate/10">
           {grouped.map(([category, comps]) => {
             const open = openCategories.has(category);
-            const counts = comps.reduce(
+            const catCounts = comps.reduce(
               (acc, c) => {
-                const status = coverage[c.id]?.status ?? 'gap';
-                acc[status] += 1;
+                acc[coverage[c.id]?.status ?? 'gap'] += 1;
                 return acc;
               },
-              { covered: 0, thin: 0, gap: 0 } as Record<CoverageStatus, number>
+              { complete: 0, gap: 0 } as Record<CoverageStatus, number>
             );
             return (
               <div key={category}>
@@ -148,11 +161,11 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
                   <span className="text-sm font-bold text-app-dark">Category {category}</span>
                   <span className="flex items-center gap-3">
                     <span className="flex items-center gap-2.5 text-[11px] font-semibold text-app-slate tabular-nums">
-                      {(['covered', 'thin', 'gap'] as CoverageStatus[]).map(status =>
-                        counts[status] > 0 ? (
+                      {(['complete', 'gap'] as CoverageStatus[]).map(status =>
+                        catCounts[status] > 0 ? (
                           <span key={status} className="flex items-center gap-1">
                             <span className={`w-1.5 h-1.5 rounded-full ${STATUS_META[status].dot}`} />
-                            {counts[status]}
+                            {catCounts[status]}
                           </span>
                         ) : null
                       )}
@@ -181,4 +194,4 @@ const CoverageView: React.FC<CoverageViewProps> = ({ logs, competencies, isReadO
   );
 };
 
-export default CoverageView;
+export default CompetenciesView;

@@ -308,7 +308,7 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
                 </span>
                 {rollup && (
                   <span className="hidden sm:inline shrink-0 text-[10px] font-medium text-app-slate opacity-60">
-                    {rollup.covered} covered · {rollup.thin} thin · {rollup.gap} gap
+                    {rollup.complete} complete · {rollup.gap} gap
                   </span>
                 )}
                 <span className="shrink-0 text-xs font-bold text-app-dark tabular-nums w-12 text-right">
