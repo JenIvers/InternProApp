@@ -71,3 +71,32 @@ export const deleteFileFromStorage = async (fileUrl: string): Promise<boolean> =
     return false;
   }
 };
+
+const MAX_MENTOR_PHOTO_SIZE = 5 * 1024 * 1024; // 5MB (photos are resized well below this)
+
+/**
+ * Upload a mentor portrait. Each upload gets a fresh object name so a replaced
+ * photo is never served stale from a browser/CDN cache.
+ * Path: mentors/{userId}/{mentorId}-{timestamp}.jpg
+ */
+export const uploadMentorPhoto = async (
+  userId: string,
+  mentorId: string,
+  photo: Blob
+): Promise<UploadResult> => {
+  if (!userId || !mentorId || !photo) {
+    return { success: false, error: "Missing required parameters" };
+  }
+  if (photo.size > MAX_MENTOR_PHOTO_SIZE) {
+    return { success: false, error: "That photo is too large. Try a smaller image." };
+  }
+  try {
+    const storageRef = ref(storage, `mentors/${userId}/${mentorId}-${Date.now()}.jpg`);
+    await uploadBytes(storageRef, photo, { contentType: "image/jpeg" });
+    return { success: true, url: await getDownloadURL(storageRef) };
+  } catch (error) {
+    console.error("Error uploading mentor photo to Firebase Storage:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    return { success: false, error: errorMessage };
+  }
+};

@@ -17,6 +17,21 @@ service firebase.storage {
                     && request.resource.contentType.matches('image/.*|video/.*|audio/.*|application/pdf');
     }
 
+    // Mentor portraits: mentors/{userId}/{mentorId}-{timestamp}.jpg
+    match /mentors/{userId}/{photoId} {
+      // Public read, like artifacts, so shared (?view=) portfolios can show photos
+      allow read: if true;
+
+      // Only the owner can replace or delete their mentors' photos
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+
+      // Images only, 5MB max
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+    }
+
     // Deny all other paths
     match /{allPaths=**} {
       allow read, write: if false;

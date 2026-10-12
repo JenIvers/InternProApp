@@ -5,15 +5,18 @@ import DashboardNew from './components/DashboardNew';
 import LogTable from './components/LogTable';
 import CompetenciesView from './components/CompetenciesView';
 import ArtifactsView from './components/ArtifactsView';
+import MentorsView from './components/MentorsView';
 import SettingsView from './components/SettingsView';
 import EntryForm from './components/EntryForm';
 import ExportDialog from './components/ExportDialog';
 import LoginView from './components/LoginView';
 import {
-  AppState, InternshipLog, Artifact, Shelf, Site,
+  AppState, InternshipLog, Artifact, Shelf, Site, Mentor,
   AppSettings, SchoolLevel, LevelBucket,
 } from './types';
 import { loadStateWithMigration, saveStateToFirestore } from './firestoreService';
+import { uploadMentorPhoto, deleteFileFromStorage } from './storageService';
+import { DEFAULT_DASHBOARD_MENTOR_COUNT, clampMentorCount, moveMentor, setPrimaryMentor } from './lib/mentors';
 import { CURRENT_SCHEMA_VERSION } from '@/lib/state-migration';
 import { bucketForLevel } from '@/lib/export-model';
 import { ALL_COMPETENCIES } from './constants';
@@ -433,6 +436,50 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, sites: [...prev.sites, site] }));
   };
 
+  // ---- Mentors ------------------------------------------------------------
+  // Resolves to an error message (shown in the editor) or null on success.
+  const saveMentor = async (mentor: Mentor, photo: Blob | null): Promise<string | null> => {
+    let next = mentor;
+    const previousUrl = state.mentors?.find(m => m.id === mentor.id)?.photoUrl;
+    if (photo) {
+      if (!user) return 'You must be signed in to add a photo.';
+      if (user.uid === 'demo') {
+        next = { ...mentor, photoUrl: URL.createObjectURL(photo) }; // dev demo: no Storage
+      } else {
+        const result = await uploadMentorPhoto(user.uid, mentor.id, photo);
+        if (!result.success || !result.url) return result.error || 'The photo could not be uploaded.';
+        next = { ...mentor, photoUrl: result.url };
+        if (previousUrl) void deleteFileFromStorage(previousUrl);
+      }
+    }
+    setState(prev => {
+      const list = prev.mentors ?? [];
+      let mentors = list.some(m => m.id === next.id)
+        ? list.map(m => (m.id === next.id ? next : m))
+        : [...list, next];
+      if (next.isPrimary) mentors = setPrimaryMentor(mentors, next.id, true);
+      return { ...prev, mentors };
+    });
+    return null;
+  };
+
+  const deleteMentor = (id: string) => {
+    const photoUrl = state.mentors?.find(m => m.id === id)?.photoUrl;
+    if (photoUrl && user && user.uid !== 'demo') void deleteFileFromStorage(photoUrl);
+    setState(prev => ({ ...prev, mentors: (prev.mentors ?? []).filter(m => m.id !== id) }));
+  };
+
+  const reorderMentor = (id: string, delta: -1 | 1) => {
+    setState(prev => ({ ...prev, mentors: moveMentor(prev.mentors ?? [], id, delta) }));
+  };
+
+  const setMentorDashboardCount = (count: number) => {
+    setState(prev => ({
+      ...prev,
+      settings: { ...(prev.settings ?? DEFAULT_SETTINGS), mentorDashboardCount: clampMentorCount(count) },
+    }));
+  };
+
   // ---- Export -------------------------------------------------------------
   const handleExportFiltered = (filtered: InternshipLog[]) => {
     setExportFilteredLogs(filtered);
@@ -497,6 +544,22 @@ const App: React.FC = () => {
             onViewLevelLogs={handleViewLevelLogs}
             onOpenCoverage={() => setView('competencies')}
             isReadOnly={isReadOnly}
+          />
+        );
+      case 'mentors':
+        return (
+          <MentorsView
+            mentors={state.mentors ?? []}
+            sites={state.sites}
+            logs={state.logs}
+            dashboardCount={settings.mentorDashboardCount ?? DEFAULT_DASHBOARD_MENTOR_COUNT}
+            isReadOnly={isReadOnly}
+            selectedMentorId={route.id}
+            onSelectMentor={(id) => selectDetail('mentors', id)}
+            onSaveMentor={saveMentor}
+            onDeleteMentor={deleteMentor}
+            onMoveMentor={reorderMentor}
+            onSetDashboardCount={setMentorDashboardCount}
           />
         );
       case 'logs':
