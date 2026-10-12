@@ -7,8 +7,10 @@ import {
   School,
   Building2,
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import type { AppSettings, Competency, InternshipLog, LevelBucket } from '../types';
+import type { AppSettings, Artifact, Competency, InternshipLog, LevelBucket, Mentor } from '../types';
+import ArtifactCarousel from './ArtifactCarousel';
+import MentorRow from './MentorRow';
+import { DEFAULT_DASHBOARD_MENTOR_COUNT, dashboardMentors } from '../lib/mentors';
 import { computeProgress } from '../lib/progress';
 import { computeCategoryRollups } from '../lib/competency-metrics';
 import { validateEntry } from '../lib/entry-validation';
@@ -25,8 +27,14 @@ export interface DashboardNewProps {
   onReviewIncomplete?: () => void;
   /** Jump to the Activity Log filtered to a requirement bucket's school level. */
   onViewLevelLogs?: (bucket: LevelBucket) => void;
-  /** Navigate to the Coverage view for full drill-down into competencies. */
-  onOpenCoverage?: () => void;
+  /** Navigate to the Competencies page for full drill-down. */
+  onOpenCompetencies?: () => void;
+  artifacts?: Artifact[];
+  mentors?: Mentor[];
+  onOpenArtifact?: (id: string) => void;
+  onOpenPortfolio?: () => void;
+  onOpenMentor?: (id: string) => void;
+  onOpenMentors?: () => void;
   isReadOnly: boolean;
 }
 
@@ -49,7 +57,13 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
   onReviewEntry,
   onReviewIncomplete,
   onViewLevelLogs,
-  onOpenCoverage,
+  onOpenCompetencies,
+  artifacts = [],
+  mentors = [],
+  onOpenArtifact,
+  onOpenPortfolio,
+  onOpenMentor,
+  onOpenMentors,
   isReadOnly,
 }) => {
   const progress = useMemo(() => computeProgress(logs, settings), [logs, settings]);
@@ -78,18 +92,6 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
     const maxHours = withHours.length > 0 ? withHours[0].hours : 0;
     return { withHours, empty, maxHours };
   }, [categoryHeaders, categoryRollups]);
-
-  const hoursOverTimeData = useMemo(() => {
-    const byMonth = new Map<string, number>();
-    for (const log of logs) {
-      const month = (log.date ?? '').slice(0, 7); // YYYY-MM
-      if (!month) continue;
-      byMonth.set(month, round1((byMonth.get(month) ?? 0) + (log.hours || 0)));
-    }
-    return Array.from(byMonth.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([month, hours]) => ({ month, hours }));
-  }, [logs]);
 
   const reviewLogsById = useMemo(() => {
     const map = new Map<string, InternshipLog>();
@@ -243,47 +245,20 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
       </section>
 
       {/* Hours over time */}
-      {hoursOverTimeData.length > 1 && (
-        <section className="rounded-xl border border-app-slate/15 bg-white px-5 py-5">
-          <h2 className="text-sm font-bold text-app-dark mb-4">Hours logged by month</h2>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <BarChart data={hoursOverTimeData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <XAxis
-                  dataKey="month"
-                  fontSize={10}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontWeight: 600, fill: '#6492A0' }}
-                />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#6492A0' }} />
-                <Tooltip
-                  cursor={{ fill: 'rgba(66, 131, 164, 0.06)' }}
-                  contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 12 }}
-                />
-                <Bar dataKey="hours" radius={[4, 4, 0, 0]} fill="#4283A4" maxBarSize={28} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-      )}
 
       {/* Hours by competency, ranked by category */}
       <section className="rounded-xl border border-app-slate/15 bg-white overflow-hidden">
         <div className="px-5 py-4 border-b border-app-slate/10 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-sm font-bold text-app-dark">Hours by competency</h2>
-            <p className="text-[11px] font-medium text-app-slate opacity-70">
-              Ranked by category. Tap a row for full coverage detail.
-            </p>
           </div>
-          {onOpenCoverage && (
+          {onOpenCompetencies && (
             <button
               type="button"
-              onClick={onOpenCoverage}
+              onClick={onOpenCompetencies}
               className="flex items-center gap-1 shrink-0 text-[11px] font-bold text-app-bright hover:text-app-deep transition-colors"
             >
-              View details
+              View all
               <ChevronRight size={12} />
             </button>
           )}
@@ -318,10 +293,10 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
             );
             return (
               <li key={cat.id}>
-                {onOpenCoverage ? (
+                {onOpenCompetencies ? (
                   <button
                     type="button"
-                    onClick={onOpenCoverage}
+                    onClick={onOpenCompetencies}
                     className="w-full flex items-center gap-3 px-5 py-2 h-10 text-left hover:bg-app-slate/5 transition-colors cursor-pointer"
                   >
                     {rowContent}
@@ -348,6 +323,19 @@ const DashboardNew: React.FC<DashboardNewProps> = ({
           </div>
         )}
       </section>
+
+      <ArtifactCarousel
+        artifacts={artifacts}
+        onOpenArtifact={(id) => onOpenArtifact?.(id)}
+        onOpenPortfolio={() => onOpenPortfolio?.()}
+      />
+
+      <MentorRow
+        mentors={dashboardMentors(mentors, settings?.mentorDashboardCount ?? DEFAULT_DASHBOARD_MENTOR_COUNT)}
+        logs={logs}
+        onOpenMentor={(id) => onOpenMentor?.(id)}
+        onOpenAll={() => onOpenMentors?.()}
+      />
     </div>
   );
 };

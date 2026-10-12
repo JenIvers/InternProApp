@@ -542,7 +542,13 @@ const App: React.FC = () => {
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
             onViewLevelLogs={handleViewLevelLogs}
-            onOpenCoverage={() => setView('competencies')}
+            onOpenCompetencies={() => setView('competencies')}
+            artifacts={state.artifacts}
+            mentors={state.mentors}
+            onOpenArtifact={(id) => navigate({ view: 'portfolio', id })}
+            onOpenPortfolio={() => setView('portfolio')}
+            onOpenMentor={(id) => navigate({ view: 'mentors', id })}
+            onOpenMentors={() => setView('mentors')}
             isReadOnly={isReadOnly}
           />
         );
@@ -638,7 +644,13 @@ const App: React.FC = () => {
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
             onViewLevelLogs={handleViewLevelLogs}
-            onOpenCoverage={() => setView('competencies')}
+            onOpenCompetencies={() => setView('competencies')}
+            artifacts={state.artifacts}
+            mentors={state.mentors}
+            onOpenArtifact={(id) => navigate({ view: 'portfolio', id })}
+            onOpenPortfolio={() => setView('portfolio')}
+            onOpenMentor={(id) => navigate({ view: 'mentors', id })}
+            onOpenMentors={() => setView('mentors')}
             isReadOnly={isReadOnly}
           />
         );
@@ -655,7 +667,7 @@ const App: React.FC = () => {
         user={isReadOnly ? state.userProfile : user}
       />
 
-      <main className="flex-1 md:ml-64 px-4 pt-1 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
+      <main className="flex-1 min-w-0 md:ml-64 px-4 pt-1 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
             <div className="flex flex-col items-center gap-4">
