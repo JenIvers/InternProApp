@@ -1,33 +1,36 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, ClipboardList, Grid3x3, Plus, MoreHorizontal, Folder, Settings, X } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Grid3x3, Plus, MoreHorizontal, Folder, UsersRound, X } from 'lucide-react';
+import type { ViewId } from '../lib/routes';
 import { useBodyScrollLock } from '../useBodyScrollLock';
 
 interface BottomNavProps {
   currentView: string;
-  setView: (view: string) => void;
+  setView: (view: ViewId) => void;
   onAdd?: () => void;
   isReadOnly?: boolean;
 }
+
+type NavItem = { id: ViewId; label: string; icon: React.ElementType };
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentView, setView, onAdd, isReadOnly }) => {
   const [moreOpen, setMoreOpen] = useState(false);
   useBodyScrollLock(moreOpen);
 
-  const primaryItems = [
+  const primaryItems: NavItem[] = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
     { id: 'logs', label: 'Log', icon: ClipboardList },
   ];
-  const secondaryItems = [
-    { id: 'coverage', label: 'Coverage', icon: Grid3x3 },
+  const secondaryItems: NavItem[] = [
+    { id: 'competencies', label: 'Competencies', icon: Grid3x3 },
   ];
-  const moreItems = [
-    { id: 'artifacts', label: 'Artifact Vault', icon: Folder },
-    { id: 'settings', label: 'Settings', icon: Settings },
+  const moreItems: NavItem[] = [
+    { id: 'portfolio', label: 'Portfolio', icon: Folder },
+    { id: 'mentors', label: 'Mentor Spotlight', icon: UsersRound },
   ];
 
   const moreActive = moreItems.some((i) => i.id === currentView);
 
-  const navBtn = (item: { id: string; label: string; icon: React.ElementType }) => {
+  const navBtn = (item: NavItem) => {
     const isActive = currentView === item.id;
     const Icon = item.icon;
     return (

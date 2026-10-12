@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppState, AppSettings, LevelBucket } from '../types';
 import { Settings as SettingsIcon, User, Download, Save, ShieldCheck, LogOut } from 'lucide-react';
 import { signOut } from '../authService';
+import Avatar from './Avatar';
 
 export interface SettingsViewProps {
   appState: AppState;
@@ -79,13 +80,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ appState, settings, userPro
           <h2 className="text-lg font-bold text-app-dark">Profile</h2>
         </div>
         <div className="flex items-center gap-4">
-          {userProfile?.photoURL ? (
-            <img src={userProfile.photoURL} alt="Profile" className="w-14 h-14 rounded-full object-cover" />
-          ) : (
-            <div className="w-14 h-14 rounded-full bg-app-slate/20 flex items-center justify-center text-app-dark font-bold text-xl">
-              {userProfile?.displayName?.charAt(0) || '?'}
-            </div>
-          )}
+          <Avatar photoURL={userProfile?.photoURL} name={userProfile?.displayName} email={userProfile?.email} className="w-14 h-14 text-xl" />
           <div>
             <p className="font-semibold text-app-dark">{userProfile?.displayName || 'Unknown user'}</p>
             <p className="text-sm text-app-slate opacity-80">{userProfile?.email || '—'}</p>

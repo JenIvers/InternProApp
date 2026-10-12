@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 // Ambient module declarations for static asset imports (Vite serves these as URLs).
 // Fixes `npx tsc --noEmit` errors for imports like `import logo from './bethel-logo.png'`.
 declare module '*.png' {

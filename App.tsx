@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
 import DashboardNew from './components/DashboardNew';
@@ -23,6 +23,8 @@ import logo from './bethel-logo.png';
 import { register as registerSW } from './registerServiceWorker';
 import { useBodyScrollLock } from './useBodyScrollLock';
 import { RefreshCw, AlertCircle, Plus } from 'lucide-react';
+import ProfileMenu from './components/ProfileMenu';
+import { parsePath, buildUrl, type Route, type ViewId } from './lib/routes';
 
 /** Fallback requirement settings for brand-new portfolios (Jen's config). */
 const DEFAULT_SETTINGS: AppSettings = {
@@ -32,7 +34,10 @@ const DEFAULT_SETTINGS: AppSettings = {
 };
 
 const App: React.FC = () => {
-  const [currentView, setViewRaw] = useState<string>('dashboard');
+  // Deep linking: the URL is the source of truth for the current screen.
+  // `route` mirrors window.location and is updated by navigate() and popstate.
+  const [route, setRoute] = useState<Route>(() => parsePath(window.location.pathname));
+  const currentView: ViewId = route.view;
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthInitializing, setIsAuthInitializing] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(false);
@@ -84,12 +89,40 @@ const App: React.FC = () => {
     mentors: [],
   });
 
+  // Push (or replace) a history entry for `next`, keeping ?view=<userId> intact.
+  const navigate = useCallback((next: Route, opts?: { replace?: boolean }) => {
+    const url = buildUrl(next, window.location.search);
+    if (url !== window.location.pathname + window.location.search) {
+      if (opts?.replace) window.history.replaceState(null, '', url);
+      else window.history.pushState(null, '', url);
+    }
+    setRoute(next);
+  }, []);
+
+  // Back/Forward: re-read the URL. Cross-view log prefilters belong to the
+  // jump that set them, so they are cleared when history moves.
+  useEffect(() => {
+    // Rewrite a retired path (e.g. /coverage) to its canonical URL in place.
+    const canonical = buildUrl(parsePath(window.location.pathname), window.location.search);
+    if (canonical !== window.location.pathname + window.location.search) {
+      window.history.replaceState(null, '', canonical);
+    }
+    const onPopState = () => {
+      setLogPrefilterCompetencyId(undefined);
+      setLogPrefilterIncomplete(false);
+      setLogPrefilterLevels(undefined);
+      setRoute(parsePath(window.location.pathname));
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   // Navigate via the nav bars: clears any cross-view log prefilters.
-  const setView = (view: string) => {
+  const setView = (view: ViewId) => {
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(false);
     setLogPrefilterLevels(undefined);
-    setViewRaw(view);
+    navigate({ view });
   };
 
   // Sync to Firestore (only if logged in and not read-only)
@@ -113,6 +146,19 @@ const App: React.FC = () => {
     });
 
     let isMounted = true;
+
+    // Dev-only: /?demo=1 loads a fake portfolio so screens can be exercised
+    // without signing in. Compiled out of production builds.
+    if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')) {
+      void import('./lib/fixtures/demo').then(({ buildDemoState }) => {
+        if (!isMounted) return;
+        setUser({ uid: 'demo', displayName: 'Demo Intern', email: 'demo@example.edu', photoURL: null } as User);
+        setState(buildDemoState());
+        setIsAuthInitializing(false);
+        setIsLoading(false);
+      });
+      return () => { isMounted = false; };
+    }
 
     const initialize = async () => {
       console.log("App initializing...");
@@ -210,7 +256,7 @@ const App: React.FC = () => {
   }, []);
 
   const performSave = React.useCallback(async () => {
-    if (isLoading || isAuthInitializing || isReadOnly || !user) return;
+    if (isLoading || isAuthInitializing || isReadOnly || !user || user.uid === 'demo') return;
 
     // Skip if state hasn't changed since last save
     const currentStateJson = JSON.stringify(state);
@@ -380,7 +426,7 @@ const App: React.FC = () => {
     setLogPrefilterIncomplete(false);
     setLogPrefilterLevels(undefined);
     setLogPrefilterCompetencyId(competencyId);
-    setViewRaw('logs');
+    navigate({ view: 'logs' });
   };
 
   // Jump to the Activity Log with the "Incomplete only" filter pre-enabled.
@@ -388,7 +434,7 @@ const App: React.FC = () => {
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(true);
     setLogPrefilterLevels(undefined);
-    setViewRaw('logs');
+    navigate({ view: 'logs' });
   };
 
   // Jump to the Activity Log filtered to a requirement bucket (from a
@@ -401,7 +447,7 @@ const App: React.FC = () => {
     setLogPrefilterCompetencyId(undefined);
     setLogPrefilterIncomplete(false);
     setLogPrefilterLevels(levels);
-    setViewRaw('logs');
+    navigate({ view: 'logs' });
   };
 
   const onUpdate = () => {
@@ -431,7 +477,7 @@ const App: React.FC = () => {
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
             onViewLevelLogs={handleViewLevelLogs}
-            onOpenCoverage={() => setView('coverage')}
+            onOpenCoverage={() => setView('competencies')}
             isReadOnly={isReadOnly}
           />
         );
@@ -468,7 +514,7 @@ const App: React.FC = () => {
             />
           </div>
         );
-      case 'coverage':
+      case 'competencies':
         return (
           <CompetenciesView
             logs={state.logs}
@@ -477,7 +523,7 @@ const App: React.FC = () => {
             onViewCompetencyLogs={handleViewCompetencyLogs}
           />
         );
-      case 'artifacts':
+      case 'portfolio':
         return (
           <ArtifactsView
             artifacts={state.artifacts}
@@ -509,7 +555,7 @@ const App: React.FC = () => {
             onReviewEntry={handleReviewEntry}
             onReviewIncomplete={handleViewIncompleteLogs}
             onViewLevelLogs={handleViewLevelLogs}
-            onOpenCoverage={() => setView('coverage')}
+            onOpenCoverage={() => setView('competencies')}
             isReadOnly={isReadOnly}
           />
         );
@@ -557,23 +603,12 @@ const App: React.FC = () => {
                     <span className="bg-app-bright/10 text-app-bright text-[11px] font-bold px-3 py-1 rounded-full">Viewer mode</span>
                   )}
                   {(isReadOnly ? state.userProfile : user) ? (
-                    <button
-                      type="button"
-                      onClick={isReadOnly ? undefined : () => setView('settings')}
-                      aria-label="Settings"
-                      disabled={isReadOnly}
-                      className="p-1.5 -mr-1.5 rounded-full transition-transform enabled:active:scale-90"
-                    >
-                      <div className="w-8 h-8 rounded-full border border-app-bright/20 p-0.5">
-                        {(isReadOnly ? state.userProfile : user)?.photoURL ? (
-                          <img src={(isReadOnly ? state.userProfile : user)?.photoURL || ''} alt="Profile" className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full rounded-full bg-app-bright/10 flex items-center justify-center text-app-bright font-bold text-[10px]">
-                            {(isReadOnly ? state.userProfile : user)?.displayName?.charAt(0) || '?'}
-                          </div>
-                        )}
-                      </div>
-                    </button>
+                    <ProfileMenu
+                      variant="avatar"
+                      user={isReadOnly ? state.userProfile ?? null : user}
+                      isReadOnly={isReadOnly}
+                      onOpenSettings={() => setView('settings')}
+                    />
                   ) : (
                     <span className="text-[11px] text-app-slate font-semibold opacity-70">Bethel University</span>
                   )}
