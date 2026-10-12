@@ -54,3 +54,16 @@ After deploying, "From Google Drive" becomes active.
 - Google Docs / Slides / Sheets are exported to PDF; everything else is copied as-is.
 - Imported files are copied into Firebase Storage, so they keep working if the
   Drive file is later moved, unshared, or deleted.
+
+## Status (2026-10-12)
+
+Done via CLI: Picker + Drive APIs enabled; referrer-restricted API key
+"InternPro Drive picker (browser)" created; `driveConfig.ts` filled in using the
+existing Firebase Google sign-in web client
+(`788133827557-03fnpdbqrr9ah8gqgaqsds68np3ga16l…`) and project number `788133827557`.
+
+Still console-only: (a) add `https://intern-pro-app.web.app` and
+`https://intern-pro-app.firebaseapp.com` (and `http://localhost:3000` for dev) to that
+client's **Authorized JavaScript origins**; (b) add the `drive.file` scope to the
+OAuth consent screen. The project has no parent organisation, so the consent
+screen can only be **External** (add testers while in Testing mode).

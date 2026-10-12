@@ -8,11 +8,11 @@
  */
 export const DRIVE_CONFIG = {
   /** Browser API key with Picker API + Drive API enabled, referrer-restricted. */
-  apiKey: '',
+  apiKey: 'AIzaSyCF1P-oyscj4ScFFMPJgQYZ_Q855GoBWp8',
   /** OAuth 2.0 Web client ID (authorized JS origins must include the app's origins). */
-  clientId: '',
+  clientId: '788133827557-03fnpdbqrr9ah8gqgaqsds68np3ga16l.apps.googleusercontent.com',
   /** Google Cloud project NUMBER (the Picker "app id"). */
-  appId: '',
+  appId: '788133827557',
 };
 
 export const isDriveConfigured = (): boolean =>
