@@ -23,13 +23,16 @@ Restrict it:
 
 ## 3. OAuth consent screen
 
-APIs & Services ▸ OAuth consent screen. Add the scope
-`https://www.googleapis.com/auth/drive.file`. This scope is "sensitive":
-for **External** apps Google may require verification before non-test users can
-consent; add testers while in testing mode. If every user is on one Google
-Workspace domain, an **Internal** app avoids verification, but the project must
-live in that Workspace organisation, and the Workspace admin may still block
-third-party apps from Drive.
+APIs & Services ▸ OAuth consent screen (Google Auth Platform ▸ Branding / Audience / Data Access).
+Add the scope `https://www.googleapis.com/auth/drive.file`. It only grants access to
+files the user explicitly picks, and Google classes it as non-sensitive (the console
+labels each scope, so confirm when you add it).
+
+Audience must be **External**: **Internal** requires the project to belong to a Google
+Workspace organisation (this project has no parent organisation) and would exclude
+anyone outside that domain. With a non-sensitive scope you can set the publishing
+status to **In production** without Google verification, so no test-user list is needed.
+If the console does label the scope sensitive, stay in Testing and add test users.
 
 ## 4. OAuth client ID (`clientId`)
 
@@ -65,5 +68,5 @@ existing Firebase Google sign-in web client
 Still console-only: (a) add `https://intern-pro-app.web.app` and
 `https://intern-pro-app.firebaseapp.com` (and `http://localhost:3000` for dev) to that
 client's **Authorized JavaScript origins**; (b) add the `drive.file` scope to the
-OAuth consent screen. The project has no parent organisation, so the consent
-screen can only be **External** (add testers while in Testing mode).
+OAuth consent screen (Audience: **External**, since the project has no parent
+organisation; publish to production if the scope is non-sensitive).
