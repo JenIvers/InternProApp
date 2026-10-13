@@ -3,14 +3,19 @@ export const register = (onUpdate: (registration: ServiceWorkerRegistration) => 
     // When the waiting worker is told to skipWaiting (via the update toast) and
     // takes control, reload so the page never keeps running old JS against the
     // new cache. One-shot guard prevents a reload loop.
+    // A first-ever install has no old JS to replace, so it must not reload the
+    // page (that could interrupt an unsaved entry).
+    const hadController = Boolean(navigator.serviceWorker.controller);
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) return;
+      if (!hadController || refreshing) return;
       refreshing = true;
       window.location.reload();
     });
 
-    window.addEventListener('load', () => {
+    // React mounts after the module graph loads, so `load` has often already
+    // fired by the time this runs; register right away in that case.
+    const start = () => {
       navigator.serviceWorker
         .register('/service-worker.js')
         .then((registration) => {
@@ -53,6 +58,8 @@ export const register = (onUpdate: (registration: ServiceWorkerRegistration) => 
         .catch((error) => {
           console.error('SW registration failed: ', error);
         });
-    });
+    };
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
   }
 };

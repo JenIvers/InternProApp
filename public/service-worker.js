@@ -1,11 +1,10 @@
-// Version: 2.1.2 - Fix entry-save undefined-field error + account switching
-const CACHE_NAME = 'internpro-v2.2.0';
+// Version: 2.2.1 - ships in dist (served from public/) so updates are detected
+const CACHE_NAME = 'internpro-v2.2.1';
 
 // Same-origin app shell: precached atomically (these must all succeed).
 const SHELL_ASSETS = [
   '/',
   '/index.html',
-  '/bethel-logo.png',
   '/InternPro.png',
   '/manifest.json'
 ];
