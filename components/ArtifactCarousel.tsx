@@ -28,8 +28,11 @@ const Slide: React.FC<{ artifact: Artifact; onOpen: () => void; hidden?: boolean
   const Icon = KIND_ICON[kind];
   const [imageFailed, setImageFailed] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
-  const showImage = kind === 'image' && artifact.data.length > 0 && !imageFailed;
-  const showVideo = kind === 'video' && artifact.data.length > 0 && !videoFailed;
+  const [coverFailed, setCoverFailed] = useState(false);
+  // A custom cover image replaces whatever the file would otherwise show.
+  const showCover = !!artifact.coverUrl && !coverFailed;
+  const showImage = !showCover && kind === 'image' && artifact.data.length > 0 && !imageFailed;
+  const showVideo = !showCover && kind === 'video' && artifact.data.length > 0 && !videoFailed;
 
   return (
     <button
@@ -39,7 +42,17 @@ const Slide: React.FC<{ artifact: Artifact; onOpen: () => void; hidden?: boolean
       aria-hidden={hidden || undefined}
       className="group relative shrink-0 w-[82%] sm:w-[22rem] lg:w-[26rem] aspect-[16/10] rounded-2xl overflow-hidden text-left shadow-sm hover:shadow-xl transition-shadow ring-1 ring-app-slate/15 bg-app-deep"
     >
-      {showImage ? (
+      {showCover ? (
+        <img
+          src={artifact.coverUrl}
+          alt=""
+          draggable={false}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setCoverFailed(true)}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : showImage ? (
         <img
           src={artifact.data}
           alt=""

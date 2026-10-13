@@ -21,6 +21,7 @@ export interface Artifact {
   uploadDate: string;
   taggedCompetencyIds: string[];
   shelfId?: string;
+  coverUrl?: string; // optional cover image (Storage URL) shown instead of the automatic preview
 }
 
 export interface Shelf {

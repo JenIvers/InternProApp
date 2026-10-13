@@ -7,6 +7,7 @@ import { pickFileFromDrive } from '../driveService';
 import { kindLabel, resolveArtifactKind } from '../lib/artifact-preview';
 import ArtifactPreview from './ArtifactPreview';
 import UploadMenu from './UploadMenu';
+import CoverImageControl from './CoverImageControl';
 import { User } from 'firebase/auth';
 
 interface ArtifactsViewProps {
@@ -27,7 +28,10 @@ const ArtifactRow: React.FC<{
   artifact: Artifact,
   onSelect: (artifact: Artifact) => void
 }> = ({ artifact, onSelect }) => {
-  const isImage = resolveArtifactKind(artifact) === 'image' && artifact.data.length > 0;
+  // A custom cover wins over the automatic preview.
+  const thumbUrl =
+    artifact.coverUrl ||
+    (resolveArtifactKind(artifact) === 'image' && artifact.data.length > 0 ? artifact.data : undefined);
   const tagCount = artifact.taggedCompetencyIds?.length ?? 0;
   return (
     <button
@@ -36,9 +40,9 @@ const ArtifactRow: React.FC<{
       className="w-full flex items-center gap-3 px-4 py-2.5 min-h-[52px] text-left hover:bg-app-slate/5 transition-colors"
     >
       <span className="shrink-0 w-9 h-9 rounded-lg bg-app-bg border border-app-slate/10 flex items-center justify-center overflow-hidden text-app-slate">
-        {isImage ? (
+        {thumbUrl ? (
           <img
-            src={artifact.data}
+            src={thumbUrl}
             alt=""
             referrerPolicy="no-referrer"
             loading="lazy"
@@ -324,6 +328,16 @@ const ArtifactsView: React.FC<ArtifactsViewProps> = ({
 
             <div className="overflow-y-auto p-4 sm:p-5 space-y-5 no-scrollbar">
               <ArtifactPreview key={selectedArtifact.id} artifact={selectedArtifact} />
+
+              {(!isReadOnly || selectedArtifact.coverUrl) && (
+                <CoverImageControl
+                  key={selectedArtifact.id}
+                  artifact={selectedArtifact}
+                  userId={user?.uid}
+                  canEdit={!isReadOnly}
+                  onChange={(coverUrl) => onUpdateArtifact({ ...selectedArtifact, coverUrl })}
+                />
+              )}
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* Shelf assignment */}
