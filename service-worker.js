@@ -1,5 +1,5 @@
 // Version: 2.1.2 - Fix entry-save undefined-field error + account switching
-const CACHE_NAME = 'internpro-v2.1.2';
+const CACHE_NAME = 'internpro-v2.2.0';
 
 // Same-origin app shell: precached atomically (these must all succeed).
 const SHELL_ASSETS = [
