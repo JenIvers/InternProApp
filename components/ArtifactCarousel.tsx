@@ -27,7 +27,9 @@ const Slide: React.FC<{ artifact: Artifact; onOpen: () => void; hidden?: boolean
   const kind = resolveArtifactKind(artifact);
   const Icon = KIND_ICON[kind];
   const [imageFailed, setImageFailed] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
   const showImage = kind === 'image' && artifact.data.length > 0 && !imageFailed;
+  const showVideo = kind === 'video' && artifact.data.length > 0 && !videoFailed;
 
   return (
     <button
@@ -47,6 +49,27 @@ const Slide: React.FC<{ artifact: Artifact; onOpen: () => void; hidden?: boolean
           onError={() => setImageFailed(true)}
           className="absolute inset-0 w-full h-full object-cover"
         />
+      ) : showVideo ? (
+        // Browsers paint the first frame of a video once its metadata loads; the
+        // #t fragment nudges iOS Safari into showing a frame instead of black.
+        <>
+          <span className="absolute inset-0 bg-gradient-to-br from-app-deep to-app-dark" />
+          <video
+            src={`${artifact.data}#t=0.1`}
+            preload="metadata"
+            muted
+            playsInline
+            tabIndex={-1}
+            aria-hidden="true"
+            onError={() => setVideoFailed(true)}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          />
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="w-14 h-14 rounded-full bg-white/85 text-app-dark flex items-center justify-center shadow-lg">
+              <Play size={22} className="ml-0.5 fill-current" />
+            </span>
+          </span>
+        </>
       ) : (
         <span className="absolute inset-0 bg-gradient-to-br from-app-deep to-app-dark flex items-center justify-center">
           <Icon size={56} strokeWidth={1.25} className="text-white/25" />
