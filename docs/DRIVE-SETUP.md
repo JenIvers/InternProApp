@@ -65,8 +65,11 @@ Done via CLI: Picker + Drive APIs enabled; referrer-restricted API key
 existing Firebase Google sign-in web client
 (`788133827557-03fnpdbqrr9ah8gqgaqsds68np3ga16l…`) and project number `788133827557`.
 
-Still console-only: (a) add `https://intern-pro-app.web.app` and
-`https://intern-pro-app.firebaseapp.com` (and `http://localhost:3000` for dev) to that
-client's **Authorized JavaScript origins**; (b) add the `drive.file` scope to the
-OAuth consent screen (Audience: **External**, since the project has no parent
-organisation; publish to production if the scope is non-sensitive).
+Console steps, done 2026-10-12: the consent screen (app "InternPro") was already
+**External / In production** because Firebase Google sign-in uses it, so do NOT switch it
+back to Testing (that would block everyone not listed as a test user, including the
+interns). `drive.file` was added under Data Access as a non-sensitive scope (saved; no
+verification needed). The OAuth client already allowed `intern-pro-app.web.app` and
+`intern-pro-app.firebaseapp.com`; `http://localhost:3000` was added for dev. Firebase
+preview-channel hosts are not allowed (origins cannot use wildcards), so test Drive
+import locally or on the live site.
