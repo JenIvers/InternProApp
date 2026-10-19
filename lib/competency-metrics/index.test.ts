@@ -5,7 +5,6 @@ import {
   computeCoverage,
   computeCategoryRollups,
   categoryGroupOf,
-  COVERED_MIN_HOURS,
 } from './index';
 
 const comps: Competency[] = [
@@ -73,16 +72,16 @@ describe('computeCoverage', () => {
     expect(cov['A1']).toEqual({ hours: 0, entryCount: 0, evidenceCount: 0, status: 'gap' });
   });
 
-  it('tag-only entries count coverage but no hours (still a gap)', () => {
+  it('a single tag-only entry with no hours or evidence is complete', () => {
     const logs = [log({ hours: 5, taggedCompetencyIds: ['A1'] })];
     const cov = computeCoverage(logs, comps);
-    expect(cov['A1']).toEqual({ hours: 0, entryCount: 1, evidenceCount: 0, status: 'gap' });
+    expect(cov['A1']).toEqual({ hours: 0, entryCount: 1, evidenceCount: 0, status: 'complete' });
   });
 
-  it('complete requires >= threshold hours and >= 1 evidence', () => {
+  it('counts evidence and hours on complete competencies', () => {
     const logs = [
       log({
-        hours: COVERED_MIN_HOURS,
+        hours: 3,
         primaryCompetencyId: 'A1',
         taggedCompetencyIds: ['A1'],
         evidenceLinks: [{ id: 'e1', label: 'doc', url: 'https://x' }],
@@ -95,9 +94,9 @@ describe('computeCoverage', () => {
     expect(cov['A1'].hours).toBe(3);
   });
 
-  it('enough hours without evidence is still a gap', () => {
-    const logs = [log({ hours: 10, primaryCompetencyId: 'A1' })];
-    expect(computeCoverage(logs, comps)['A1'].status).toBe('gap');
+  it('a short entry without evidence is still complete', () => {
+    const logs = [log({ hours: 0.5, primaryCompetencyId: 'A1' })];
+    expect(computeCoverage(logs, comps)['A1'].status).toBe('complete');
   });
 
   it('ignores competency ids not in the catalog', () => {
@@ -140,6 +139,8 @@ describe('computeCategoryRollups', () => {
     expect(roll['B'].entryCount).toBe(1);
     expect(roll['P_B'].hours).toBe(0);
     expect(roll['P_B'].gap).toBe(1);
+    expect(roll['A'].complete).toBe(2); // A1 and A2; the bare 'A' row is untouched
+    expect(roll['A'].gap).toBe(1);
   });
 
   it('status tallies add up to competencyCount', () => {

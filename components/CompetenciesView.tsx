@@ -3,7 +3,6 @@ import { InternshipLog, Competency } from '../types';
 import {
   computeCoverage,
   categoryGroupOf,
-  COVERED_MIN_HOURS,
   CoverageStatus,
   CompetencyCoverage,
 } from '../lib/competency-metrics';
@@ -104,7 +103,7 @@ const CompetenciesView: React.FC<CompetenciesViewProps> = ({ logs, competencies,
       <header className="min-w-0">
         <h1 className="text-2xl font-bold text-app-dark tracking-tight">Competencies</h1>
         <p className="text-app-slate text-sm opacity-70">
-          A competency is complete once it has at least {COVERED_MIN_HOURS} hours and one piece of evidence.
+          A competency is complete once any log entry is tagged with it.
         </p>
       </header>
 
