@@ -16,16 +16,12 @@
  * every entry touching the competency.
  *
  * Status (deliberately binary — "thin" was subjective and has been removed):
- *  - 'complete' — at least COVERED_MIN_HOURS (3) attributed hours AND at
- *                 least COVERED_MIN_EVIDENCE (1) piece of evidence.
- *  - 'gap'      — everything else, including competencies that are touched
- *                 but have not yet met the bar.
+ *  - 'complete' — touched by at least one entry, however few hours or
+ *                 pieces of evidence it has.
+ *  - 'gap'      — not referenced by any entry.
  */
 
 import type { Competency, InternshipLog } from '../../types';
-
-export const COVERED_MIN_HOURS = 3;
-export const COVERED_MIN_EVIDENCE = 1;
 
 export type CoverageStatus = 'complete' | 'gap';
 
@@ -106,12 +102,7 @@ export function computeCoverage(
     }
   }
   for (const row of Object.values(out)) {
-    row.status =
-      row.entryCount > 0 &&
-      row.hours >= COVERED_MIN_HOURS &&
-      row.evidenceCount >= COVERED_MIN_EVIDENCE
-        ? 'complete'
-        : 'gap';
+    row.status = row.entryCount > 0 ? 'complete' : 'gap';
   }
   return out;
 }
