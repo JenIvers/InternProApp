@@ -1,5 +1,5 @@
-// Version: 2.2.2 - video first-frame slides and artifact cover images
-const CACHE_NAME = 'internpro-v2.2.2';
+// Version: 2.2.3 - any tagged competency counts as complete
+const CACHE_NAME = 'internpro-v2.2.3';
 
 // Same-origin app shell: precached atomically (these must all succeed).
 const SHELL_ASSETS = [
